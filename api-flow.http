@@ -3,7 +3,7 @@
 ### =================================================================
 @hostname = http://localhost:8080
 @registration_key = password
-@username = my-awesome-service
+@username = my-awesome-service6
 @long_url = https://github.com/google/gemini-api
 
 ### =================================================================
@@ -31,7 +31,8 @@ Content-Type: application/json
 Authorization: Bearer {{initialApiKey}}
 
 {
-  "longUrl": "{{long_url}}"
+  "longUrl": "{{long_url}}",
+  "username": "{{username}}"
 }
 
 > {%
