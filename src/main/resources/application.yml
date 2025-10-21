@@ -13,15 +13,6 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     show-sql: true
     database-platform: org.hibernate.dialect.OracleDialect
-  data:
-    redis:
-      host: 130.1.17.65
-      port: 7000
-      cluster:
-        nodes:
-          - 130.1.17.65:7000
-          - 130.1.17.66:7000
-          - 130.1.17.67:7000
 
 # Jasypt
 jasypt:
