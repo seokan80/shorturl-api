@@ -3,7 +3,7 @@
 ### =================================================================
 @hostname = http://localhost:8080
 @registration_key = password
-@username = my-awesome-service6
+@username = my-awesome-service
 @long_url = https://github.com/google/gemini-api
 
 ### =================================================================
@@ -20,7 +20,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 
 > {%
     // 응답에서 첫 번째 apiKey를 변수에 저장
-    client.global.set("initialApiKey", response.body.apiKey);
+    client.global.set("initialApiKey", response.body.data.apiKey);
 %}
 
 ### =================================================================
@@ -36,17 +36,21 @@ Authorization: Bearer {{initialApiKey}}
 }
 
 > {%
-    // 응답에서 단축 URL 키를 변수에 저장 (전체 URL이 아닌 키 부분만 추출)
-    const shortUrl = response.body.shortUrl;
+    // 응답에서 단축 URL 키와 ID를 변수에 저장
+    const shortUrl = response.body.data.shortUrl;
     const key = shortUrl.substring(shortUrl.lastIndexOf('/') + 1);
     client.global.set("shortUrlKey", key);
+    client.global.set("shortUrlId", response.body.data.id);
 %}
 
 
 ### =================================================================
 ### 3. 생성된 단축 URL로 리디렉션 테스트 (인증 불필요)
+### 리디렉션 시 통계 데이터가 적재됩니다.
 ### =================================================================
 GET {{hostname}}/r/{{shortUrlKey}}
+Referer: https://www.google.com/
+User-Agent: Gemini-Test-Agent/1.0
 
 
 ### =================================================================
@@ -65,7 +69,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 
 > {%
     // 응답에서 새로 발급된 토큰을 변수에 저장
-    client.global.set("reissuedApiKey", response.body.token);
+    client.global.set("reissuedApiKey", response.body.data.token);
 %}
 
 ### =================================================================
@@ -76,5 +80,50 @@ Content-Type: application/json
 Authorization: Bearer {{reissuedApiKey}}
 
 {
-  "longUrl": "https://developers.google.com/gemini"
+  "longUrl": "https://developers.google.com/gemini",
+  "username": "{{username}}"
+}
+
+> {%
+    // 응답에서 단축 URL 키와 ID를 변수에 저장
+    const shortUrl = response.body.data.shortUrl;
+    const key = shortUrl.substring(shortUrl.lastIndexOf('/') + 1);
+    client.global.set("shortUrlKey", key);
+    client.global.set("shortUrlId", response.body.data.id);
+%}
+
+### =================================================================
+### 6. 생성된 단축 URL로 리디렉션 테스트 (인증 불필요)
+### 리디렉션 시 통계 데이터가 적재됩니다.
+### =================================================================
+GET {{hostname}}/r/{{shortUrlKey}}
+Referer: https://www.google.com/
+User-Agent: Gemini-Test-Agent/1.0
+
+### =================================================================
+### 7. 단축 URL 리디렉션 횟수 조회
+### =================================================================
+GET {{hostname}}/r/history/{{shortUrlId}}/count
+Accept: application/json
+
+
+### =================================================================
+### 8. 단축 URL 통계 조회 (Referer, Year 기준)
+### =================================================================
+POST {{hostname}}/r/history/{{shortUrlId}}/stats
+Content-Type: application/json
+
+{
+  "groupBy": ["REFERER", "YEAR"]
+}
+
+
+### =================================================================
+### 9. 단축 URL 통계 조회 (User-Agent, Month, Day 기준)
+### =================================================================
+POST {{hostname}}/r/history/{{shortUrlId}}/stats
+Content-Type: application/json
+
+{
+  "groupBy": ["USER_AGENT", "MONTH", "DAY"]
 }

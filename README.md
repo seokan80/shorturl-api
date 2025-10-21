@@ -1,8 +1,157 @@
-# 단축 URL 서비스 API
+# Short URL Service
 
-이 문서는 단축 URL 서비스의 API 사용법과 전체적인 인증 흐름을 설명합니다.
+## 1. 프로젝트 소개
 
-## 환경 변수 설정 (Jasypt Encryptor Password)
+원본 URL을 입력받아 짧은 URL을 생성해주고, 단축된 URL로 접근 시 원본 URL로 리디렉션해주는 서비스입니다.
+
+주요 기능:
+- 사용자별 API Key 발급
+- 단축 URL 생성
+- 단축 URL 리디렉션
+- 리디렉션 통계 조회
+
+## 2. 기술 스택
+
+- Java 17
+- Spring Boot 3.x
+- Spring Data JPA
+- Spring MVC
+- QueryDSL
+- H2 Database
+- Lombok
+- JWT
+
+## 3. 실행 방법
+
+1. 프로젝트를 Git clone 받습니다.
+   ```bash
+   git clone {저장소_URL}
+   ```
+
+2. 프로젝트 루트 디렉토리에서 아래 명령어를 사용하여 빌드합니다.
+   ```bash
+   ./gradlew build
+   ```
+
+3. 빌드된 JAR 파일을 실행하여 애플리케이션을 시작합니다.
+   ```bash
+   java -jar build/libs/short-url-0.0.1-SNAPSHOT.jar
+   ```
+4. 애플리케이션은 기본적으로 8080 포트에서 실행됩니다.
+
+## 4. API 테스트
+
+프로젝트 루트에 포함된 `api-flow.http` 파일과 `url_shortener_script.sh` 스크립트를 사용하여 주요 API 흐름을 테스트할 수 있습니다.
+
+### `api-flow.http` 사용법
+
+- IntelliJ IDEA Ultimate 버전에서 `api-flow.http` 파일을 열고 각 요청의 왼쪽에 있는 실행 버튼(▶)을 클릭하여 API를 테스트할 수 있습니다.
+- 변수는 파일 상단에 정의되어 있으며, 필요에 따라 수정하여 사용할 수 있습니다.
+
+### `url_shortener_script.sh` 사용법
+
+- 터미널에서 스크립트를 직접 실행하여 API 흐름을 테스트합니다.
+- 스크립트 실행을 위해서는 `jq`가 시스템에 설치되어 있어야 합니다.
+  ```bash
+  # 스크립트 실행 권한 부여
+  chmod +x url_shortener_script.sh
+
+  # 스크립트 실행
+  ./url_shortener_script.sh
+  ```
+
+## 5. API 엔드포인트 상세
+
+### 5.1. 인증
+
+#### `POST /api/auth/register`
+- 사용자를 등록하고 최초 API Key(Access Token)를 발급합니다.
+- **Header:** `X-REGISTRATION-KEY: {등록용 키}`
+- **Body:**
+  ```json
+  {
+    "username": "my-awesome-service"
+  }
+  ```
+
+#### `POST /api/auth/token`
+- 만료된 API Key를 재발급합니다.
+- **Header:** `X-REGISTRATION-KEY: {등록용 키}`
+- **Body:**
+  ```json
+  {
+    "username": "my-awesome-service",
+    "apiKey": "{만료된 API Key}"
+  }
+  ```
+
+### 5.2. 단축 URL
+
+#### `POST /api/short-url`
+- 새로운 단축 URL을 생성합니다.
+- **Header:** `Authorization: Bearer {API Key}`
+- **Body:**
+  ```json
+  {
+    "longUrl": "https://github.com/google/gemini-api",
+    "username": "my-awesome-service"
+  }
+  ```
+- **응답:** 생성된 단축 URL 정보 (`id`, `shortUrl` 등)를 반환합니다.
+
+#### `GET /r/{shortUrlKey}`
+- 단축 URL 키를 사용하여 원본 URL로 리디렉션합니다.
+- 이 API 호출 시 리디렉션 기록(통계 데이터)이 저장됩니다.
+
+### 5.3. 리디렉션 통계
+
+#### `GET /r/history/{shortUrlId}/count`
+- 특정 단축 URL의 총 리디렉션 횟수를 조회합니다.
+- **Path Variable:** `shortUrlId` - 통계를 조회할 단축 URL의 ID
+- **성공 응답:**
+  ```json
+  {
+      "data": 15,
+      "message": "SUCCESS",
+      "status": "OK"
+  }
+  ```
+
+#### `POST /r/history/{shortUrlId}/stats`
+- 다양한 조건으로 그룹화된 리디렉션 통계를 조회합니다.
+- **Path Variable:** `shortUrlId` - 통계를 조회할 단축 URL의 ID
+- **Body:**
+  ```json
+  {
+    "groupBy": ["REFERER", "YEAR"]
+  }
+  ```
+- `groupBy` 필드에 아래의 값들을 배열 형태로 조합하여 요청할 수 있습니다.
+  - `REFERER`: 리퍼러별 집계
+  - `USER_AGENT`: User-Agent별 집계
+  - `YEAR`: 연도별 집계
+  - `MONTH`: 월별 집계
+  - `DAY`: 일별 집계
+  - `HOUR`: 시간별 집계
+- **성공 응답 (Referer, Year 기준):**
+  ```json
+  {
+      "data": [
+          {
+              "referer": "https://www.google.com/",
+              "year": 2025,
+              "count": 5
+          },
+          {
+              "referer": "https://www.naver.com/",
+              "year": 2025,
+              "count": 2
+          }
+      ],
+      "message": "SUCCESS",
+      "status": "OK"
+  }
+  ```
 
 애플리케이션은 `application.yml` 파일의 민감한 정보(예: 데이터베이스 비밀번호, JWT 시크릿 키)를 암호화하기 위해 Jasypt를 사용합니다. 암호화된 값을 복호화하기 위해서는 마스터 키 역할을 하는 `JASYPT_ENCRYPTOR_PASSWORD` 환경 변수를 설정해야 합니다.
 

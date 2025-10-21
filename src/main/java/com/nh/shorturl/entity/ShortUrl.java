@@ -31,10 +31,13 @@ public class ShortUrl {
     @Comment("단축 URL")
     private String shortUrl;
 
+    @Comment("생성자")
+    private String createBy;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "USER_ID", nullable = false)
     @Comment("생성자 User ID")
-    private User createBy;
+    private User user;
 
     @Column
     @Comment("만료일")
@@ -44,7 +47,7 @@ public class ShortUrl {
     @Comment("생성일")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public ShortUrl(String longUrl, String shortUrl, User createBy, LocalDateTime expiredAt) {
+    public ShortUrl(String longUrl, String shortUrl, String createBy, LocalDateTime expiredAt) {
         this.longUrl = longUrl;
         this.shortUrl = shortUrl;
         this.createBy = createBy;

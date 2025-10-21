@@ -2,23 +2,32 @@ spring:
   datasource:
     url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
     username: my_user
-    password: ENC(58B2+Q05JnmNWOzdv1r40LI+ajnpa5MJiBJNcpHwTHYfnOiL+fObZfKzKwucYGOS)
+    password: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
     driver-class-name: oracle.jdbc.OracleDriver
   application:
     name: short-url
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     show-sql: true
     database-platform: org.hibernate.dialect.OracleDialect
+  data:
+    redis:
+      host: 130.1.17.65
+      port: 7000
+      cluster:
+        nodes:
+          - 130.1.17.65:7000
+          - 130.1.17.66:7000
+          - 130.1.17.67:7000
 
 # Jasypt
 jasypt:
   encryptor:
-#    password: ${JASYPT_ENCRYPTOR_PASSWORD}
-    password: "aaa"
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
+#    password: "aaa"
     algorithm: "PBEWITHHMACSHA512ANDAES_256"
     iv-generator-classname: org.jasypt.iv.RandomIvGenerator
     # jasypt-spring-boot 3.x 이상을 사용하는 경우 아래와 같이 pool-size를 1로 설정해야 할 수 있습니다.
@@ -26,9 +35,14 @@ jasypt:
 
 # Registration Key
 registration:
-  key: ENC(58B2+Q05JnmNWOzdv1r40LI+ajnpa5MJiBJNcpHwTHYfnOiL+fObZfKzKwucYGOS)
+#  key: ENC(58B2+Q05JnmNWOzdv1r40LI+ajnpa5MJiBJNcpHwTHYfnOiL+fObZfKzKwucYGOS)
+  key: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
 
 # JWT
 jwt:
-  secret: ENC(++CaXj5X9Uuo8y26uyogaB7t13TUnsiIagg8HCevTyPzhA6nW7SPSt4uJ5VS84MhOniyODqzlHW20urAnf/7Rtw8A9MaydLywp1QWV6awpn1SihcQBFifIKlJRvltCD+2yRwPfpYgQXetrVzeN5Mg8f1VBnknvITajJBJZgEzEI=)
+#  secret: ENC(++CaXj5X9Uuo8y26uyogaB7t13TUnsiIagg8HCevTyPzhA6nW7SPSt4uJ5VS84MhOniyODqzlHW20urAnf/7Rtw8A9MaydLywp1QWV6awpn1SihcQBFifIKlJRvltCD+2yRwPfpYgQXetrVzeN5Mg8f1VBnknvITajJBJZgEzEI=)
+#  secret: "mXuH+WprMme+/ankLaa+v0AskbYICwpCaimcaqE/z+kABiSQZxP9CyBTUf7IneqZK5t7tw5glKTO0iGi5gwR4Q=="
+  secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
   expiration: 3600000
+
+base-url: http://localhost:8080/

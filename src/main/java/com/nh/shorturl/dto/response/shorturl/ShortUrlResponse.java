@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 /**
  * Short URL 응답 DTO
  */
@@ -23,11 +25,14 @@ public class ShortUrlResponse {
     /** 원본 URL */
     private String longUrl;
 
-    /** 생성자 ID */
-    private Long createdBy;
+    /** 생성자 */
+    private String createdBy;
+
+    /** 생성자 ID*/
+    private Long userId;
 
     /** 생성일 */
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     /** 만료일 */
     private String expiredAt;

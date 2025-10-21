@@ -5,11 +5,11 @@ import com.nh.shorturl.dto.request.auth.TokenRequest;
 import com.nh.shorturl.dto.request.auth.UserRequest;
 import com.nh.shorturl.dto.response.auth.TokenResponse;
 import com.nh.shorturl.dto.response.auth.UserResponse;
+import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.service.auth.AuthService;
 import com.nh.shorturl.service.user.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.nh.shorturl.type.ApiResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,29 +27,33 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestHeader("X-REGISTRATION-KEY") String key,
-                                                 @RequestBody UserRequest request) {
+    public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,
+                                               @RequestBody UserRequest request) {
         if (!registrationConfig.getRegistrationKey().equals(key)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
-        
-        User user = userService.createUser(request.getUsername());
-        return ResponseEntity.ok(new UserResponse(user.getUsername(), user.getApiKey()));
+
+        try {
+            User user = userService.createUser(request.getUsername());
+            return new ResultEntity<>(new UserResponse(user.getUsername(), user.getApiKey()));
+        } catch (IllegalArgumentException e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
     }
 
     @PostMapping("/token")
-    public ResponseEntity<TokenResponse> getToken(@RequestHeader("X-REGISTRATION-KEY") String key,
+    public ResultEntity<?> getToken(@RequestHeader("X-REGISTRATION-KEY") String key,
                                                   @RequestBody TokenRequest request) {
         if (!registrationConfig.getRegistrationKey().equals(key)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
         try {
             String newApiKey = authService.reissueToken(request.getUsername(), request.getApiKey());
-            return ResponseEntity.ok(new TokenResponse(newApiKey));
+            return new ResultEntity<>(new TokenResponse(newApiKey));
         } catch (IllegalArgumentException e) {
             // 사용자가 존재하지 않거나 기존 apiKey가 일치하지 않는 경우
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResultEntity.of(ApiResult.FORBIDDEN);
         }
     }
 }

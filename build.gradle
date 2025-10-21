@@ -36,9 +36,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    // Database (예: H2 or MySQL)
-//    runtimeOnly 'com.h2database:h2'
-    // runtimeOnly 'com.mysql:mysql-connector-j'
+    // h2
+    runtimeOnly 'com.h2database:h2'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

@@ -8,7 +8,9 @@ import com.nh.shorturl.repository.ShortUrlRepository;
 import com.nh.shorturl.repository.UserRepository;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.util.Base62;
+import com.nh.shorturl.util.DateUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +22,9 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     private final ShortUrlRepository shortUrlRepository;
     private final UserRepository userRepository;
+
+    @Value("${base-url}")
+    String baseUrl;
 
     @Override
     public ShortUrlResponse createShortUrl(ShortUrlRequest request) {
@@ -36,7 +41,8 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
                 .createdAt(LocalDateTime.now())
-                .createBy(user)
+                .createBy(user.getUsername())
+                .user(user)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
                 .build();
 
@@ -94,10 +100,12 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     private ShortUrlResponse toResponse(ShortUrl entity) {
         return ShortUrlResponse.builder()
                 .id(entity.getId())
-                .shortUrl("https://a.com/" + entity.getShortUrl())
+                .shortKey(entity.getShortUrl())
+                .shortUrl(baseUrl + entity.getShortUrl())
                 .longUrl(entity.getLongUrl())
-                .createdBy(entity.getCreateBy().getId())
-                .createdAt(entity.getCreatedAt().toString())
+                .createdBy(entity.getCreateBy())
+                .userId(entity.getUser().getId())
+                .createdAt(entity.getCreatedAt())
                 .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)
                 .build();
     }
