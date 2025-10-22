@@ -51,3 +51,19 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// 빌드 시 사용할 프로파일을 파라미터로 받기 (기본값: local)
+// 사용법: ./gradlew build -Pprofile=prod
+def profile = project.hasProperty('profile') ? project.getProperty('profile') : 'local'
+
+// Spring Boot의 bootJar 태스크 설정
+bootJar {
+    // 1. 빌드된 JAR 파일 이름에 프로파일명 추가
+    archiveFileName = "${archiveBaseName.get()}-${profile}-${archiveVersion.get()}.${archiveExtension.get()}"
+
+    // 2. JAR 파일의 Manifest에 기본 활성 프로파일을 지정
+    // 이렇게 하면 별도 옵션 없이 java -jar로 실행해도 해당 프로파일로 동작함
+    manifest {
+        attributes 'Spring-Profiles-Active': profile
+    }
+}

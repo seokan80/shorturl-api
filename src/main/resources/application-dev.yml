@@ -1,0 +1,25 @@
+# --- Development 환경 설정 ---
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
+    username: my_user
+    password: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate # 스키마가 올바른지 검증만 함
+    show-sql: true
+    database-platform: org.hibernate.dialect.OracleDialect
+
+server:
+  port: 8081 # 로컬과 다른 포트 사용
+
+# 개발 환경용 등록 키 (암호화)
+registration:
+  key: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
+
+# 개발 환경용 JWT 비밀키 (암호화)
+jwt:
+  secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
+
+base-url: http://dev.your-domain.com/

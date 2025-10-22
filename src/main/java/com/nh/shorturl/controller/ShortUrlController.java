@@ -2,11 +2,9 @@ package com.nh.shorturl.controller;
 
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
-import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.type.ApiResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -58,9 +56,13 @@ public class ShortUrlController {
     /**
      * 단축 URL 삭제.
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        shortUrlService.deleteShortUrl(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/delete/{id}")
+    public ResultEntity<?> delete(@PathVariable Long id) {
+        try {
+            shortUrlService.deleteShortUrl(id);
+            return ResultEntity.True();
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
     }
 }

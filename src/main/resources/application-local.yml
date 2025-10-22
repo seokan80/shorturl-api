@@ -1,0 +1,31 @@
+# --- Local 환경 설정 ---
+spring:
+  # H2 인-메모리 데이터베이스 설정으로 변경
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=Oracle  # H2를 Oracle 호환 모드로 실행
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 로컬에서는 실행 시 스키마를 생성하고 종료 시 삭제
+    show-sql: true # SQL 쿼리를 로그로 보여줌
+    database-platform: org.hibernate.dialect.H2Dialect # H2 Dialect로 변경
+  # H2 웹 콘솔 활성화
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8080
+
+# 로컬 환경용 등록 키 (암호화)
+registration:
+  key: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
+
+# 로컬 환경용 JWT 비밀키 (암호화)
+jwt:
+  secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
+
+base-url: http://localhost:8080/
