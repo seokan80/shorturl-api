@@ -54,7 +54,7 @@ public class ShortUrlRedirectController {
             response.sendRedirect(shortUrlResponse.getLongUrl());
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            // 유효하지 않거나 만료된 URL 등, 리디렉션 자체가 불가능한 경우는 404 에러 페이지를 보여줍니다.
+            // 유효하지 않거나 만료된 URL 등, 리디렉션 자체가 불가능한 경우는 404 에러 페이지 노출
             response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         }
     }

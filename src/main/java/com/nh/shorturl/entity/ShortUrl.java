@@ -1,9 +1,12 @@
 package com.nh.shorturl.entity;
 
 import com.nh.shorturl.constants.SchemaConstants;
+import com.nh.shorturl.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +19,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShortUrl {
+@SQLDelete(sql = "UPDATE " + SchemaConstants.TABLE_PREFIX + "SHORT_URL SET IS_DEL = 'Y', DELETED_AT = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("IS_DEL = 'N'")
+public class ShortUrl extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,15 +48,19 @@ public class ShortUrl {
     @Comment("만료일")
     private LocalDateTime expiredAt;
 
-    @Column(nullable = false)
-    @Comment("생성일")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "IS_DEL", length = 1)
+    @Comment("삭제 여부")
+    @Builder.Default
+    private Boolean deleted = false;
+
+    @Column
+    @Comment("삭제일")
+    private LocalDateTime deletedAt;
 
     public ShortUrl(String longUrl, String shortUrl, String createBy, LocalDateTime expiredAt) {
         this.longUrl = longUrl;
         this.shortUrl = shortUrl;
         this.createBy = createBy;
         this.expiredAt = expiredAt;
-        this.createdAt = LocalDateTime.now();
     }
 }

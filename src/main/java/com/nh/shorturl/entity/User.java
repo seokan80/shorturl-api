@@ -1,12 +1,16 @@
 package com.nh.shorturl.entity;
 
 import com.nh.shorturl.constants.SchemaConstants;
+import com.nh.shorturl.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -22,7 +26,9 @@ import java.util.Collections;
                 @UniqueConstraint(name = "UK_USER_USERNAME_APIKEY", columnNames = {"USERNAME", "API_KEY"})
         }
 )
-public class User implements UserDetails {
+@SQLDelete(sql = "UPDATE " + SchemaConstants.TABLE_PREFIX + "USER SET IS_DEL = 'Y', DELETED_AT = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLRestriction("IS_DEL = 'N'")
+public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +42,15 @@ public class User implements UserDetails {
     @Column(name = "API_KEY", nullable = false)
     @Comment("고객별 발급 API Key")
     private String apiKey;
+
+    @Column(name = "IS_DEL", length = 1)
+    @Comment("삭제 여부")
+    @Builder.Default
+    private Boolean deleted = false;
+
+    @Column
+    @Comment("삭제일")
+    private LocalDateTime deletedAt;
 
     public User(String username, String apiKey) {
         this.username = username;
@@ -78,6 +93,6 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         // 계정이 활성화(사용가능)인지 리턴 (true: 활성화)
-        return true;
+        return deleted;
     }
 }

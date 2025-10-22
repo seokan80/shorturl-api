@@ -8,7 +8,6 @@ import com.nh.shorturl.repository.ShortUrlRepository;
 import com.nh.shorturl.repository.UserRepository;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.util.Base62;
-import com.nh.shorturl.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,6 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl entity = ShortUrl.builder()
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
-                .createdAt(LocalDateTime.now())
                 .createBy(user.getUsername())
                 .user(user)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
@@ -72,7 +70,10 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     @Override
     public void deleteShortUrl(Long id) {
-        shortUrlRepository.deleteById(id);
+        ShortUrl shortUrl = shortUrlRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("삭제할 URL을 찾을 수 없습니다. ID: " + id));
+
+        shortUrlRepository.delete(shortUrl);
     }
 
     @Override
