@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 공통 변수 정의: 로그 패턴 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <!-- Appender 1: 콘솔 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ================================================================= -->
+    <!-- 환경별 설정 (로그 경로 및 로깅 레벨) -->
+    <!-- ================================================================= -->
+
+    <!-- local 환경일 때 활성화 -->
+    <springProfile name="local">
+        <property name="LOG_DIR" value="logs/local"/>
+        <logger name="com.nh.shorturl" level="DEBUG" />
+        <logger name="org.hibernate.SQL" level="DEBUG" />
+        <logger name="org.hibernate.type.descriptor.sql" level="DEBUG" />
+    </springProfile>
+
+    <!-- dev 환경일 때 활성화 -->
+    <springProfile name="dev">
+        <property name="LOG_DIR" value="logs/dev"/>
+        <logger name="com.nh.shorturl" level="DEBUG" />
+        <logger name="org.hibernate.SQL" level="DEBUG" />
+        <logger name="org.hibernate.type.descriptor.sql" level="DEBUG" />
+    </springProfile>
+
+    <!-- prod 환경일 때 활성화 -->
+    <springProfile name="prod">
+        <!-- 실제 운영 서버에서는 /var/log/app_name 등 절대 경로를 사용하는 것이 일반적입니다. -->
+        <property name="LOG_DIR" value="logs/prod"/>
+        <logger name="com.nh.shorturl" level="INFO" />
+    </springProfile>
+
+    <!-- Appender 2: 파일 출력 (Rolling) -->
+    <!-- 로그 경로는 위에서 설정한 profile별 LOG_DIR 변수를 사용합니다. -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ================================================================= -->
+    <!-- 루트 로거 설정 -->
+    <!-- ================================================================= -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

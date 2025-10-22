@@ -31,8 +31,7 @@ Content-Type: application/json
 Authorization: Bearer {{initialApiKey}}
 
 {
-  "longUrl": "{{long_url}}",
-  "username": "{{username}}"
+  "longUrl": "{{long_url}}"
 }
 
 > {%
@@ -104,8 +103,7 @@ Content-Type: application/json
 Authorization: Bearer {{reissuedApiKey}}
 
 {
-  "longUrl": "https://developers.google.com/gemini",
-  "username": "{{username}}"
+  "longUrl": "https://developers.google.com/gemini"
 }
 
 > {%

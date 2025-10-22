@@ -27,14 +27,14 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     String baseUrl;
 
     @Override
-    public ShortUrlResponse createShortUrl(ShortUrlRequest request) {
+    public ShortUrlResponse createShortUrl(ShortUrlRequest request, String username) {
         // 중복 방지를 위해 UUID → Base62 8자리 인코딩
         String shortUrl;
         do {
             shortUrl = Base62.encodeUUID(UUID.randomUUID());
         } while (shortUrlRepository.existsByShortUrl(shortUrl));
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자"));
 
         ShortUrl entity = ShortUrl.builder()

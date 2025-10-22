@@ -8,7 +8,7 @@ public interface ShortUrlService {
     /**
      * 단축 URL 생성.
      */
-    ShortUrlResponse createShortUrl(ShortUrlRequest request) throws Exception;
+    ShortUrlResponse createShortUrl(ShortUrlRequest request, String username) throws Exception;
 
     /**
      * ID 기반 단축 URL 조회.

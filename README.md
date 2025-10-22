@@ -165,8 +165,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 - **Body**:
   ```json
   {
-    "longUrl": "https://www.google.com",
-    "username": "my-awesome-service"
+    "longUrl": "https://www.google.com"
   }
   ```
 - **성공 응답 (`data` 필드 내부)**:

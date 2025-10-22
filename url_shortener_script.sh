@@ -61,16 +61,10 @@ echo -e "${GREEN}성공! 발급된 Initial API Key: ${INITIAL_API_KEY}${NC}"
 # =================================================================
 step 2 "발급받은 API Key로 단축 URL 생성"
 
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${HOSTNAME}/api/short-url" \
+execute_curl -X POST "${HOSTNAME}/api/short-url" \
 -H "Content-Type: application/json" \
 -H "Authorization: Bearer ${INITIAL_API_KEY}" \
--d "{\"longUrl\": \"${LONG_URL}\", \"username\": \"${USERNAME}\"}")
-
-HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
-BODY=$(echo "$RESPONSE" | sed '$d')
-
-echo "Response Body: ${BODY}"
-echo "HTTP Status: ${HTTP_STATUS}"
+-d "{\"longUrl\": \"${LONG_URL}\"}"
 
 if [ "$HTTP_STATUS" -ne 200 ]; then
     echo -e "${RED}Error: 단축 URL 생성에 실패했습니다. (Status: $HTTP_STATUS)${NC}"
@@ -175,14 +169,16 @@ echo "" # for new line
 
 
 # =================================================================
-# 8. 단축 URL 통계 조회 (Referer, Year 기준) (새로운 URL 기준)
+# 8. 새로 발급받은 API Key로 다른 단축 URL 생성 테스트
 # =================================================================
-step 8 "단축 URL 통계 조회 (Referer, Year 기준)"
-echo "Requesting: ${HOSTNAME}/r/history/${SHORT_URL_ID_NEW}/stats"
-curl -s -X POST "${HOSTNAME}/r/history/${SHORT_URL_ID_NEW}/stats" \
+step 8 "새로 발급받은 API Key로 다른 단축 URL 생성 테스트"
+
+execute_curl -X POST "${HOSTNAME}/api/short-url" \
 -H "Content-Type: application/json" \
--d '{"groupBy": ["REFERER", "YEAR"]}'
-echo "" # for new line
+-H "Authorization: Bearer ${REISSUED_API_KEY}" \
+-d "{\"longUrl\": \"${NEW_LONG_URL}\"}"
+
+if [ "$HTTP_STATUS" -ne 200 ]; then
 
 
 # =================================================================

@@ -7,6 +7,8 @@ import com.nh.shorturl.type.ApiResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 /**
  * 단축 URL 관련 REST API 컨트롤러.
  */
@@ -21,9 +23,10 @@ public class ShortUrlController {
      * 단축 URL 생성 API.
      */
     @PostMapping
-    public ResultEntity<?> create(@RequestBody ShortUrlRequest request) {
+    public ResultEntity<?> create(@RequestBody ShortUrlRequest request, Principal principal) {
         try {
-            return new ResultEntity<>(shortUrlService.createShortUrl(request));
+            // JWT 토큰에서 추출한 username을 서비스로 전달
+            return new ResultEntity<>(shortUrlService.createShortUrl(request, principal.getName()));
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }

@@ -1,0 +1,401 @@
+2025-10-22 13:32:59.086 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-10-22 13:32:59.139 [main] INFO  com.nh.shorturl.ShortUrlApplication - Starting ShortUrlApplication using Java 17.0.16 with PID 16505 (/Users/kms/dev/short-url/build/classes/java/main started by kms in /Users/kms/dev/short-url)
+2025-10-22 13:32:59.140 [main] DEBUG com.nh.shorturl.ShortUrlApplication - Running with Spring Boot v3.5.7-SNAPSHOT, Spring v6.2.12
+2025-10-22 13:32:59.140 [main] INFO  com.nh.shorturl.ShortUrlApplication - The following 1 profile is active: "local"
+2025-10-22 13:32:59.727 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-22 13:32:59.786 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 52 ms. Found 3 JPA repository interfaces.
+2025-10-22 13:32:59.999 [main] INFO  c.u.j.c.EnableEncryptablePropertiesBeanFactoryPostProcessor - Post-processing PropertySource instances
+2025-10-22 13:33:00.000 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2025-10-22 13:33:00.001 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:33:00.001 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletContextInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:33:00.002 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource systemProperties [org.springframework.core.env.PropertiesPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:33:00.002 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource systemEnvironment [org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor$OriginAwareSystemEnvironmentPropertySource] to EncryptableSystemEnvironmentPropertySourceWrapper
+2025-10-22 13:33:00.002 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource random [org.springframework.boot.env.RandomValuePropertySource] to EncryptablePropertySourceWrapper
+2025-10-22 13:33:00.002 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource Config resource 'class path resource [application-local.yml]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:33:00.003 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource Config resource 'class path resource [application.yml]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:33:00.003 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource applicationInfo [org.springframework.boot.ApplicationInfoPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:33:00.293 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-10-22 13:33:00.308 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-10-22 13:33:00.311 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-10-22 13:33:00.311 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-10-22 13:33:00.374 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-10-22 13:33:00.374 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1197 ms
+2025-10-22 13:33:00.379 [main] INFO  c.u.j.f.DefaultLazyPropertyFilter - Property Filter custom Bean not found with name 'encryptablePropertyFilter'. Initializing Default Property Filter
+2025-10-22 13:33:00.388 [main] INFO  c.u.j.r.DefaultLazyPropertyResolver - Property Resolver custom Bean not found with name 'encryptablePropertyResolver'. Initializing Default Property Resolver
+2025-10-22 13:33:00.390 [main] INFO  c.u.j.d.DefaultLazyPropertyDetector - Property Detector custom Bean not found with name 'encryptablePropertyDetector'. Initializing Default Property Detector
+2025-10-22 13:33:00.532 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-22 13:33:00.584 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-10-22 13:33:00.630 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-10-22 13:33:00.870 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-22 13:33:00.893 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-22 13:33:01.077 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-10-22 13:33:01.079 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-22 13:33:01.103 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-10-22 13:33:01.127 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-10-22 13:33:01.924 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-10-22 13:33:01.936 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_redirection_history cascade 
+2025-10-22 13:33:01.940 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_short_url cascade 
+2025-10-22 13:33:01.940 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_user cascade 
+2025-10-22 13:33:01.944 [main] DEBUG org.hibernate.SQL - create table tbl_redirection_history (id bigint generated by default as identity, redirect_at timestamp(6), short_url_id bigint not null, ip varchar(255), referer varchar(255), user_agent varchar(255), primary key (id))
+2025-10-22 13:33:01.952 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.id is '자동 생성 ID'
+2025-10-22 13:33:01.953 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.redirect_at is 'Redirect 일시'
+2025-10-22 13:33:01.954 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.short_url_id is 'Short URL ID'
+2025-10-22 13:33:01.954 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.ip is 'IP'
+2025-10-22 13:33:01.955 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.referer is 'referer'
+2025-10-22 13:33:01.955 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.user_agent is 'userAgent'
+2025-10-22 13:33:01.956 [main] DEBUG org.hibernate.SQL - create table tbl_short_url (created_at timestamp(6) not null, expired_at timestamp(6), id bigint generated by default as identity, user_id bigint not null, short_url varchar(100) not null, long_url varchar(2000) not null, create_by varchar(255), primary key (id), unique (short_url))
+2025-10-22 13:33:01.958 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.created_at is '생성일'
+2025-10-22 13:33:01.959 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.expired_at is '만료일'
+2025-10-22 13:33:01.960 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.id is '자동 생성 ID'
+2025-10-22 13:33:01.960 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.user_id is '생성자 User ID'
+2025-10-22 13:33:01.961 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.short_url is '단축 URL'
+2025-10-22 13:33:01.961 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.long_url is '원본 URL'
+2025-10-22 13:33:01.962 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.create_by is '생성자'
+2025-10-22 13:33:01.962 [main] DEBUG org.hibernate.SQL - create table tbl_user (id bigint generated by default as identity, api_key varchar(255) not null, username varchar(255) not null, primary key (id), constraint UK_USER_USERNAME_APIKEY unique (username, api_key))
+2025-10-22 13:33:01.963 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.id is '자동 생성 ID'
+2025-10-22 13:33:01.964 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.api_key is '고객별 발급 API Key'
+2025-10-22 13:33:01.964 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.username is '사용자'
+2025-10-22 13:33:01.965 [main] DEBUG org.hibernate.SQL - alter table if exists tbl_redirection_history add constraint FK5i482darsqdymvtkxodd7xpsu foreign key (short_url_id) references tbl_short_url
+2025-10-22 13:33:01.977 [main] DEBUG org.hibernate.SQL - alter table if exists tbl_short_url add constraint FK195ldnm2klb8amrpp4w92dij7 foreign key (user_id) references tbl_user
+2025-10-22 13:33:01.980 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-22 13:33:01.987 [main] INFO  c.u.j.encryptor.DefaultLazyEncryptor - String Encryptor custom Bean not found with name 'jasyptStringEncryptor'. Initializing Default String Encryptor
+2025-10-22 13:33:01.995 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.key-obtention-iterations, using default value: 1000
+2025-10-22 13:33:01.995 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.provider-name, using default value: null
+2025-10-22 13:33:01.995 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.provider-class-name, using default value: null
+2025-10-22 13:33:01.996 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.salt-generator-classname, using default value: org.jasypt.salt.RandomSaltGenerator
+2025-10-22 13:33:01.997 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.string-output-type, using default value: base64
+2025-10-22 13:33:02.386 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-10-22 13:33:02.423 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2025-10-22 13:33:02.896 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-10-22 13:33:03.012 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-10-22 13:33:03.028 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-10-22 13:33:03.029 [main] INFO  c.u.j.c.RefreshScopeRefreshedEventListener - Refreshing cached encryptable property sources on ServletWebServerInitializedEvent
+2025-10-22 13:33:03.029 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source systemProperties refreshed
+2025-10-22 13:33:03.029 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source systemEnvironment refreshed
+2025-10-22 13:33:03.029 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source random refreshed
+2025-10-22 13:33:03.030 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source Config resource 'class path resource [application-local.yml]' via location 'optional:classpath:/' refreshed
+2025-10-22 13:33:03.030 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source Config resource 'class path resource [application.yml]' via location 'optional:classpath:/' refreshed
+2025-10-22 13:33:03.030 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source applicationInfo refreshed
+2025-10-22 13:33:03.030 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2025-10-22 13:33:03.030 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:33:03.030 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource servletContextInitParams [org.springframework.web.context.support.ServletContextPropertySource] to EncryptableEnumerablePropertySourceWrapper
+2025-10-22 13:33:03.040 [main] INFO  com.nh.shorturl.ShortUrlApplication - Started ShortUrlApplication in 4.51 seconds (process running for 5.301)
+2025-10-22 13:33:54.392 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-22 13:33:54.392 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-10-22 13:33:54.393 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-10-22 13:33:54.635 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:54.736 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into tbl_user (api_key,username,id) values (?,?,default)
+2025-10-22 13:33:56.620 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:56.632 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select su1_0.id from tbl_short_url su1_0 where su1_0.short_url=? fetch first ? rows only
+2025-10-22 13:33:56.635 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:56.637 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - insert into tbl_short_url (create_by,created_at,expired_at,long_url,short_url,user_id,id) values (?,?,?,?,?,?,default)
+2025-10-22 13:33:56.983 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:56.998 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:33:57.161 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:57.170 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:33:57.363 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:57.370 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:33:57.378 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - delete from tbl_short_url where id=?
+2025-10-22 13:33:57.611 [http-nio-8080-exec-6] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:33:57.786 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=? and u1_0.api_key=?
+2025-10-22 13:33:57.796 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - update tbl_user set api_key=?,username=? where id=?
+2025-10-22 13:33:58.141 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:58.145 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select su1_0.id from tbl_short_url su1_0 where su1_0.short_url=? fetch first ? rows only
+2025-10-22 13:33:58.147 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:33:58.148 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - insert into tbl_short_url (create_by,created_at,expired_at,long_url,short_url,user_id,id) values (?,?,?,?,?,?,default)
+2025-10-22 13:33:58.479 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:33:58.481 [http-nio-8080-exec-10] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - saveRedirectionHistory: shortUrl=52ukLfno, request=SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@78c2d46e]
+2025-10-22 13:33:58.483 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:33:58.485 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - insert into tbl_redirection_history (ip,redirect_at,referer,short_url_id,user_agent,id) values (?,?,?,?,?,default)
+2025-10-22 13:33:59.355 [http-nio-8080-exec-1] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getRedirectCount: shortUrlId=2
+2025-10-22 13:33:59.356 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:33:59.366 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select count(rh1_0.id) from tbl_redirection_history rh1_0 left join tbl_short_url su1_0 on su1_0.id=rh1_0.short_url_id where su1_0.id=?
+2025-10-22 13:33:59.708 [http-nio-8080-exec-2] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getStats: shortUrlId=2, groupBy=[REFERER, YEAR]
+2025-10-22 13:33:59.709 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:34:00.413 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select rh1_0.referer,extract(year from rh1_0.redirect_at),count(rh1_0.id) from tbl_redirection_history rh1_0 where rh1_0.short_url_id=? group by rh1_0.referer,extract(year from rh1_0.redirect_at) order by count(rh1_0.id) desc
+2025-10-22 13:34:00.515 [http-nio-8080-exec-3] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getStats: shortUrlId=2, groupBy=[USER_AGENT, MONTH, DAY]
+2025-10-22 13:34:00.515 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:34:00.521 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select rh1_0.user_agent,extract(month from rh1_0.redirect_at),extract(day from rh1_0.redirect_at),count(rh1_0.id) from tbl_redirection_history rh1_0 where rh1_0.short_url_id=? group by rh1_0.user_agent,extract(month from rh1_0.redirect_at),extract(day from rh1_0.redirect_at) order by count(rh1_0.id) desc
+2025-10-22 13:41:44.687 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-10-22 13:41:44.691 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-10-22 13:41:44.695 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-10-22 13:41:44.695 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_redirection_history cascade 
+2025-10-22 13:41:44.697 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_short_url cascade 
+2025-10-22 13:41:44.697 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_user cascade 
+2025-10-22 13:41:44.700 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-10-22 13:41:44.701 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-10-22 13:41:49.947 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-10-22 13:41:49.998 [main] INFO  com.nh.shorturl.ShortUrlApplication - Starting ShortUrlApplication using Java 17.0.16 with PID 17249 (/Users/kms/dev/short-url/build/classes/java/main started by kms in /Users/kms/dev/short-url)
+2025-10-22 13:41:49.999 [main] DEBUG com.nh.shorturl.ShortUrlApplication - Running with Spring Boot v3.5.7-SNAPSHOT, Spring v6.2.12
+2025-10-22 13:41:49.999 [main] INFO  com.nh.shorturl.ShortUrlApplication - The following 1 profile is active: "local"
+2025-10-22 13:41:50.566 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-22 13:41:50.625 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 50 ms. Found 3 JPA repository interfaces.
+2025-10-22 13:41:50.815 [main] INFO  c.u.j.c.EnableEncryptablePropertiesBeanFactoryPostProcessor - Post-processing PropertySource instances
+2025-10-22 13:41:50.815 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2025-10-22 13:41:50.815 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:41:50.816 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletContextInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:41:50.816 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource systemProperties [org.springframework.core.env.PropertiesPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:41:50.817 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource systemEnvironment [org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor$OriginAwareSystemEnvironmentPropertySource] to EncryptableSystemEnvironmentPropertySourceWrapper
+2025-10-22 13:41:50.817 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource random [org.springframework.boot.env.RandomValuePropertySource] to EncryptablePropertySourceWrapper
+2025-10-22 13:41:50.817 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource Config resource 'class path resource [application-local.yml]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:41:50.817 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource Config resource 'class path resource [application.yml]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:41:50.817 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource applicationInfo [org.springframework.boot.ApplicationInfoPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:41:51.043 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-10-22 13:41:51.073 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-10-22 13:41:51.075 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-10-22 13:41:51.075 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-10-22 13:41:51.127 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-10-22 13:41:51.128 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1089 ms
+2025-10-22 13:41:51.134 [main] INFO  c.u.j.f.DefaultLazyPropertyFilter - Property Filter custom Bean not found with name 'encryptablePropertyFilter'. Initializing Default Property Filter
+2025-10-22 13:41:51.141 [main] INFO  c.u.j.r.DefaultLazyPropertyResolver - Property Resolver custom Bean not found with name 'encryptablePropertyResolver'. Initializing Default Property Resolver
+2025-10-22 13:41:51.143 [main] INFO  c.u.j.d.DefaultLazyPropertyDetector - Property Detector custom Bean not found with name 'encryptablePropertyDetector'. Initializing Default Property Detector
+2025-10-22 13:41:51.304 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-22 13:41:51.355 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-10-22 13:41:51.390 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-10-22 13:41:51.655 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-22 13:41:51.681 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-22 13:41:51.883 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-10-22 13:41:51.885 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-22 13:41:51.908 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-10-22 13:41:51.930 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-10-22 13:41:52.873 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-10-22 13:41:52.887 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_redirection_history cascade 
+2025-10-22 13:41:52.890 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_short_url cascade 
+2025-10-22 13:41:52.890 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_user cascade 
+2025-10-22 13:41:52.894 [main] DEBUG org.hibernate.SQL - create table tbl_redirection_history (id bigint generated by default as identity, redirect_at timestamp(6), short_url_id bigint not null, ip varchar(255), referer varchar(255), user_agent varchar(255), primary key (id))
+2025-10-22 13:41:52.902 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.id is '자동 생성 ID'
+2025-10-22 13:41:52.904 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.redirect_at is 'Redirect 일시'
+2025-10-22 13:41:52.905 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.short_url_id is 'Short URL ID'
+2025-10-22 13:41:52.906 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.ip is 'IP'
+2025-10-22 13:41:52.907 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.referer is 'referer'
+2025-10-22 13:41:52.908 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.user_agent is 'userAgent'
+2025-10-22 13:41:52.909 [main] DEBUG org.hibernate.SQL - create table tbl_short_url (created_at timestamp(6) not null, expired_at timestamp(6), id bigint generated by default as identity, user_id bigint not null, short_url varchar(100) not null, long_url varchar(2000) not null, create_by varchar(255), primary key (id), unique (short_url))
+2025-10-22 13:41:52.911 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.created_at is '생성일'
+2025-10-22 13:41:52.913 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.expired_at is '만료일'
+2025-10-22 13:41:52.913 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.id is '자동 생성 ID'
+2025-10-22 13:41:52.914 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.user_id is '생성자 User ID'
+2025-10-22 13:41:52.914 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.short_url is '단축 URL'
+2025-10-22 13:41:52.915 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.long_url is '원본 URL'
+2025-10-22 13:41:52.915 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.create_by is '생성자'
+2025-10-22 13:41:52.916 [main] DEBUG org.hibernate.SQL - create table tbl_user (id bigint generated by default as identity, api_key varchar(255) not null, username varchar(255) not null, primary key (id), constraint UK_USER_USERNAME_APIKEY unique (username, api_key))
+2025-10-22 13:41:52.917 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.id is '자동 생성 ID'
+2025-10-22 13:41:52.917 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.api_key is '고객별 발급 API Key'
+2025-10-22 13:41:52.918 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.username is '사용자'
+2025-10-22 13:41:52.918 [main] DEBUG org.hibernate.SQL - alter table if exists tbl_redirection_history add constraint FK5i482darsqdymvtkxodd7xpsu foreign key (short_url_id) references tbl_short_url
+2025-10-22 13:41:52.934 [main] DEBUG org.hibernate.SQL - alter table if exists tbl_short_url add constraint FK195ldnm2klb8amrpp4w92dij7 foreign key (user_id) references tbl_user
+2025-10-22 13:41:52.938 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-22 13:41:52.945 [main] INFO  c.u.j.encryptor.DefaultLazyEncryptor - String Encryptor custom Bean not found with name 'jasyptStringEncryptor'. Initializing Default String Encryptor
+2025-10-22 13:41:52.953 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.key-obtention-iterations, using default value: 1000
+2025-10-22 13:41:52.954 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.provider-name, using default value: null
+2025-10-22 13:41:52.955 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.provider-class-name, using default value: null
+2025-10-22 13:41:52.955 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.salt-generator-classname, using default value: org.jasypt.salt.RandomSaltGenerator
+2025-10-22 13:41:52.957 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.string-output-type, using default value: base64
+2025-10-22 13:41:53.345 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-10-22 13:41:53.374 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2025-10-22 13:41:53.711 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-10-22 13:41:53.780 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-10-22 13:41:53.793 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.RefreshScopeRefreshedEventListener - Refreshing cached encryptable property sources on ServletWebServerInitializedEvent
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source systemProperties refreshed
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source systemEnvironment refreshed
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source random refreshed
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source Config resource 'class path resource [application-local.yml]' via location 'optional:classpath:/' refreshed
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source Config resource 'class path resource [application.yml]' via location 'optional:classpath:/' refreshed
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source applicationInfo refreshed
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:41:53.794 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource servletContextInitParams [org.springframework.web.context.support.ServletContextPropertySource] to EncryptableEnumerablePropertySourceWrapper
+2025-10-22 13:41:53.803 [main] INFO  com.nh.shorturl.ShortUrlApplication - Started ShortUrlApplication in 4.758 seconds (process running for 5.35)
+2025-10-22 13:42:10.641 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-22 13:42:10.641 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-10-22 13:42:10.643 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-10-22 13:42:10.841 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:10.935 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into tbl_user (api_key,username,id) values (?,?,default)
+2025-10-22 13:42:11.779 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:11.848 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select su1_0.id from tbl_short_url su1_0 where su1_0.short_url=? fetch first ? rows only
+2025-10-22 13:42:11.854 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:11.859 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - insert into tbl_short_url (create_by,created_at,expired_at,long_url,short_url,user_id,id) values (?,?,?,?,?,?,default)
+2025-10-22 13:42:12.126 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:12.137 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:42:12.317 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:12.324 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:42:12.505 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:12.510 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:42:12.515 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - delete from tbl_short_url where id=?
+2025-10-22 13:42:12.684 [http-nio-8080-exec-6] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:42:12.930 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=? and u1_0.api_key=?
+2025-10-22 13:42:12.937 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - update tbl_user set api_key=?,username=? where id=?
+2025-10-22 13:42:13.295 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:13.301 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select su1_0.id from tbl_short_url su1_0 where su1_0.short_url=? fetch first ? rows only
+2025-10-22 13:42:13.302 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:42:13.304 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - insert into tbl_short_url (create_by,created_at,expired_at,long_url,short_url,user_id,id) values (?,?,?,?,?,?,default)
+2025-10-22 13:42:13.684 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:42:13.686 [http-nio-8080-exec-10] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - saveRedirectionHistory: shortUrl=6iMT6Z76, request=SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@171b0a9a]
+2025-10-22 13:42:13.688 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:42:13.690 [http-nio-8080-exec-10] DEBUG org.hibernate.SQL - insert into tbl_redirection_history (ip,redirect_at,referer,short_url_id,user_agent,id) values (?,?,?,?,?,default)
+2025-10-22 13:42:14.538 [http-nio-8080-exec-1] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getRedirectCount: shortUrlId=2
+2025-10-22 13:42:14.539 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:42:14.546 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select count(rh1_0.id) from tbl_redirection_history rh1_0 left join tbl_short_url su1_0 on su1_0.id=rh1_0.short_url_id where su1_0.id=?
+2025-10-22 13:42:14.826 [http-nio-8080-exec-2] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getStats: shortUrlId=2, groupBy=[REFERER, YEAR]
+2025-10-22 13:42:14.826 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:42:15.804 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select rh1_0.referer,extract(year from rh1_0.redirect_at),count(rh1_0.id) from tbl_redirection_history rh1_0 where rh1_0.short_url_id=? group by rh1_0.referer,extract(year from rh1_0.redirect_at) order by count(rh1_0.id) desc
+2025-10-22 13:42:15.946 [http-nio-8080-exec-3] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getStats: shortUrlId=2, groupBy=[USER_AGENT, MONTH, DAY]
+2025-10-22 13:42:15.947 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:42:15.954 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select rh1_0.user_agent,extract(month from rh1_0.redirect_at),extract(day from rh1_0.redirect_at),count(rh1_0.id) from tbl_redirection_history rh1_0 where rh1_0.short_url_id=? group by rh1_0.user_agent,extract(month from rh1_0.redirect_at),extract(day from rh1_0.redirect_at) order by count(rh1_0.id) desc
+2025-10-22 13:42:21.270 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-10-22 13:42:21.273 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-10-22 13:42:21.278 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-10-22 13:42:21.279 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_redirection_history cascade 
+2025-10-22 13:42:21.280 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_short_url cascade 
+2025-10-22 13:42:21.281 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_user cascade 
+2025-10-22 13:42:21.283 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-10-22 13:42:21.285 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-10-22 13:42:32.004 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-10-22 13:42:32.050 [main] INFO  com.nh.shorturl.ShortUrlApplication - Starting ShortUrlApplication using Java 17.0.16 with PID 17336 (/Users/kms/dev/short-url/build/classes/java/main started by kms in /Users/kms/dev/short-url)
+2025-10-22 13:42:32.051 [main] DEBUG com.nh.shorturl.ShortUrlApplication - Running with Spring Boot v3.5.7-SNAPSHOT, Spring v6.2.12
+2025-10-22 13:42:32.051 [main] INFO  com.nh.shorturl.ShortUrlApplication - The following 1 profile is active: "local"
+2025-10-22 13:42:32.637 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-22 13:42:32.694 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 50 ms. Found 3 JPA repository interfaces.
+2025-10-22 13:42:32.890 [main] INFO  c.u.j.c.EnableEncryptablePropertiesBeanFactoryPostProcessor - Post-processing PropertySource instances
+2025-10-22 13:42:32.891 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2025-10-22 13:42:32.891 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:42:32.891 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletContextInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:42:32.892 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource systemProperties [org.springframework.core.env.PropertiesPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:42:32.892 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource systemEnvironment [org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor$OriginAwareSystemEnvironmentPropertySource] to EncryptableSystemEnvironmentPropertySourceWrapper
+2025-10-22 13:42:32.892 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource random [org.springframework.boot.env.RandomValuePropertySource] to EncryptablePropertySourceWrapper
+2025-10-22 13:42:32.893 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource Config resource 'class path resource [application-local.yml]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:42:32.893 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource Config resource 'class path resource [application.yml]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:42:32.893 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource applicationInfo [org.springframework.boot.ApplicationInfoPropertySource] to EncryptableMapPropertySourceWrapper
+2025-10-22 13:42:33.182 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-10-22 13:42:33.196 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2025-10-22 13:42:33.198 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-10-22 13:42:33.199 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.48]
+2025-10-22 13:42:33.251 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-10-22 13:42:33.252 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1167 ms
+2025-10-22 13:42:33.257 [main] INFO  c.u.j.f.DefaultLazyPropertyFilter - Property Filter custom Bean not found with name 'encryptablePropertyFilter'. Initializing Default Property Filter
+2025-10-22 13:42:33.265 [main] INFO  c.u.j.r.DefaultLazyPropertyResolver - Property Resolver custom Bean not found with name 'encryptablePropertyResolver'. Initializing Default Property Resolver
+2025-10-22 13:42:33.267 [main] INFO  c.u.j.d.DefaultLazyPropertyDetector - Property Detector custom Bean not found with name 'encryptablePropertyDetector'. Initializing Default Property Detector
+2025-10-22 13:42:33.413 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-22 13:42:33.465 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-10-22 13:42:33.501 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-10-22 13:42:33.793 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-22 13:42:33.815 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-22 13:42:33.989 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-10-22 13:42:33.990 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-22 13:42:34.013 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-10-22 13:42:34.044 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-10-22 13:42:34.842 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-10-22 13:42:34.853 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_redirection_history cascade 
+2025-10-22 13:42:34.856 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_short_url cascade 
+2025-10-22 13:42:34.857 [main] DEBUG org.hibernate.SQL - drop table if exists tbl_user cascade 
+2025-10-22 13:42:34.860 [main] DEBUG org.hibernate.SQL - create table tbl_redirection_history (id bigint generated by default as identity, redirect_at timestamp(6), short_url_id bigint not null, ip varchar(255), referer varchar(255), user_agent varchar(255), primary key (id))
+2025-10-22 13:42:34.868 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.id is '자동 생성 ID'
+2025-10-22 13:42:34.869 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.redirect_at is 'Redirect 일시'
+2025-10-22 13:42:34.869 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.short_url_id is 'Short URL ID'
+2025-10-22 13:42:34.870 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.ip is 'IP'
+2025-10-22 13:42:34.870 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.referer is 'referer'
+2025-10-22 13:42:34.870 [main] DEBUG org.hibernate.SQL - comment on column tbl_redirection_history.user_agent is 'userAgent'
+2025-10-22 13:42:34.871 [main] DEBUG org.hibernate.SQL - create table tbl_short_url (created_at timestamp(6) not null, expired_at timestamp(6), id bigint generated by default as identity, user_id bigint not null, short_url varchar(100) not null, long_url varchar(2000) not null, create_by varchar(255), primary key (id), unique (short_url))
+2025-10-22 13:42:34.873 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.created_at is '생성일'
+2025-10-22 13:42:34.873 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.expired_at is '만료일'
+2025-10-22 13:42:34.873 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.id is '자동 생성 ID'
+2025-10-22 13:42:34.874 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.user_id is '생성자 User ID'
+2025-10-22 13:42:34.874 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.short_url is '단축 URL'
+2025-10-22 13:42:34.874 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.long_url is '원본 URL'
+2025-10-22 13:42:34.875 [main] DEBUG org.hibernate.SQL - comment on column tbl_short_url.create_by is '생성자'
+2025-10-22 13:42:34.875 [main] DEBUG org.hibernate.SQL - create table tbl_user (id bigint generated by default as identity, api_key varchar(255) not null, username varchar(255) not null, primary key (id), constraint UK_USER_USERNAME_APIKEY unique (username, api_key))
+2025-10-22 13:42:34.876 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.id is '자동 생성 ID'
+2025-10-22 13:42:34.877 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.api_key is '고객별 발급 API Key'
+2025-10-22 13:42:34.877 [main] DEBUG org.hibernate.SQL - comment on column tbl_user.username is '사용자'
+2025-10-22 13:42:34.877 [main] DEBUG org.hibernate.SQL - alter table if exists tbl_redirection_history add constraint FK5i482darsqdymvtkxodd7xpsu foreign key (short_url_id) references tbl_short_url
+2025-10-22 13:42:34.888 [main] DEBUG org.hibernate.SQL - alter table if exists tbl_short_url add constraint FK195ldnm2klb8amrpp4w92dij7 foreign key (user_id) references tbl_user
+2025-10-22 13:42:34.891 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-22 13:42:34.897 [main] INFO  c.u.j.encryptor.DefaultLazyEncryptor - String Encryptor custom Bean not found with name 'jasyptStringEncryptor'. Initializing Default String Encryptor
+2025-10-22 13:42:34.904 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.key-obtention-iterations, using default value: 1000
+2025-10-22 13:42:34.904 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.provider-name, using default value: null
+2025-10-22 13:42:34.904 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.provider-class-name, using default value: null
+2025-10-22 13:42:34.905 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.salt-generator-classname, using default value: org.jasypt.salt.RandomSaltGenerator
+2025-10-22 13:42:34.906 [main] INFO  c.u.j.c.StringEncryptorBuilder - Encryptor config not found for property jasypt.encryptor.string-output-type, using default value: base64
+2025-10-22 13:42:35.300 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-10-22 13:42:35.333 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2025-10-22 13:42:35.679 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-10-22 13:42:35.756 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2025-10-22 13:42:35.770 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.RefreshScopeRefreshedEventListener - Refreshing cached encryptable property sources on ServletWebServerInitializedEvent
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source systemProperties refreshed
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source systemEnvironment refreshed
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source random refreshed
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source Config resource 'class path resource [application-local.yml]' via location 'optional:classpath:/' refreshed
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source Config resource 'class path resource [application.yml]' via location 'optional:classpath:/' refreshed
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.c.CachingDelegateEncryptablePropertySource - Property Source applicationInfo refreshed
+2025-10-22 13:42:35.771 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2025-10-22 13:42:35.772 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2025-10-22 13:42:35.772 [main] INFO  c.u.j.EncryptablePropertySourceConverter - Converting PropertySource servletContextInitParams [org.springframework.web.context.support.ServletContextPropertySource] to EncryptableEnumerablePropertySourceWrapper
+2025-10-22 13:42:35.780 [main] INFO  com.nh.shorturl.ShortUrlApplication - Started ShortUrlApplication in 4.352 seconds (process running for 5.793)
+2025-10-22 13:44:01.431 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-22 13:44:01.431 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-10-22 13:44:01.432 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-10-22 13:44:01.683 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:44:01.804 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into tbl_user (api_key,username,id) values (?,?,default)
+2025-10-22 13:44:02.096 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:44:19.689 [HikariPool-1:housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=45s587ms).
+2025-10-22 13:44:19.695 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select su1_0.id from tbl_short_url su1_0 where su1_0.short_url=? fetch first ? rows only
+2025-10-22 13:44:19.697 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:44:19.699 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - insert into tbl_short_url (create_by,created_at,expired_at,long_url,short_url,user_id,id) values (?,?,?,?,?,?,default)
+2025-10-22 13:44:19.922 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:44:19.938 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:44:20.119 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:44:20.128 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:44:20.423 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:44:20.433 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:44:20.442 [http-nio-8080-exec-5] DEBUG org.hibernate.SQL - delete from tbl_short_url where id=?
+2025-10-22 13:44:20.604 [http-nio-8080-exec-6] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:44:20.862 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=? and u1_0.api_key=?
+2025-10-22 13:44:20.872 [http-nio-8080-exec-8] DEBUG org.hibernate.SQL - update tbl_user set api_key=?,username=? where id=?
+2025-10-22 13:44:21.060 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:45:04.790 [HikariPool-1:housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=45s101ms).
+2025-10-22 13:45:04.793 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select su1_0.id from tbl_short_url su1_0 where su1_0.short_url=? fetch first ? rows only
+2025-10-22 13:45:04.796 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - select u1_0.id,u1_0.api_key,u1_0.username from tbl_user u1_0 where u1_0.username=?
+2025-10-22 13:45:04.798 [http-nio-8080-exec-9] DEBUG org.hibernate.SQL - insert into tbl_short_url (create_by,created_at,expired_at,long_url,short_url,user_id,id) values (?,?,?,?,?,?,default)
+2025-10-22 13:45:04.994 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:45:04.996 [http-nio-8080-exec-1] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - saveRedirectionHistory: shortUrl=4jFV5dRZ, request=SecurityContextHolderAwareRequestWrapper[ org.springframework.security.web.header.HeaderWriterFilter$HeaderWriterRequest@5fec92af]
+2025-10-22 13:45:04.998 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.short_url=?
+2025-10-22 13:45:05.000 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into tbl_redirection_history (ip,redirect_at,referer,short_url_id,user_agent,id) values (?,?,?,?,?,default)
+2025-10-22 13:45:06.183 [http-nio-8080-exec-2] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getRedirectCount: shortUrlId=2
+2025-10-22 13:45:06.184 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:45:06.192 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - select count(rh1_0.id) from tbl_redirection_history rh1_0 left join tbl_short_url su1_0 on su1_0.id=rh1_0.short_url_id where su1_0.id=?
+2025-10-22 13:45:06.418 [http-nio-8080-exec-3] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getStats: shortUrlId=2, groupBy=[REFERER, YEAR]
+2025-10-22 13:45:06.419 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:45:07.162 [http-nio-8080-exec-3] DEBUG org.hibernate.SQL - select rh1_0.referer,extract(year from rh1_0.redirect_at),count(rh1_0.id) from tbl_redirection_history rh1_0 where rh1_0.short_url_id=? group by rh1_0.referer,extract(year from rh1_0.redirect_at) order by count(rh1_0.id) desc
+2025-10-22 13:45:07.248 [http-nio-8080-exec-4] INFO  c.n.s.s.i.h.RedirectionHistoryServiceImpl - getStats: shortUrlId=2, groupBy=[USER_AGENT, MONTH, DAY]
+2025-10-22 13:45:07.248 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select su1_0.id,su1_0.create_by,su1_0.created_at,su1_0.expired_at,su1_0.long_url,su1_0.short_url,su1_0.user_id from tbl_short_url su1_0 where su1_0.id=?
+2025-10-22 13:45:07.254 [http-nio-8080-exec-4] DEBUG org.hibernate.SQL - select rh1_0.user_agent,extract(month from rh1_0.redirect_at),extract(day from rh1_0.redirect_at),count(rh1_0.id) from tbl_redirection_history rh1_0 where rh1_0.short_url_id=? group by rh1_0.user_agent,extract(month from rh1_0.redirect_at),extract(day from rh1_0.redirect_at) order by count(rh1_0.id) desc
+2025-10-22 13:52:29.605 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-10-22 13:52:29.610 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-10-22 13:52:29.615 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-10-22 13:52:29.615 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_redirection_history cascade 
+2025-10-22 13:52:29.617 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_short_url cascade 
+2025-10-22 13:52:29.618 [SpringApplicationShutdownHook] DEBUG org.hibernate.SQL - drop table if exists tbl_user cascade 
+2025-10-22 13:52:29.621 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-10-22 13:52:29.623 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
