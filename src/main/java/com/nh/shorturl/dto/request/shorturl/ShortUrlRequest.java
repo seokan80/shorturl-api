@@ -13,5 +13,4 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ShortUrlRequest {
     private String longUrl;
-    // username 필드 제거
 }
