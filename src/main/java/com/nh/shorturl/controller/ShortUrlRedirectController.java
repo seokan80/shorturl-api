@@ -17,7 +17,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/r")
 public class ShortUrlRedirectController {
-    Logger log = LoggerFactory.getLogger(ShortUrlRedirectController.class));
+    Logger log = LoggerFactory.getLogger(ShortUrlRedirectController.class);
 
     private final ShortUrlService shortUrlService;
 
