@@ -3,6 +3,7 @@ package com.nh.shorturl.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -10,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 @Slf4j
@@ -27,8 +31,26 @@ public class JwtProvider {
 
     @PostConstruct
     public void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes = resolveKeyBytes(secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private byte[] resolveKeyBytes(String candidate) {
+        try {
+            return Decoders.BASE64.decode(candidate);
+        } catch (IllegalArgumentException | DecodingException ex) {
+            log.warn("JWT secret is not valid Base64; deriving a SHA-512 key from the provided text. " +
+                    "Set a Base64-encoded value in `jwt.secret` to silence this warning.");
+            return sha512(candidate.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private byte[] sha512(byte[] value) {
+        try {
+            return MessageDigest.getInstance("SHA-512").digest(value);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-512 algorithm not available", e);
+        }
     }
 
     /**
