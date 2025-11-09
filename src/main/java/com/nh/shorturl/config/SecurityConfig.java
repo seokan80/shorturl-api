@@ -29,9 +29,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/server-keys/**", "/api/auth/**", "/r/**", "/error").permitAll()
                         // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
                         .anyRequest().authenticated()
-                );
-                // .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
-                //         UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
