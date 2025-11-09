@@ -19,7 +19,7 @@ public class TokenController {
     private final ClientAccessKeyService clientAccessKeyService;
 
     @PostMapping("/issue")
-    public ResultEntity<?> issueToken(@RequestHeader("X-REGISTRATION-KEY") String key,
+    public ResultEntity<?> issueToken(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                       @RequestBody TokenIssueRequest request) {
         if (!isAccessKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
@@ -36,7 +36,7 @@ public class TokenController {
     }
 
     @PostMapping("/re-issue")
-    public ResultEntity<?> reissueToken(@RequestHeader("X-REGISTRATION-KEY") String key,
+    public ResultEntity<?> reissueToken(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                         @RequestBody TokenReissueRequest request) {
         if (!isAccessKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);

@@ -31,11 +31,11 @@ type ApiEnvelope<T> = {
   data: T;
 };
 
-const REG_STORAGE_KEY = "shorturl:registrationKey";
+const REG_STORAGE_KEY = "shorturl:accessKey";
 const formatDateTime = (value?: string) => (value ? new Date(value).toLocaleString() : "-");
 
 export function UserManagementPage() {
-  const [registrationKey, setRegistrationKey] = useState(() => {
+  const [accessKey, setAccessKey] = useState(() => {
     if (typeof window === "undefined") return "";
     return localStorage.getItem(REG_STORAGE_KEY) ?? "";
   });
@@ -50,25 +50,25 @@ export function UserManagementPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (registrationKey) {
-      localStorage.setItem(REG_STORAGE_KEY, registrationKey);
+    if (accessKey) {
+      localStorage.setItem(REG_STORAGE_KEY, accessKey);
     } else {
       localStorage.removeItem(REG_STORAGE_KEY);
     }
-  }, [registrationKey]);
+  }, [accessKey]);
 
   const setSuccess = (message: string) => setStatus({ type: "success", message });
   const setError = (message: string) => setStatus({ type: "error", message });
 
   const request = useCallback(
     async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
-      const key = registrationKey.trim();
+      const key = accessKey.trim();
       if (!key) {
         throw new Error("먼저 클라이언트 키를 입력해주세요.");
       }
 
       const headers = new Headers(init.headers);
-      headers.set("X-REGISTRATION-KEY", key);
+      headers.set("X-CLIENTACCESS-KEY", key);
       if (init.body && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
       }
@@ -90,7 +90,7 @@ export function UserManagementPage() {
 
       return payload.data;
     },
-    [registrationKey]
+    [accessKey]
   );
 
   const runWithStatus = async (label: string, fn: () => Promise<void>) => {
@@ -212,24 +212,24 @@ export function UserManagementPage() {
               <Shield className="h-4 w-4" />
               클라이언트 키
             </CardTitle>
-            <CardDescription>백엔드와 통신할 때 사용할 `X-REGISTRATION-KEY` 값을 저장합니다.</CardDescription>
+            <CardDescription>백엔드와 통신할 때 사용할 `X-CLIENTACCESS-KEY` 값을 저장합니다.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 md:flex-row md:items-center">
           <Input
-            value={registrationKey}
-            onChange={(event) => setRegistrationKey(event.target.value)}
+            value={accessKey}
+            onChange={(event) => setAccessKey(event.target.value)}
             placeholder="클라이언트 키를 입력하세요"
           />
           <div className="flex gap-2">
             <Button
               type="button"
               variant="secondary"
-              onClick={() => setRegistrationKey((prev) => prev.trim())}
-              disabled={!registrationKey}
+              onClick={() => setAccessKey((prev) => prev.trim())}
+              disabled={!accessKey}
             >
               공백 제거
             </Button>
-            <Button type="button" variant="outline" onClick={() => setRegistrationKey("")}>
+            <Button type="button" variant="outline" onClick={() => setAccessKey("")}>
               초기화
             </Button>
           </div>

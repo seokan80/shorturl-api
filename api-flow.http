@@ -2,7 +2,7 @@
 ### 변수 설정 (실제 환경에 맞게 수정)
 ### =================================================================
 @hostname = http://localhost:8080
-@registration_key = password
+@access_key = password
 @username = my-awesome-service
 @long_url = https://github.com/google/gemini-api
 
@@ -10,14 +10,14 @@
 ### 1. 클라이언트 키 목록 확인
 ### =================================================================
 GET {{hostname}}/api/client-keys
-X-REGISTRATION-KEY: {{registration_key}}
+X-CLIENTACCESS-KEY: {{access_key}}
 
 ### =================================================================
 ### 2. 클라이언트 키 발급
 ### =================================================================
 POST {{hostname}}/api/client-keys
 Content-Type: application/json
-X-REGISTRATION-KEY: {{registration_key}}
+X-CLIENTACCESS-KEY: {{access_key}}
 
 {
   "name": "demo-key",
@@ -31,7 +31,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 ### =================================================================
 POST {{hostname}}/api/auth/register
 Content-Type: application/json
-X-REGISTRATION-KEY: {{registration_key}}
+X-CLIENTACCESS-KEY: {{access_key}}
 
 {
   "username": "{{username}}"
@@ -43,7 +43,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 ### =================================================================
 POST {{hostname}}/api/auth/token/issue
 Content-Type: application/json
-X-REGISTRATION-KEY: {{registration_key}}
+X-CLIENTACCESS-KEY: {{access_key}}
 
 {
   "username": "{{username}}"
@@ -110,12 +110,12 @@ User-Agent: Gemini-Test-Agent/1.0
 
 ### =================================================================
 ### 10. API Key 만료 시나리오: 토큰 재발급 요청
-### (X-REGISTRATION-KEY와 Refresh Token을 함께 전송)
+### (X-CLIENTACCESS-KEY와 Refresh Token을 함께 전송)
 ### @name: reissue
 ### =================================================================
 POST {{hostname}}/api/auth/token/re-issue
 Content-Type: application/json
-X-REGISTRATION-KEY: {{registration_key}}
+X-CLIENTACCESS-KEY: {{access_key}}
 
 {
   "username": "{{username}}",

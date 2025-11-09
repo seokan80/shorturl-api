@@ -4,7 +4,7 @@
 # 변수 설정 (실제 환경에 맞게 수정)
 # =================================================================
 HOSTNAME="http://localhost:8080"
-REGISTRATION_KEY="password"
+access_key="password"
 USERNAME="my-awesome-service"
 LONG_URL="https://github.com/google/gemini-api"
 NEW_LONG_URL="https://developers.google.com/gemini"
@@ -37,7 +37,7 @@ fail_if_http_error() {
 step 1 "최초 사용자 등록"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${HOSTNAME}/api/auth/register" \
     -H "Content-Type: application/json" \
-    -H "X-REGISTRATION-KEY: ${REGISTRATION_KEY}" \
+    -H "X-CLIENTACCESS-KEY: ${access_key}" \
     -d "{\"username\": \"${USERNAME}\"}")
 
 HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
@@ -53,7 +53,7 @@ echo -e "${GREEN}성공! 사용자 등록 완료${NC}"
 step 2 "등록된 사용자 토큰 발급"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${HOSTNAME}/api/auth/token/issue" \
     -H "Content-Type: application/json" \
-    -H "X-REGISTRATION-KEY: ${REGISTRATION_KEY}" \
+    -H "X-CLIENTACCESS-KEY: ${access_key}" \
     -d "{\"username\": \"${USERNAME}\"}")
 
 HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
@@ -102,7 +102,7 @@ echo -e "${GREEN}리디렉션 요청 완료 (통계 데이터 적재됨)${NC}"
 step 5 "Refresh Token으로 토큰 재발급"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${HOSTNAME}/api/auth/token/re-issue" \
     -H "Content-Type: application/json" \
-    -H "X-REGISTRATION-KEY: ${REGISTRATION_KEY}" \
+    -H "X-CLIENTACCESS-KEY: ${access_key}" \
     -d "{\"username\": \"${USERNAME}\", \"refreshToken\": \"${REFRESH_TOKEN}\"}")
 
 HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)

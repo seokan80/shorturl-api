@@ -122,7 +122,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 #### `POST /api/auth/register`
 
 - **설명**: 새로운 사용자를 등록합니다. 토큰 발급은 별도의 `/token/issue` 엔드포인트에서 수행됩니다.
-- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
 - **Body**:
   ```json
   {
@@ -142,7 +142,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 #### `POST /api/auth/token/issue`
 
 - **설명**: 등록된 사용자 계정으로 Access/Refresh Token을 발급합니다.
-- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
 - **Body**:
   ```json
   {
@@ -160,7 +160,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 #### `POST /api/auth/token/re-issue`
 
 - **설명**: Refresh Token을 검증하고 Access/Refresh Token을 재발급합니다.
-- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
 - **Body**:
   ```json
   {
@@ -179,7 +179,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 ### 5.2. 단축 URL
 
 - **설명**: Refresh Token을 검증하고 Access/Refresh Token을 재발급합니다.
-- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
 - **Body**:
   ```json
   {
@@ -198,7 +198,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 #### `GET /api/auth/users/{username}`
 
 - **설명**: 특정 사용자의 기본 정보를 조회합니다. API Key, Refresh Token 등 민감 정보는 포함하지 않습니다.
-- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
 - **성공 응답 (`data` 필드 내부)**:
   ```json
   {
@@ -217,7 +217,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 
 #### `GET /api/client-keys`
 - **설명**: 발급된 클라이언트 키 목록을 조회합니다.
-- **Header**: `X-REGISTRATION-KEY: {client-access-key}`
+- **Header**: `X-CLIENTACCESS-KEY: {client-access-key}`
 - **성공 응답**: `ClientAccessKeyResponse[]` (각 항목에 `id`, `name`, `keyValue`, `issuedBy`, `description`, `expiresAt`, `lastUsedAt`, `active`, `createdAt`, `updatedAt` 포함)
 
 #### `POST /api/client-keys`

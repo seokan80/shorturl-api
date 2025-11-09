@@ -23,7 +23,7 @@ public class AuthController {
     private final ClientAccessKeyService clientAccessKeyService;
 
     @GetMapping("/users")
-    public ResultEntity<?> getUsers(@RequestHeader("X-REGISTRATION-KEY") String key) {
+    public ResultEntity<?> getUsers(@RequestHeader("X-CLIENTACCESS-KEY") String key) {
         if (getValidatedAccessKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
@@ -46,7 +46,7 @@ public class AuthController {
     }
     
     @PostMapping("/users")
-    public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,
+    public ResultEntity<?> register(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                     @RequestBody UserRequest request) {
         ClientAccessKey clientAccessKey = getValidatedAccessKey(key);
         if (clientAccessKey == null) {
@@ -68,7 +68,7 @@ public class AuthController {
     }
 
     @DeleteMapping("/users/{username}")
-    public ResultEntity<?> deleteUser(@RequestHeader("X-REGISTRATION-KEY") String key,
+    public ResultEntity<?> deleteUser(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                       @PathVariable String username) {
         if (getValidatedAccessKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
@@ -85,7 +85,7 @@ public class AuthController {
     }
 
     @GetMapping("/users/{username}")
-    public ResultEntity<?> getUser(@RequestHeader("X-REGISTRATION-KEY") String key,
+    public ResultEntity<?> getUser(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                    @PathVariable String username) {
         if (getValidatedAccessKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);

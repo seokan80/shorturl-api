@@ -4,13 +4,13 @@
 
 ## 공통 규칙
 - 모든 응답은 `ResultEntity` 포맷을 따르며 `code`, `message`, `data` 필드를 포함합니다.
-- 모든 인증 엔드포인트는 클라이언트 키(`X-REGISTRATION-KEY`) 기반 검증을 수행합니다.
+- 모든 인증 엔드포인트는 클라이언트 키(`X-CLIENTACCESS-KEY`) 기반 검증을 수행합니다.
   - 발급된 클라이언트 키가 비활성 상태이거나 존재하지 않을 경우 `1401 (UNAUTHORIZED)`를 반환합니다.
 
 ## POST `/register`
 - **설명**: 신규 사용자 정보를 저장합니다. 토큰 발급은 `/token/issue`에서 별도로 수행됩니다.
 - **요청 헤더**
-  - `X-REGISTRATION-KEY: {registration-key}`
+  - `X-CLIENTACCESS-KEY: {access-key}`
 - **요청 본문**
   ```json
   { "username": "my-service" }
@@ -35,7 +35,7 @@
 ## GET `/users/{username}`
 - **설명**: 단일 사용자의 기본 정보를 조회합니다. 민감한 인증 정보(API Key, Refresh Token)는 포함되지 않습니다.
 - **요청 헤더**
-  - `X-REGISTRATION-KEY: {registration-key}`
+  - `X-CLIENTACCESS-KEY: {access-key}`
 - **성공 응답 (`200`, code `0000`)**
   ```json
   {
@@ -56,7 +56,7 @@
 ## POST `/token/issue`
 - **설명**: 등록된 사용자 이름으로 Access/Refresh Token 쌍을 최초 발급합니다.
 - **요청 헤더**
-  - `X-REGISTRATION-KEY: {registration-key}`
+  - `X-CLIENTACCESS-KEY: {access-key}`
 - **요청 본문**
   ```json
   {
@@ -81,7 +81,7 @@
 ## POST `/token/re-issue`
 - **설명**: 저장된 Refresh Token을 검증하고 Access/Refresh Token을 재발급합니다.
 - **요청 헤더**
-  - `X-REGISTRATION-KEY: {registration-key}`
+  - `X-CLIENTACCESS-KEY: {access-key}`
 - **요청 본문**
   ```json
   {
@@ -110,7 +110,7 @@
 
 기본 경로: `/api/client-keys`
 
-- 모든 요청은 `X-REGISTRATION-KEY` 헤더에 유효한 클라이언트 키가 포함되어야 합니다.
+- 모든 요청은 `X-CLIENTACCESS-KEY` 헤더에 유효한 클라이언트 키가 포함되어야 합니다.
 
 ### GET `/`
 - **설명**: 발급된 클라이언트 키 목록을 최신순으로 반환합니다.

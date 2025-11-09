@@ -55,7 +55,7 @@ export const apiSpecs: ApiSpec[] = [
     authentication: "등록 키",
     headers: [
       {
-        name: "X-REGISTRATION-KEY",
+        name: "X-CLIENTACCESS-KEY",
         required: true,
         description: "Oracle 설정에 저장된 마스터 등록 키"
       },
@@ -113,7 +113,7 @@ export const apiSpecs: ApiSpec[] = [
     authentication: "등록 키",
     headers: [
       {
-        name: "X-REGISTRATION-KEY",
+        name: "X-CLIENTACCESS-KEY",
         required: true,
         description: "Oracle 설정에 저장된 마스터 등록 키"
       }
@@ -162,7 +162,7 @@ export const apiSpecs: ApiSpec[] = [
     authentication: "등록 키",
     headers: [
       {
-        name: "X-REGISTRATION-KEY",
+        name: "X-CLIENTACCESS-KEY",
         required: true,
         description: "Oracle 설정에 저장된 마스터 등록 키"
       }
