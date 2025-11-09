@@ -30,7 +30,12 @@ public class AuthController {
         try {
             List<UserResponse> users = userService.getAllUsers()
                     .stream()
-                    .map(user -> new UserResponse(user.getUsername()))
+                    .map(user -> new UserResponse(
+                            user.getId(),
+                            user.getUsername(),
+                            user.getCreatedAt(),
+                            user.getUpdatedAt()
+                    ))
                     .toList();
             return ResultEntity.ok(users);
         } catch (Exception e) {
@@ -47,7 +52,12 @@ public class AuthController {
 
         try {
             User user = userService.createUser(request);
-            return new ResultEntity<>(new UserResponse(user.getUsername()));
+            return new ResultEntity<>(new UserResponse(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getCreatedAt(),
+                    user.getUpdatedAt()
+            ));
         } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.FAIL);
         }

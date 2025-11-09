@@ -4,10 +4,13 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Badge } from "../../components/ui/badge";
-import { Loader2, RefreshCw, Trash2, Copy, Shield, Users, XCircle } from "lucide-react";
+import { Loader2, RefreshCw, Trash2, Copy, Shield, Users, XCircle, Search } from "lucide-react";
 
 type UserSummary = {
+  id: number;
   username: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type UserDetail = {
@@ -29,6 +32,7 @@ type ApiEnvelope<T> = {
 };
 
 const REG_STORAGE_KEY = "shorturl:registrationKey";
+const formatDateTime = (value?: string) => (value ? new Date(value).toLocaleString() : "-");
 
 export function UserManagementPage() {
   const [registrationKey, setRegistrationKey] = useState(() => {
@@ -191,8 +195,8 @@ export function UserManagementPage() {
     if (!selectedUser) return null;
     return {
       ...selectedUser,
-      createdAtFormatted: selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : "-",
-      updatedAtFormatted: selectedUser.updatedAt ? new Date(selectedUser.updatedAt).toLocaleString() : "-"
+      createdAtFormatted: formatDateTime(selectedUser.createdAt),
+      updatedAtFormatted: formatDateTime(selectedUser.updatedAt)
     };
   }, [selectedUser]);
 
@@ -269,48 +273,49 @@ export function UserManagementPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-16 text-center">No</TableHead>
                   <TableHead>사용자명</TableHead>
-                  <TableHead className="w-48 text-center">작업</TableHead>
+                  <TableHead>생성일</TableHead>
+                  <TableHead>수정일</TableHead>
+                  <TableHead className="w-32 text-center">작업</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="py-6 text-center text-sm text-slate-500">
+                    <TableCell colSpan={5} className="py-6 text-center text-sm text-slate-500">
                       조회된 사용자가 없습니다. 새로고침을 눌러 목록을 불러오세요.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  users.map((user) => (
-                    <TableRow key={user.username}>
+                  users.map((user, index) => (
+                    <TableRow key={user.id ?? user.username}>
+                      <TableCell className="text-center font-mono text-xs text-slate-500">{index + 1}</TableCell>
                       <TableCell className="font-medium">{user.username}</TableCell>
-                      <TableCell className="flex flex-wrap gap-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleSelectUser(user.username)}
-                          disabled={isBusy(`detail-${user.username}`)}
-                        >
-                          상세
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleIssueToken(user.username)}
-                          disabled={isBusy(`issue-${user.username}`)}
-                        >
-                          토큰 발급
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="border border-rose-200 text-rose-600 hover:bg-rose-50"
-                          onClick={() => handleDeleteUser(user.username)}
-                          disabled={isBusy(`delete-${user.username}`)}
-                        >
-                          <Trash2 className="mr-1 h-4 w-4" />
-                          삭제
-                        </Button>
+                      <TableCell>{formatDateTime(user.createdAt)}</TableCell>
+                      <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            aria-label="상세 조회"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleSelectUser(user.username)}
+                            disabled={isBusy(`detail-${user.username}`)}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            aria-label="사용자 삭제"
+                            variant="ghost"
+                            size="icon"
+                            className="text-rose-600 hover:text-rose-700"
+                            onClick={() => handleDeleteUser(user.username)}
+                            disabled={isBusy(`delete-${user.username}`)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -346,6 +351,17 @@ export function UserManagementPage() {
             <div>
               <p className="text-xs text-slate-500">수정일</p>
               <p>{formattedSelectedUser.updatedAtFormatted}</p>
+            </div>
+            <div className="sm:col-span-2 flex flex-wrap gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleIssueToken(formattedSelectedUser.username)}
+                disabled={isBusy(`issue-${formattedSelectedUser.username}`)}
+              >
+                {isBusy(`issue-${formattedSelectedUser.username}`) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                토큰 발급
+              </Button>
             </div>
           </CardContent>
         </Card>

@@ -132,7 +132,10 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 - **성공 응답 (`data` 필드 내부)**:
   ```json
   {
-    "username": "my-awesome-service"
+    "id": 42,
+    "username": "my-awesome-service",
+    "createdAt": "2025-01-13T12:00:00",
+    "updatedAt": "2025-01-13T12:00:00"
   }
   ```
 

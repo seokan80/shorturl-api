@@ -21,7 +21,10 @@
     "code": "0000",
     "message": "Success",
     "data": {
-      "username": "my-service"
+      "id": 1,
+      "username": "my-service",
+      "createdAt": "2025-01-13T12:00:00",
+      "updatedAt": "2025-01-13T12:00:00"
     }
   }
   ```
