@@ -1,14 +1,13 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, FileText, ListChecks, Clock, Settings } from "lucide-react";
+import { FileText, ShieldCheck, Link2, Shuffle, BarChart3 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const navItems = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/projects", label: "Projects", icon: FolderKanban },
-  { to: "/specs", label: "API Specs", icon: FileText },
-  { to: "/workflow", label: "Workflow Inbox", icon: ListChecks },
-  { to: "/activity", label: "Activity", icon: Clock },
-  { to: "/settings", label: "Settings", icon: Settings }
+  { to: "/specs", label: "API 명세", icon: FileText },
+  { to: "/auth", label: "인증 제어", icon: ShieldCheck },
+  { to: "/short-url", label: "단축 URL 제어", icon: Link2 },
+  { to: "/redirection", label: "리디렉션 제어", icon: Shuffle },
+  { to: "/analytics", label: "통계 제어", icon: BarChart3 }
 ];
 
 export function AdminSidebar() {

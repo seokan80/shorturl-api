@@ -61,9 +61,9 @@ export function SpecDetailPage() {
             <Badge variant="outline">Version {spec.version}</Badge>
             <Badge
               variant={
-                spec.status === "Approved"
+                spec.status === "승인됨"
                   ? "success"
-                  : spec.status === "Pending Review"
+                  : spec.status === "검토 대기"
                   ? "warning"
                   : "outline"
               }

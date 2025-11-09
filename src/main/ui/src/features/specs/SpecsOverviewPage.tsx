@@ -7,11 +7,16 @@ export function SpecsOverviewPage() {
   return (
     <div className="flex flex-col gap-6">
       <Card>
-        <CardHeader>
-          <CardTitle>API Specifications</CardTitle>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Categorised view of Oracle `API_SPEC` records with status and owner context.
-          </p>
+        <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <CardTitle>API Specifications</CardTitle>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Categorised view of Oracle `API_SPEC` records with status and owner context.
+            </p>
+          </div>
+          <Link to="/auth" className="text-sm font-medium text-brand hover:underline">
+            인증 제어 열기 →
+          </Link>
         </CardHeader>
         <CardContent className="space-y-6">
           {specCategories.map((category) => {
@@ -49,9 +54,9 @@ export function SpecsOverviewPage() {
                         </div>
                         <Badge
                           variant={
-                            spec.status === "Approved"
+                            spec.status === "승인됨"
                               ? "success"
-                              : spec.status === "Pending Review"
+                              : spec.status === "검토 대기"
                               ? "warning"
                               : "outline"
                           }

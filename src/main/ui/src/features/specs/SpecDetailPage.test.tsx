@@ -13,7 +13,7 @@ describe("SpecDetailPage", () => {
     );
 
     expect(screen.getByText("/api/auth/register")).toBeInTheDocument();
-    expect(screen.getByText("Owner · Platform Squad")).toBeInTheDocument();
+    expect(screen.getByText("Owner · 플랫폼 스쿼드")).toBeInTheDocument();
     expect(screen.getByText("Headers")).toBeInTheDocument();
   });
 

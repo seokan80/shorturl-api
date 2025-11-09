@@ -1,6 +1,6 @@
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
-export type SpecStatus = "Draft" | "Pending Review" | "Approved";
+export type SpecStatus = "작성 중" | "검토 대기" | "승인됨";
 
 export interface ApiResponse {
   code: string;
@@ -24,14 +24,14 @@ export interface ApiBodyField {
 
 export interface ApiSpec {
   id: string;
-  category: "Authentication" | "Short URL" | "Redirection";
+  category: "인증" | "단축 URL" | "리디렉션";
   name: string;
   method: HttpMethod;
   path: string;
   summary: string;
   description: string;
   tags: string[];
-  authentication: "Public" | "Registration Key" | "JWT";
+  authentication: "공개" | "등록 키" | "JWT";
   headers: ApiHeader[];
   requestBody?: ApiBodyField[];
   responses: ApiResponse[];
@@ -44,26 +44,26 @@ export interface ApiSpec {
 export const apiSpecs: ApiSpec[] = [
   {
     id: "auth-register",
-    category: "Authentication",
-    name: "Register API Key",
+    category: "인증",
+    name: "API 키 등록",
     method: "POST",
     path: "/api/auth/register",
-    summary: "Issue initial API key using registration key",
+    summary: "등록 키로 최초 API 키 발급",
     description:
-      "Registers a new service account and returns the bootstrap API key. Requires the configured registration key header.",
-    tags: ["auth", "bootstrap"],
-    authentication: "Registration Key",
+      "사전에 공유된 등록 키를 검증한 뒤 신규 서비스 계정을 생성하고 부트스트랩 API 키를 돌려줍니다.",
+    tags: ["인증", "초기화"],
+    authentication: "등록 키",
     headers: [
       {
         name: "X-REGISTRATION-KEY",
         required: true,
-        description: "Registration master key configured in Oracle settings"
+        description: "Oracle 설정에 저장된 마스터 등록 키"
       },
       {
         name: "Content-Type",
         required: true,
         value: "application/json",
-        description: "Payload encoding"
+        description: "JSON 요청 본문 형식"
       }
     ],
     requestBody: [
@@ -71,13 +71,13 @@ export const apiSpecs: ApiSpec[] = [
         name: "username",
         type: "string",
         required: true,
-        description: "Unique identifier for the consumer service"
+        description: "소비자 서비스에서 사용할 고유 아이디"
       }
     ],
     responses: [
       {
         code: "200",
-        description: "Success with username and apiKey payload",
+        description: "성공 시 사용자명과 apiKey를 포함",
         sample: `{
   "code": "0000",
   "message": "Success",
@@ -89,34 +89,34 @@ export const apiSpecs: ApiSpec[] = [
       },
       {
         code: "1401",
-        description: "Registration key invalid or missing"
+        description: "등록 키가 없거나 잘못됨"
       },
       {
         code: "9999",
-        description: "Duplicate username or server failure"
+        description: "중복 사용자명 또는 서버 오류"
       }
     ],
     lastUpdated: "2025-01-12",
-    owner: "Platform Squad",
+    owner: "플랫폼 스쿼드",
     version: "v1.3",
-    status: "Pending Review"
+    status: "검토 대기"
   },
   {
     id: "auth-token",
-    category: "Authentication",
-    name: "Reissue API Key",
+    category: "인증",
+    name: "API 키 재발급",
     method: "POST",
     path: "/api/auth/token",
-    summary: "Reissue JWT when existing token expires",
+    summary: "기존 토큰 만료 시 재발급",
     description:
-      "Reissues an API key for an existing service account after validating the registration key and previous token.",
-    tags: ["auth", "rotation"],
-    authentication: "Registration Key",
+      "등록 키와 이전 토큰을 모두 검증한 뒤 기존 서비스 계정에 새 JWT를 발급합니다.",
+    tags: ["인증", "회전"],
+    authentication: "등록 키",
     headers: [
       {
         name: "X-REGISTRATION-KEY",
         required: true,
-        description: "Registration master key configured in Oracle settings"
+        description: "Oracle 설정에 저장된 마스터 등록 키"
       }
     ],
     requestBody: [
@@ -124,19 +124,19 @@ export const apiSpecs: ApiSpec[] = [
         name: "username",
         type: "string",
         required: true,
-        description: "Existing service account"
+        description: "기존 서비스 계정"
       },
       {
         name: "apiKey",
         type: "string",
         required: true,
-        description: "Previously issued API key to refresh"
+        description: "갱신하려는 이전 API 키"
       }
     ],
     responses: [
       {
         code: "200",
-        description: "Success with new token field",
+        description: "새 토큰이 data.token 으로 반환",
         sample: `{
   "code": "0000",
   "message": "Success",
@@ -147,37 +147,37 @@ export const apiSpecs: ApiSpec[] = [
       },
       {
         code: "1403",
-        description: "User not found or apiKey mismatch"
+        description: "사용자를 찾지 못했거나 apiKey 불일치"
       }
     ],
     lastUpdated: "2025-01-11",
-    owner: "Platform Squad",
+    owner: "플랫폼 스쿼드",
     version: "v1.1",
-    status: "Approved"
+    status: "승인됨"
   },
   {
     id: "shorturl-create",
-    category: "Short URL",
-    name: "Create Short URL",
+    category: "단축 URL",
+    name: "단축 URL 생성",
     method: "POST",
     path: "/api/short-url",
-    summary: "Create a new short URL mapping",
+    summary: "원본 URL을 단축 URL로 생성",
     description:
-      "Generates an expiring short URL for an existing account. Requires JWT authentication and enforces unique short key generation.",
-    tags: ["short-url", "mutation"],
+      "JWT 인증을 요구하며 만료 시간이 있는 단축 키를 생성합니다. 동일 키는 재사용하지 않습니다.",
+    tags: ["단축", "쓰기"],
     authentication: "JWT",
     headers: [
       {
         name: "Authorization",
         value: "Bearer {API_KEY}",
         required: true,
-        description: "JWT issued by auth endpoints"
+        description: "인증 엔드포인트가 발급한 JWT"
       },
       {
         name: "Content-Type",
         value: "application/json",
         required: true,
-        description: "Payload encoding"
+        description: "JSON 요청 본문"
       }
     ],
     requestBody: [
@@ -185,19 +185,19 @@ export const apiSpecs: ApiSpec[] = [
         name: "longUrl",
         type: "string",
         required: true,
-        description: "Original destination URL"
+        description: "원본 목적지 URL"
       },
       {
         name: "username",
         type: "string",
         required: true,
-        description: "Owning service account"
+        description: "URL을 소유한 서비스 계정"
       }
     ],
     responses: [
       {
         code: "200",
-        description: "Success with ShortUrlResponse payload",
+        description: "ShortUrlResponse 형태로 반환",
         sample: `{
   "code": "0000",
   "message": "Success",
@@ -215,98 +215,98 @@ export const apiSpecs: ApiSpec[] = [
       },
       {
         code: "9999",
-        description: "Invalid account or unexpected error"
+        description: "존재하지 않는 계정이거나 서버 오류"
       }
     ],
     lastUpdated: "2025-01-10",
-    owner: "Growth Squad",
+    owner: "그로스 스쿼드",
     version: "v1.0",
-    status: "Pending Review"
+    status: "검토 대기"
   },
   {
     id: "shorturl-detail",
-    category: "Short URL",
-    name: "Get Short URL",
+    category: "단축 URL",
+    name: "단축 URL 조회",
     method: "GET",
     path: "/api/short-url/{id}",
-    summary: "Retrieve short URL by numeric identifier",
+    summary: "ID 기준 단축 URL 상세 조회",
     description:
-      "Returns the full ShortUrlResponse payload when the resource exists and is not expired. Requires JWT authentication.",
-    tags: ["short-url", "read"],
+      "리소스가 존재하고 만료되지 않았다면 전체 ShortUrlResponse 정보를 반환합니다.",
+    tags: ["단축", "조회"],
     authentication: "JWT",
     headers: [
       {
         name: "Authorization",
         required: true,
         value: "Bearer {API_KEY}",
-        description: "JWT issued by auth endpoints"
+        description: "인증 엔드포인트가 발급한 JWT"
       }
     ],
     responses: [
       {
         code: "200",
-        description: "Success with ShortUrlResponse payload"
+        description: "ShortUrlResponse payload"
       },
       {
         code: "1404",
-        description: "Short URL not found or expired"
+        description: "단축 URL이 없거나 만료됨"
       }
     ],
     lastUpdated: "2025-01-08",
-    owner: "Growth Squad",
+    owner: "그로스 스쿼드",
     version: "v1.0",
-    status: "Approved"
+    status: "승인됨"
   },
   {
     id: "redirection-redirect",
-    category: "Redirection",
-    name: "Redirect to Long URL",
+    category: "리디렉션",
+    name: "단축 URL 리디렉션",
     method: "GET",
     path: "/r/{shortKey}",
-    summary: "Public redirect entry point",
+    summary: "공개 리다이렉트 엔드포인트",
     description:
-      "Resolves the short key and issues an HTTP 302 redirect to the long URL while tracking history metadata.",
-    tags: ["redirection", "public"],
-    authentication: "Public",
+      "단축 키를 원본 URL로 변환해 HTTP 302 응답을 내보내며, 히스토리 메타데이터를 기록합니다.",
+    tags: ["리디렉션", "공개"],
+    authentication: "공개",
     headers: [],
     responses: [
       {
         code: "302",
-        description: "Redirect to long URL"
+        description: "원본 URL로 리디렉션"
       },
       {
         code: "302 (/error)",
-        description: "Fallback redirect when the key is invalid"
+        description: "잘못된 키일 때 오류 페이지로 리디렉션"
       }
     ],
     lastUpdated: "2025-01-05",
-    owner: "Core Platform",
+    owner: "코어 플랫폼",
     version: "v1.2",
-    status: "Approved"
+    status: "승인됨"
   },
   {
     id: "redirection-stats",
-    category: "Redirection",
-    name: "Redirection Stats",
+    category: "리디렉션",
+    name: "리디렉션 통계",
     method: "POST",
     path: "/r/history/{shortUrlId}/stats",
-    summary: "Aggregated redirection metrics",
+    summary: "리디렉션 집계 통계",
     description:
-      "Returns aggregated metrics grouped by referer, user agent, and temporal dimensions. Requires JWT authentication.",
-    tags: ["analytics", "reporting"],
+      "참조자, UA, 시간 구간 등으로 묶어 집계값을 반환합니다. JWT 인증이 필요합니다.",
+    tags: ["통계", "리포트"],
     authentication: "JWT",
     headers: [
       {
         name: "Authorization",
         required: true,
         value: "Bearer {API_KEY}",
-        description: "JWT issued by auth endpoints"
+        description: "인증 엔드포인트가 발급한 JWT"
       },
       {
         name: "Content-Type",
         required: true,
         value: "application/json",
-        description: "Payload encoding"
+        description: "JSON 요청 본문"
       }
     ],
     requestBody: [
@@ -314,13 +314,13 @@ export const apiSpecs: ApiSpec[] = [
         name: "groupBy",
         type: "GroupingType[]",
         required: true,
-        description: "List of groupings like REFERER, YEAR, MONTH, USER_AGENT"
+        description: "REFERER, YEAR, MONTH, USER_AGENT 등의 그룹 목록"
       }
     ],
     responses: [
       {
         code: "200",
-        description: "List of aggregated metrics",
+        description: "집계 결과 리스트",
         sample: `{
   "code": "0000",
   "message": "Success",
@@ -332,14 +332,14 @@ export const apiSpecs: ApiSpec[] = [
       },
       {
         code: "9999",
-        description: "Invalid shortUrlId or unsupported grouping"
+        description: "존재하지 않는 shortUrlId 또는 지원하지 않는 그룹"
       }
     ],
     lastUpdated: "2025-01-09",
-    owner: "Analytics Guild",
+    owner: "애널리틱스 길드",
     version: "v1.2",
-    status: "Pending Review"
+    status: "검토 대기"
   }
 ];
 
-export const specCategories = ["Authentication", "Short URL", "Redirection"] as const;
+export const specCategories = ["인증", "단축 URL", "리디렉션"] as const;
