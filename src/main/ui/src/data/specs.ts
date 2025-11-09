@@ -45,13 +45,13 @@ export const apiSpecs: ApiSpec[] = [
   {
     id: "auth-register",
     category: "인증",
-    name: "API 키 등록",
+    name: "사용자 등록",
     method: "POST",
     path: "/api/auth/register",
-    summary: "등록 키로 최초 API 키 발급",
+    summary: "등록 키로 신규 서비스 계정을 추가",
     description:
-      "사전에 공유된 등록 키를 검증한 뒤 신규 서비스 계정을 생성하고 부트스트랩 API 키를 돌려줍니다.",
-    tags: ["인증", "초기화"],
+      "사전에 공유된 등록 키를 검증한 뒤 신규 서비스 계정을 생성합니다. 토큰 발급은 별도의 엔드포인트에서 수행됩니다.",
+    tags: ["인증", "등록"],
     authentication: "등록 키",
     headers: [
       {
@@ -77,13 +77,12 @@ export const apiSpecs: ApiSpec[] = [
     responses: [
       {
         code: "200",
-        description: "성공 시 사용자명과 apiKey를 포함",
+        description: "성공 시 사용자명을 반환",
         sample: `{
   "code": "0000",
   "message": "Success",
   "data": {
-    "username": "my-service",
-    "apiKey": "eyJhbGciOiJIUzUxMiJ9..."
+    "username": "my-service"
   }
 }`
       },
@@ -104,12 +103,61 @@ export const apiSpecs: ApiSpec[] = [
   {
     id: "auth-token",
     category: "인증",
-    name: "API 키 재발급",
+    name: "토큰 발급",
     method: "POST",
-    path: "/api/auth/token",
-    summary: "기존 토큰 만료 시 재발급",
+    path: "/api/auth/token/issue",
+    summary: "등록된 사용자명으로 Access/Refresh Token 발급",
     description:
-      "등록 키와 이전 토큰을 모두 검증한 뒤 기존 서비스 계정에 새 JWT를 발급합니다.",
+      "등록 키 헤더를 검증한 뒤 지정된 사용자명으로 Access Token과 Refresh Token을 동시에 발급합니다.",
+    tags: ["인증", "발급"],
+    authentication: "등록 키",
+    headers: [
+      {
+        name: "X-REGISTRATION-KEY",
+        required: true,
+        description: "Oracle 설정에 저장된 마스터 등록 키"
+      }
+    ],
+    requestBody: [
+      {
+        name: "username",
+        type: "string",
+        required: true,
+        description: "토큰을 발급받을 서비스 계정"
+      }
+    ],
+    responses: [
+      {
+        code: "200",
+        description: "Access/Refresh Token 쌍이 data에 포함",
+        sample: `{
+  "code": "0000",
+  "message": "Success",
+  "data": {
+    "token": "eyJhbGciOiJIUzUxMiJ9...",
+    "refreshToken": "f26c0d12-..."
+  }
+}`
+      },
+      {
+        code: "1403",
+        description: "사용자를 찾지 못함"
+      }
+    ],
+    lastUpdated: "2025-01-13",
+    owner: "플랫폼 스쿼드",
+    version: "v1.4",
+    status: "승인됨"
+  },
+  {
+    id: "auth-token-reissue",
+    category: "인증",
+    name: "토큰 재발급",
+    method: "POST",
+    path: "/api/auth/token/re-issue",
+    summary: "Refresh Token 검증 후 Access/Refresh Token 재발급",
+    description:
+      "등록 키와 Refresh Token을 검증한 뒤 Access Token과 Refresh Token을 모두 회전시킵니다.",
     tags: ["인증", "회전"],
     authentication: "등록 키",
     headers: [
@@ -124,35 +172,36 @@ export const apiSpecs: ApiSpec[] = [
         name: "username",
         type: "string",
         required: true,
-        description: "기존 서비스 계정"
+        description: "재발급 받을 서비스 계정"
       },
       {
-        name: "apiKey",
+        name: "refreshToken",
         type: "string",
         required: true,
-        description: "갱신하려는 이전 API 키"
+        description: "이전에 발급된 Refresh Token"
       }
     ],
     responses: [
       {
         code: "200",
-        description: "새 토큰이 data.token 으로 반환",
+        description: "새 Access/Refresh Token이 data에 포함",
         sample: `{
   "code": "0000",
   "message": "Success",
   "data": {
-    "token": "eyJhbGciOiJIUzUxMiJ9..."
+    "token": "eyJhbGciOiJIUzUxMiJ9...",
+    "refreshToken": "0d1ea972-..."
   }
 }`
       },
       {
         code: "1403",
-        description: "사용자를 찾지 못했거나 apiKey 불일치"
+        description: "사용자/Refresh Token 불일치"
       }
     ],
     lastUpdated: "2025-01-11",
     owner: "플랫폼 스쿼드",
-    version: "v1.1",
+    version: "v1.0",
     status: "승인됨"
   },
   {

@@ -121,7 +121,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 
 #### `POST /api/auth/register`
 
-- **설명**: 새로운 사용자를 등록하고 API Key(Access Token)를 발급합니다.
+- **설명**: 새로운 사용자를 등록합니다. 토큰 발급은 별도의 `/token/issue` 엔드포인트에서 수행됩니다.
 - **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
 - **Body**:
   ```json
@@ -132,31 +132,79 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 - **성공 응답 (`data` 필드 내부)**:
   ```json
   {
-    "username": "my-awesome-service",
-    "apiKey": "{발급된_API_Key}"
+    "username": "my-awesome-service"
   }
   ```
 
-#### `POST /api/auth/token`
+#### `POST /api/auth/token/issue`
 
-- **설명**: 만료된 API Key를 재발급합니다.
+- **설명**: 등록된 사용자 계정으로 Access/Refresh Token을 발급합니다.
 - **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
 - **Body**:
   ```json
   {
-    "username": "my-awesome-service",
-    "apiKey": "{만료된_API_Key}"
+    "username": "my-awesome-service"
   }
   ```
 - **성공 응답 (`data` 필드 내부)**:
   ```json
   {
+    "token": "{발급된_API_Key}",
+    "refreshToken": "{발급된_Refresh_Token}"
+  }
+  ```
+
+#### `POST /api/auth/token/re-issue`
+
+- **설명**: Refresh Token을 검증하고 Access/Refresh Token을 재발급합니다.
+- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Body**:
+  ```json
+  {
     "username": "my-awesome-service",
-    "apiKey": "{재발급된_API_Key}"
+    "refreshToken": "{저장된_Refresh_Token}"
+  }
+  ```
+- **성공 응답 (`data` 필드 내부)**:
+  ```json
+  {
+    "token": "{재발급된_API_Key}",
+    "refreshToken": "{재발급된_Refresh_Token}"
   }
   ```
 
 ### 5.2. 단축 URL
+
+- **설명**: Refresh Token을 검증하고 Access/Refresh Token을 재발급합니다.
+- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **Body**:
+  ```json
+  {
+    "username": "my-awesome-service",
+    "refreshToken": "{저장된_Refresh_Token}"
+  }
+  ```
+- **성공 응답 (`data` 필드 내부)**:
+  ```json
+  {
+    "token": "{재발급된_API_Key}",
+    "refreshToken": "{재발급된_Refresh_Token}"
+  }
+  ```
+
+#### `GET /api/auth/users/{username}`
+
+- **설명**: 특정 사용자의 기본 정보를 조회합니다. API Key, Refresh Token 등 민감 정보는 포함하지 않습니다.
+- **Header**: `X-REGISTRATION-KEY: {{registration_key}}`
+- **성공 응답 (`data` 필드 내부)**:
+  ```json
+  {
+    "id": 1,
+    "username": "my-awesome-service",
+    "createdAt": "2025-01-13T12:00:00",
+    "updatedAt": "2025-01-13T12:00:00"
+  }
+  ```
 
 #### `POST /api/short-url`
 
@@ -284,28 +332,24 @@ bash export JASYPT_ENCRYPTOR_PASSWORD=aaa
 
 본 시스템은 크게 **API 키 발급(회원가입)**과 **API 인증 및 사용** 두 단계로 구성됩니다. 인증은 JWT(JSON Web Token)를 기반으로 이루어집니다.
 
-### 1단계: API 키 발급 (회원가입)
+### 1단계: API 키 발급 (회원가입 + 토큰 요청)
 
-이 단계는 사용자가 시스템에 처음 등록하고, API를 사용하는 데 필요한 고유한 키(JWT)를 발급받는 과정입니다.
+이 단계는 사용자가 시스템에 처음 등록하고, 별도의 토큰 발급 요청을 통해 API Key/Refresh Token 쌍을 획득하는 과정입니다.
 
-1.  **클라이언트 요청**:
-    *   사용자는 자신의 `username`을 포함하여 회원가입을 요청합니다.
-    *   HTTP `POST` 요청이 `/api/auth/register` 엔드포인트로 전송됩니다.
+1.  **회원가입 요청**:
+    *   사용자는 자신의 `username`을 포함하여 `/api/auth/register` 엔드포인트로 `POST` 요청을 전송합니다.
+    *   컨트롤러는 `UserService.createUser`를 호출해 중복 여부를 확인하고 사용자를 저장합니다.
 
-2.  **컨트롤러 처리 (`AuthController`)**:
-    *   `register` 메소드가 이 요청을 받아 `UserService`의 `createUser` 메소드를 호출하여 사용자 생성을 위임합니다.
+2.  **토큰 발급 요청**:
+    *   등록이 완료되면, 클라이언트는 `/api/auth/token/issue` 엔드포인트에 동일한 `username`을 전달해 토큰 발급을 요청합니다.
 
-3.  **서비스 로직 (`UserService`)**:
-    *   `createUser` 메소드는 먼저 동일한 `username`의 존재 여부를 확인합니다.
-    *   `JwtProvider.createToken` 메소드를 호출하여 해당 사용자를 위한 고유 API 키(JWT)를 생성합니다.
+3.  **토큰 생성 (`TokenService`)**:
+    *   `TokenService.issueToken`은 사용자 존재 여부를 확인한 뒤 `JwtProvider.createToken`을 호출해 Access Token을 생성합니다.
+    *   동시에 새 Refresh Token(UUID 기반)을 만들어 `User` 엔티티에 함께 저장합니다.
 
-4.  **JWT 생성 (`JwtProvider`)**:
-    *   `createToken` 메소드는 `username`을 주제(subject)로 하고, 설정 파일(`application.yml`)에 정의된 만료 시간을 적용하여 JWT를 생성합니다.
-    *   가장 중요한 부분으로, `HS512` 알고리즘과 **안전하게 생성된 비밀 키(`jwt.secret`)**를 사용하여 토큰에 전자 서명을 합니다. 이 서명은 토큰이 위변조되지 않았음을 보장합니다.
-
-5.  **사용자 정보 저장 및 응답**:
-    *   `UserService`는 생성된 JWT(API 키)와 `username`을 `User` 엔티티에 담아 데이터베이스에 저장합니다.
-    *   마지막으로, `AuthController`는 생성된 사용자의 `username`과 발급된 API 키를 클라이언트에게 응답으로 반환합니다.
+4.  **응답 반환**:
+    *   컨트롤러는 발급된 Access Token과 Refresh Token을 응답 본문으로 돌려줍니다.
+    *   이후 클라이언트는 Access Token을 API 호출에, Refresh Token은 재발급 요청(`/token/re-issue`)에 사용합니다.
 
 ### 2단계: API 인증 및 사용
 
