@@ -12,6 +12,7 @@ import { AuthControlsPage } from "./features/controls/AuthControlsPage";
 import { ShortUrlControlsPage } from "./features/controls/ShortUrlControlsPage";
 import { RedirectionControlsPage } from "./features/controls/RedirectionControlsPage";
 import { AnalyticsControlsPage } from "./features/controls/AnalyticsControlsPage";
+import { UserManagementPage } from "./features/auth/UserManagementPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="auth" element={<ControlsLayout />}>
           <Route index element={<AuthControlsPage />} />
         </Route>
+        <Route path="users" element={<UserManagementPage />} />
         <Route path="short-url" element={<ControlsLayout />}>
           <Route index element={<ShortUrlControlsPage />} />
         </Route>

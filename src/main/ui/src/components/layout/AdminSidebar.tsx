@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { FileText, ShieldCheck, Link2, Shuffle, BarChart3 } from "lucide-react";
+import { FileText, ShieldCheck, Link2, Shuffle, BarChart3, Users } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const navItems = [
   { to: "/specs", label: "API 명세", icon: FileText },
   { to: "/auth", label: "인증 제어", icon: ShieldCheck },
+  { to: "/users", label: "사용자 관리", icon: Users },
   { to: "/short-url", label: "단축 URL 제어", icon: Link2 },
   { to: "/redirection", label: "리디렉션 제어", icon: Shuffle },
   { to: "/analytics", label: "통계 제어", icon: BarChart3 }
