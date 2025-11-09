@@ -42,10 +42,11 @@ class UserServiceImplTest {
                     return entity;
                 });
 
-        User created = userService.createUser(request);
+        User created = userService.createUser(request, "NH Bank");
 
         assertThat(created.getId()).isEqualTo(10L);
         assertThat(created.getUsername()).isEqualTo("my-service");
+        assertThat(created.getGroupName()).isEqualTo("NH Bank");
         assertThat(created.getApiKey()).isNull();
         verify(userRepository).save(created);
     }
@@ -64,7 +65,7 @@ class UserServiceImplTest {
         UserRequest request = new UserRequest();
         request.setUsername("dup");
 
-        assertThatThrownBy(() -> userService.createUser(request))
+        assertThatThrownBy(() -> userService.createUser(request, "NH Bank"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("exists");
     }

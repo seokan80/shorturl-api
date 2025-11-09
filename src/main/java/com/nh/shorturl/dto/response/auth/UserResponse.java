@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class UserResponse {
     private Long id;
     private String username;
+    private String groupName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

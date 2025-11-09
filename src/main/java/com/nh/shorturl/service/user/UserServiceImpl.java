@@ -20,16 +20,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User createUser(UserRequest request) {
-        return createUserInternal(request.getUsername());
+    public User createUser(UserRequest request, String groupName) {
+        return createUserInternal(request.getUsername(), groupName);
     }
 
-    private User createUserInternal(String username) {
+    private User createUserInternal(String username, String groupName) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        User user = new User(username);
+        User user = new User(username, groupName);
         return userRepository.save(user);
     }
 

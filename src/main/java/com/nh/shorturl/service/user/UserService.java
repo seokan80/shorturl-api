@@ -6,7 +6,7 @@ import com.nh.shorturl.entity.User;
 import java.util.List;
 
 public interface UserService {
-    User createUser(UserRequest request);
+    User createUser(UserRequest request, String groupName);
     List<User> getAllUsers();
     void deleteUser(String username);
     User getUser(String username);

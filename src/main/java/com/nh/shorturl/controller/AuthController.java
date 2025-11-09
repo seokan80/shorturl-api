@@ -4,6 +4,7 @@ import com.nh.shorturl.dto.request.auth.UserRequest;
 import com.nh.shorturl.dto.response.auth.UserDetailResponse;
 import com.nh.shorturl.dto.response.auth.UserResponse;
 import com.nh.shorturl.dto.response.common.ResultEntity;
+import com.nh.shorturl.entity.ServerAuthKey;
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.service.serverauth.ServerAuthKeyService;
 import com.nh.shorturl.service.user.UserService;
@@ -23,7 +24,7 @@ public class AuthController {
 
     @GetMapping("/users")
     public ResultEntity<?> getUsers(@RequestHeader("X-REGISTRATION-KEY") String key) {
-        if (!isServerAuthKeyValid(key)) {
+        if (getValidatedServerAuthKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -33,6 +34,7 @@ public class AuthController {
                     .map(user -> new UserResponse(
                             user.getId(),
                             user.getUsername(),
+                            user.getGroupName(),
                             user.getCreatedAt(),
                             user.getUpdatedAt()
                     ))
@@ -46,15 +48,17 @@ public class AuthController {
     @PostMapping("/users")
     public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,
                                     @RequestBody UserRequest request) {
-        if (!isServerAuthKeyValid(key)) {
+        ServerAuthKey serverAuthKey = getValidatedServerAuthKey(key);
+        if (serverAuthKey == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
         try {
-            User user = userService.createUser(request);
+            User user = userService.createUser(request, serverAuthKey.getName());
             return new ResultEntity<>(new UserResponse(
                     user.getId(),
                     user.getUsername(),
+                    user.getGroupName(),
                     user.getCreatedAt(),
                     user.getUpdatedAt()
             ));
@@ -66,7 +70,7 @@ public class AuthController {
     @DeleteMapping("/users/{username}")
     public ResultEntity<?> deleteUser(@RequestHeader("X-REGISTRATION-KEY") String key,
                                       @PathVariable String username) {
-        if (!isServerAuthKeyValid(key)) {
+        if (getValidatedServerAuthKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -83,7 +87,7 @@ public class AuthController {
     @GetMapping("/users/{username}")
     public ResultEntity<?> getUser(@RequestHeader("X-REGISTRATION-KEY") String key,
                                    @PathVariable String username) {
-        if (!isServerAuthKeyValid(key)) {
+        if (getValidatedServerAuthKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -92,6 +96,7 @@ public class AuthController {
             UserDetailResponse response = new UserDetailResponse(
                     user.getId(),
                     user.getUsername(),
+                    user.getGroupName(),
                     user.getCreatedAt(),
                     user.getUpdatedAt()
             );
@@ -105,12 +110,11 @@ public class AuthController {
 
     
 
-    private boolean isServerAuthKeyValid(String key) {
+    private ServerAuthKey getValidatedServerAuthKey(String key) {
         try {
-            serverAuthKeyService.validateActiveKey(key);
-            return true;
+            return serverAuthKeyService.validateActiveKey(key);
         } catch (IllegalArgumentException e) {
-            return false;
+            return null;
         }
     }
 }

@@ -39,6 +39,10 @@ public class User extends BaseEntity implements UserDetails {
     @Comment("사용자")
     private String username;
 
+    @Column(name = "GROUP_NAME")
+    @Comment("사용자 그룹(고객사 명)")
+    private String groupName;
+
     @Column(name = "API_KEY")
     @Comment("고객별 발급 API Key")
     private String apiKey;
@@ -56,13 +60,13 @@ public class User extends BaseEntity implements UserDetails {
     @Comment("삭제일")
     private LocalDateTime deletedAt;
 
-    public User(String username, String apiKey) {
+    public User(String username, String groupName) {
         this.username = username;
-        this.apiKey = apiKey;
+        this.groupName = groupName;
     }
 
     public User(String username) {
-        this.username = username;
+        this(username, (String) null);
     }
 
     @Override
