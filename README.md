@@ -211,6 +211,43 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 
 #### `POST /api/short-url`
 
+### 5.1.1. 서버 인증 키
+
+서버 인증 키는 `/api/auth/**` 계열 API를 호출할 때 사용하는 상위 자격 증명입니다. 아래 API로 발급/조회할 수 있습니다.
+
+#### `GET /api/server-keys`
+- **설명**: 발급된 서버 인증 키 목록을 조회합니다.
+- **Header**: `X-REGISTRATION-KEY: {server-auth-key}`
+- **성공 응답**: `ServerAuthKeyResponse[]` (각 항목에 `id`, `name`, `keyValue`, `issuedBy`, `description`, `expiresAt`, `lastUsedAt`, `active`, `createdAt`, `updatedAt` 포함)
+
+#### `POST /api/server-keys`
+- **설명**: 새로운 서버 인증 키를 발급합니다.
+- **Body**:
+  ```json
+  {
+    "name": "Payments",
+    "issuedBy": "infra-team",
+    "description": "결제 게이트웨이 연동",
+    "expiresAt": "2025-12-31T15:00:00"
+  }
+  ```
+- **성공 응답**: 발급된 키 정보와 `keyValue`를 반환합니다.
+
+#### `PUT /api/server-keys/{id}`
+- **설명**: 서버 인증 키의 이름, 설명, 활성 여부, 만료일을 수정합니다.
+- **Body (예시)**:
+  ```json
+  {
+    "name": "Payments-Prod",
+    "description": "프로덕션용",
+    "active": true,
+    "expiresAt": "2026-01-01T00:00:00"
+  }
+  ```
+
+#### `DELETE /api/server-keys/{id}`
+- **설명**: 서버 인증 키를 삭제(비활성화)합니다.
+
 - **설명**: 원본 URL을 전달하여 새로운 단축 URL을 생성합니다.
 - **Header**: `Authorization: Bearer {{token}}`
 - **Body**:

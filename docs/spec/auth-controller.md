@@ -4,8 +4,8 @@
 
 ## 공통 규칙
 - 모든 응답은 `ResultEntity` 포맷을 따르며 `code`, `message`, `data` 필드를 포함합니다.
-- 모든 인증 엔드포인트는 등록 키 기반 헤더 검증을 수행합니다.
-  - `X-REGISTRATION-KEY` 값이 `registrationConfig.registrationKey`와 일치하지 않으면 `1401 (UNAUTHORIZED)`를 반환합니다.
+- 모든 인증 엔드포인트는 서버 인증 키(`X-REGISTRATION-KEY`) 기반 검증을 수행합니다.
+  - 발급된 서버 인증 키가 비활성 상태이거나 존재하지 않을 경우 `1401 (UNAUTHORIZED)`를 반환합니다.
 
 ## POST `/register`
 - **설명**: 신규 사용자 정보를 저장합니다. 토큰 발급은 `/token/issue`에서 별도로 수행됩니다.
@@ -103,3 +103,54 @@
 - **에러 시나리오**
   - 등록 키 불일치 → `1401`
   - 사용자/Refresh Token 불일치 → `1403` (`FORBIDDEN`)
+
+---
+
+## ServerAuthKeyController
+
+기본 경로: `/api/server-keys`
+
+- 모든 요청은 `X-REGISTRATION-KEY` 헤더에 유효한 서버 인증 키가 포함되어야 합니다.
+
+### GET `/`
+- **설명**: 발급된 서버 인증 키 목록을 최신순으로 반환합니다.
+- **성공 응답 (`200`)**
+  ```json
+  {
+    "code": "0000",
+    "message": "Success",
+    "data": [
+      {
+        "id": 1,
+        "name": "Payments",
+        "keyValue": "59b4478b157c4e0f8c3a3a5c7c81d5f7",
+        "issuedBy": "infra-team",
+        "description": "결제 게이트웨이 연동",
+        "expiresAt": "2025-12-31T15:00:00",
+        "lastUsedAt": "2025-01-13T09:00:00",
+        "active": true,
+        "createdAt": "2025-01-10T08:00:00",
+        "updatedAt": "2025-01-11T01:20:00"
+      }
+    ]
+  }
+  ```
+
+### POST `/`
+- **설명**: 서버 인증 키를 발급합니다.
+- **요청 본문**
+  ```json
+  {
+    "name": "Payments",
+    "issuedBy": "infra-team",
+    "description": "결제 게이트웨이 연동",
+    "expiresAt": "2025-12-31T15:00:00"
+  }
+  ```
+- **성공 응답 (`200`)**: `ServerAuthKeyResponse`
+
+### PUT `/{id}`
+- **설명**: 이름/설명/만료일/활성 여부를 수정합니다.
+
+### DELETE `/{id}`
+- **설명**: 서버 인증 키를 삭제(소프트 삭제)합니다.

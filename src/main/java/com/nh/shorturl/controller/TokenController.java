@@ -1,10 +1,10 @@
 package com.nh.shorturl.controller;
 
-import com.nh.shorturl.config.RegistrationConfig;
 import com.nh.shorturl.dto.request.auth.TokenIssueRequest;
 import com.nh.shorturl.dto.request.auth.TokenReissueRequest;
 import com.nh.shorturl.dto.response.auth.TokenResponse;
 import com.nh.shorturl.dto.response.common.ResultEntity;
+import com.nh.shorturl.service.serverauth.ServerAuthKeyService;
 import com.nh.shorturl.service.token.TokenService;
 import com.nh.shorturl.type.ApiResult;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class TokenController {
 
     private final TokenService tokenService;
-    private final RegistrationConfig registrationConfig;
+    private final ServerAuthKeyService serverAuthKeyService;
 
     @PostMapping("/issue")
     public ResultEntity<?> issueToken(@RequestHeader("X-REGISTRATION-KEY") String key,
                                       @RequestBody TokenIssueRequest request) {
-        if (!isRegistrationKeyValid(key)) {
+        if (!isServerKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -38,7 +38,7 @@ public class TokenController {
     @PostMapping("/re-issue")
     public ResultEntity<?> reissueToken(@RequestHeader("X-REGISTRATION-KEY") String key,
                                         @RequestBody TokenReissueRequest request) {
-        if (!isRegistrationKeyValid(key)) {
+        if (!isServerKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -52,7 +52,12 @@ public class TokenController {
         }
     }
 
-    private boolean isRegistrationKeyValid(String key) {
-        return registrationConfig.getRegistrationKey().equals(key);
+    private boolean isServerKeyValid(String key) {
+        try {
+            serverAuthKeyService.validateActiveKey(key);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

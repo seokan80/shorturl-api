@@ -25,6 +25,33 @@ type TokenPayload = {
   refreshToken: string;
 };
 
+type ServerAuthKeyInfo = {
+  id: number;
+  name: string;
+  keyValue: string;
+  issuedBy?: string;
+  description?: string;
+  expiresAt?: string;
+  lastUsedAt?: string;
+  active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type ServerAuthKeyForm = {
+  name: string;
+  issuedBy: string;
+  description: string;
+  expiresAt: string;
+};
+
+type ServerAuthKeyEditForm = {
+  name: string;
+  description: string;
+  expiresAt: string;
+  active: boolean;
+};
+
 type ApiEnvelope<T> = {
   code: string;
   message: string;
@@ -44,6 +71,20 @@ export function UserManagementPage() {
   const [tokenCache, setTokenCache] = useState<
     Record<string, TokenPayload & { username: string; issuedAt: string }>
   >({});
+  const [serverKeys, setServerKeys] = useState<ServerAuthKeyInfo[]>([]);
+  const [serverKeyForm, setServerKeyForm] = useState<ServerAuthKeyForm>({
+    name: "",
+    issuedBy: "",
+    description: "",
+    expiresAt: ""
+  });
+  const [editingServerKey, setEditingServerKey] = useState<ServerAuthKeyInfo | null>(null);
+  const [serverKeyEditForm, setServerKeyEditForm] = useState<ServerAuthKeyEditForm>({
+    name: "",
+    description: "",
+    expiresAt: "",
+    active: true
+  });
   const [newUsername, setNewUsername] = useState("");
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
@@ -114,6 +155,14 @@ export function UserManagementPage() {
     });
   };
 
+  const handleFetchServerKeys = async () => {
+    await runWithStatus("fetchServerKeys", async () => {
+      const list = await request<ServerAuthKeyInfo[]>("/api/server-keys");
+      setServerKeys(list);
+      setSuccess(`서버 인증 키 ${list.length}건을 불러왔습니다.`);
+    });
+  };
+
   const handleCreateUser = async () => {
     const username = newUsername.trim();
     if (!username) {
@@ -129,6 +178,69 @@ export function UserManagementPage() {
       setSuccess(`${username} 사용자가 등록되었습니다.`);
       await handleFetchUsers();
     });
+  };
+
+  const handleCreateServerKey = async () => {
+    if (!serverKeyForm.name.trim()) {
+      setError("서버 인증 키 이름을 입력해주세요.");
+      return;
+    }
+    await runWithStatus("createServerKey", async () => {
+      const payload = await request<ServerAuthKeyInfo>("/api/server-keys", {
+        method: "POST",
+        body: JSON.stringify({
+          ...serverKeyForm,
+          expiresAt: serverKeyForm.expiresAt ? new Date(serverKeyForm.expiresAt).toISOString() : null
+        })
+      });
+      setServerKeyForm({ name: "", issuedBy: "", description: "", expiresAt: "" });
+      setServerKeys((prev) => [payload, ...prev]);
+      setSuccess(`서버 인증 키 '${payload.name}'이 발급되었습니다.`);
+    });
+  };
+
+  const handleEditServerKey = (key: ServerAuthKeyInfo) => {
+    setEditingServerKey(key);
+    setServerKeyEditForm({
+      name: key.name,
+      description: key.description ?? "",
+      expiresAt: key.expiresAt ? key.expiresAt.slice(0, 16) : "",
+      active: key.active
+    });
+  };
+
+  const handleUpdateServerKey = async () => {
+    if (!editingServerKey) return;
+    await runWithStatus(`updateServerKey-${editingServerKey.id}`, async () => {
+      const payload = await request<ServerAuthKeyInfo>(`/api/server-keys/${editingServerKey.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          name: serverKeyEditForm.name,
+          description: serverKeyEditForm.description,
+          active: serverKeyEditForm.active,
+          expiresAt: serverKeyEditForm.expiresAt ? new Date(serverKeyEditForm.expiresAt).toISOString() : null
+        })
+      });
+      setServerKeys((prev) => prev.map((item) => (item.id === payload.id ? payload : item)));
+      setEditingServerKey(null);
+      setSuccess(`'${payload.name}' 서버 인증 키를 수정했습니다.`);
+    });
+  };
+
+  const handleDeleteServerKey = async (key: ServerAuthKeyInfo) => {
+    if (!confirm(`'${key.name}' 키를 삭제하시겠습니까?`)) return;
+    await runWithStatus(`deleteServerKey-${key.id}`, async () => {
+      await request(`/api/server-keys/${key.id}`, { method: "DELETE" });
+      setServerKeys((prev) => prev.filter((item) => item.id !== key.id));
+      if (editingServerKey?.id === key.id) {
+        setEditingServerKey(null);
+      }
+      setSuccess(`'${key.name}' 키를 삭제했습니다.`);
+    });
+  };
+
+  const handleCancelServerKeyEdit = () => {
+    setEditingServerKey(null);
   };
 
   const handleDeleteUser = async (username: string) => {
@@ -235,6 +347,212 @@ export function UserManagementPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle className="text-base">서버 인증 키 발급</CardTitle>
+            <CardDescription>사용자 등록에 사용할 신규 서버 인증 키를 생성합니다.</CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleFetchServerKeys}
+            disabled={isBusy("fetchServerKeys")}
+          >
+            {isBusy("fetchServerKeys") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            목록 새로고침
+          </Button>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500">이름 *</p>
+            <Input
+              value={serverKeyForm.name}
+              placeholder="예: Payment-Gateway"
+              onChange={(event) => setServerKeyForm((prev) => ({ ...prev, name: event.target.value }))}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500">발급자</p>
+            <Input
+              value={serverKeyForm.issuedBy}
+              placeholder="담당자 이름"
+              onChange={(event) => setServerKeyForm((prev) => ({ ...prev, issuedBy: event.target.value }))}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500">만료일 (선택)</p>
+            <Input
+              type="datetime-local"
+              value={serverKeyForm.expiresAt}
+              onChange={(event) => setServerKeyForm((prev) => ({ ...prev, expiresAt: event.target.value }))}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500">설명</p>
+            <Input
+              value={serverKeyForm.description}
+              placeholder="비고"
+              onChange={(event) => setServerKeyForm((prev) => ({ ...prev, description: event.target.value }))}
+            />
+          </div>
+          <div className="md:col-span-2 flex gap-2">
+            <Button type="button" onClick={handleCreateServerKey} disabled={isBusy("createServerKey")}>
+              {isBusy("createServerKey") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              서버 인증 키 발급
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setServerKeyForm({ name: "", issuedBy: "", description: "", expiresAt: "" })}>
+              초기화
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">서버 인증 키 목록</CardTitle>
+          <CardDescription>발급된 키와 사용 이력을 확인하고 관리합니다.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>No</TableHead>
+                  <TableHead>이름</TableHead>
+                  <TableHead>키 값</TableHead>
+                  <TableHead>발급자</TableHead>
+                  <TableHead>만료일</TableHead>
+                  <TableHead>상태</TableHead>
+                  <TableHead className="w-28 text-center">작업</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {serverKeys.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-6 text-center text-sm text-slate-500">
+                      등록된 서버 인증 키가 없습니다. 상단의 발급 폼을 사용해 생성하세요.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  serverKeys.map((key, index) => (
+                    <TableRow key={key.id}>
+                      <TableCell className="font-mono text-xs text-slate-500">{serverKeys.length - index}</TableCell>
+                      <TableCell className="font-medium">{key.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs">{key.keyValue}</span>
+                          <Button variant="ghost" size="icon" onClick={() => copyToClipboard(key.keyValue)}>
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>{key.issuedBy || "-"}</TableCell>
+                      <TableCell>{formatDateTime(key.expiresAt)}</TableCell>
+                      <TableCell>
+                        <Badge variant={key.active ? "secondary" : "outline"}>
+                          {key.active ? "활성" : "비활성"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="수정"
+                            onClick={() => handleEditServerKey(key)}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-rose-600 hover:text-rose-700"
+                            aria-label="삭제"
+                            onClick={() => handleDeleteServerKey(key)}
+                            disabled={isBusy(`deleteServerKey-${key.id}`)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {editingServerKey && (
+        <Card>
+          <CardHeader className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="text-base">서버 인증 키 수정</CardTitle>
+              <CardDescription>{editingServerKey.name} 설정을 변경합니다.</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleCancelServerKeyEdit}>
+                취소
+              </Button>
+              <Button
+                onClick={handleUpdateServerKey}
+                disabled={isBusy(`updateServerKey-${editingServerKey.id}`)}
+              >
+                {isBusy(`updateServerKey-${editingServerKey.id}`) && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                저장
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-slate-500">이름</p>
+              <Input
+                value={serverKeyEditForm.name}
+                onChange={(event) => setServerKeyEditForm((prev) => ({ ...prev, name: event.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-slate-500">만료일</p>
+              <Input
+                type="datetime-local"
+                value={serverKeyEditForm.expiresAt}
+                onChange={(event) =>
+                  setServerKeyEditForm((prev) => ({ ...prev, expiresAt: event.target.value }))
+                }
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-slate-500">설명</p>
+              <Input
+                value={serverKeyEditForm.description}
+                onChange={(event) =>
+                  setServerKeyEditForm((prev) => ({ ...prev, description: event.target.value }))
+                }
+              />
+            </div>
+            <div className="flex items-center gap-2 pt-4">
+              <input
+                id="server-key-active"
+                type="checkbox"
+                className="h-4 w-4 rounded border-slate-300"
+                checked={serverKeyEditForm.active}
+                onChange={(event) =>
+                  setServerKeyEditForm((prev) => ({ ...prev, active: event.target.checked }))
+                }
+              />
+              <label htmlFor="server-key-active" className="text-sm text-slate-600">
+                활성 상태
+              </label>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

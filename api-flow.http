@@ -7,7 +7,26 @@
 @long_url = https://github.com/google/gemini-api
 
 ### =================================================================
-### 1. 최초 사용자 등록 (토큰은 별도 발급)
+### 1. 서버 인증 키 목록 확인
+### =================================================================
+GET {{hostname}}/api/server-keys
+X-REGISTRATION-KEY: {{registration_key}}
+
+### =================================================================
+### 2. 서버 인증 키 발급
+### =================================================================
+POST {{hostname}}/api/server-keys
+Content-Type: application/json
+X-REGISTRATION-KEY: {{registration_key}}
+
+{
+  "name": "demo-key",
+  "issuedBy": "platform",
+  "description": "로컬 테스트"
+}
+
+### =================================================================
+### 3. 최초 사용자 등록 (토큰은 별도 발급)
 ### @name: register
 ### =================================================================
 POST {{hostname}}/api/auth/register
@@ -19,7 +38,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 }
 
 ### =================================================================
-### 2. 등록된 사용자 토큰 발급
+### 4. 등록된 사용자 토큰 발급
 ### @name: issue
 ### =================================================================
 POST {{hostname}}/api/auth/token/issue
@@ -37,7 +56,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 %}
 
 ### =================================================================
-### 3. 발급받은 API Key로 단축 URL 생성
+### 5. 발급받은 API Key로 단축 URL 생성
 ### =================================================================
 POST {{hostname}}/api/short-url
 Content-Type: application/json
@@ -57,7 +76,7 @@ Authorization: Bearer {{initialApiKey}}
 
 
 ### =================================================================
-### 4. 단축 URL 조회 - ID 기반
+### 6. 단축 URL 조회 - ID 기반
 ### =================================================================
 GET {{hostname}}/api/short-url/{{shortUrlId}}
 Authorization: Bearer {{initialApiKey}}
@@ -65,7 +84,7 @@ Content-Type: application/json
 
 
 ### =================================================================
-### 5. 단축 URL 조회 - Key 기반
+### 7. 단축 URL 조회 - Key 기반
 ### =================================================================
 GET {{hostname}}/api/short-url/key/{{shortUrlKey}}
 Authorization: Bearer {{initialApiKey}}
@@ -73,7 +92,7 @@ Content-Type: application/json
 
 
 ### =================================================================
-### 6. 단축 URL 삭제
+### 8. 단축 URL 삭제
 ### =================================================================
 POST {{hostname}}/api/short-url/delete/{{shortUrlId}}
 Authorization: Bearer {{initialApiKey}}
@@ -81,7 +100,7 @@ Content-Type: application/json
 
 
 ### =================================================================
-### 7. 생성된 단축 URL로 리디렉션 테스트 (인증 불필요)
+### 9. 생성된 단축 URL로 리디렉션 테스트 (인증 불필요)
 ### 리디렉션 시 통계 데이터가 적재됩니다.
 ### =================================================================
 GET {{hostname}}/r/{{shortUrlKey}}
@@ -90,7 +109,7 @@ User-Agent: Gemini-Test-Agent/1.0
 
 
 ### =================================================================
-### 8. API Key 만료 시나리오: 토큰 재발급 요청
+### 10. API Key 만료 시나리오: 토큰 재발급 요청
 ### (X-REGISTRATION-KEY와 Refresh Token을 함께 전송)
 ### @name: reissue
 ### =================================================================
@@ -110,7 +129,7 @@ X-REGISTRATION-KEY: {{registration_key}}
 %}
 
 ### =================================================================
-### 9. 새로 발급받은 API Key로 다른 단축 URL 생성 테스트
+### 11. 새로 발급받은 API Key로 다른 단축 URL 생성 테스트
 ### =================================================================
 POST {{hostname}}/api/short-url
 Content-Type: application/json
@@ -129,7 +148,7 @@ Authorization: Bearer {{reissuedApiKey}}
 %}
 
 ### =================================================================
-### 10. 생성된 단축 URL로 리디렉션 테스트 (인증 불필요)
+### 12. 생성된 단축 URL로 리디렉션 테스트 (인증 불필요)
 ### 리디렉션 시 통계 데이터가 적재됩니다.
 ### =================================================================
 GET {{hostname}}/r/{{shortUrlKey}}
@@ -137,14 +156,14 @@ Referer: https://www.google.com/
 User-Agent: Gemini-Test-Agent/1.0
 
 ### =================================================================
-### 11. 단축 URL 리디렉션 횟수 조회
+### 13. 단축 URL 리디렉션 횟수 조회
 ### =================================================================
 GET {{hostname}}/r/history/{{shortUrlId}}/count
 Accept: application/json
 
 
 ### =================================================================
-### 12. 단축 URL 통계 조회 (Referer, Year 기준)
+### 14. 단축 URL 통계 조회 (Referer, Year 기준)
 ### =================================================================
 POST {{hostname}}/r/history/{{shortUrlId}}/stats
 Content-Type: application/json
@@ -155,7 +174,7 @@ Content-Type: application/json
 
 
 ### =================================================================
-### 13. 단축 URL 통계 조회 (User-Agent, Month, Day 기준)
+### 15. 단축 URL 통계 조회 (User-Agent, Month, Day 기준)
 ### =================================================================
 POST {{hostname}}/r/history/{{shortUrlId}}/stats
 Content-Type: application/json

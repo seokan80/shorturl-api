@@ -1,11 +1,11 @@
 package com.nh.shorturl.controller;
 
-import com.nh.shorturl.config.RegistrationConfig;
 import com.nh.shorturl.dto.request.auth.UserRequest;
 import com.nh.shorturl.dto.response.auth.UserDetailResponse;
 import com.nh.shorturl.dto.response.auth.UserResponse;
 import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.entity.User;
+import com.nh.shorturl.service.serverauth.ServerAuthKeyService;
 import com.nh.shorturl.service.user.UserService;
 import com.nh.shorturl.type.ApiResult;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +19,11 @@ import java.util.List;
 public class AuthController {
 
     private final UserService userService;
-    private final RegistrationConfig registrationConfig;
+    private final ServerAuthKeyService serverAuthKeyService;
 
     @GetMapping("/users")
     public ResultEntity<?> getUsers(@RequestHeader("X-REGISTRATION-KEY") String key) {
-        if (!isRegistrationKeyValid(key)) {
+        if (!isServerAuthKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -46,7 +46,7 @@ public class AuthController {
     @PostMapping("/users")
     public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,
                                     @RequestBody UserRequest request) {
-        if (!isRegistrationKeyValid(key)) {
+        if (!isServerAuthKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -66,7 +66,7 @@ public class AuthController {
     @DeleteMapping("/users/{username}")
     public ResultEntity<?> deleteUser(@RequestHeader("X-REGISTRATION-KEY") String key,
                                       @PathVariable String username) {
-        if (!isRegistrationKeyValid(key)) {
+        if (!isServerAuthKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -83,7 +83,7 @@ public class AuthController {
     @GetMapping("/users/{username}")
     public ResultEntity<?> getUser(@RequestHeader("X-REGISTRATION-KEY") String key,
                                    @PathVariable String username) {
-        if (!isRegistrationKeyValid(key)) {
+        if (!isServerAuthKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -105,7 +105,12 @@ public class AuthController {
 
     
 
-    private boolean isRegistrationKeyValid(String key) {
-        return registrationConfig.getRegistrationKey().equals(key);
+    private boolean isServerAuthKeyValid(String key) {
+        try {
+            serverAuthKeyService.validateActiveKey(key);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
