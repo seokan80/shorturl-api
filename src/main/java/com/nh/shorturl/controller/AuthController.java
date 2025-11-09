@@ -10,21 +10,19 @@ import com.nh.shorturl.entity.User;
 import com.nh.shorturl.service.auth.AuthService;
 import com.nh.shorturl.service.user.UserService;
 import com.nh.shorturl.type.ApiResult;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
     private final RegistrationConfig registrationConfig;
-
-    public AuthController(AuthService authService, UserService userService, RegistrationConfig registrationConfig) {
-        this.authService = authService;
-        this.userService = userService;
-        this.registrationConfig = registrationConfig;
-    }
 
     @PostMapping("/register")
     public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,

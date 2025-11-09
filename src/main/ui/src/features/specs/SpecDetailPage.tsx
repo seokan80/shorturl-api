@@ -59,17 +59,6 @@ export function SpecDetailPage() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="outline">Owner · {spec.owner}</Badge>
             <Badge variant="outline">Version {spec.version}</Badge>
-            <Badge
-              variant={
-                spec.status === "승인됨"
-                  ? "success"
-                  : spec.status === "검토 대기"
-                  ? "warning"
-                  : "outline"
-              }
-            >
-              {spec.status}
-            </Badge>
             <Badge variant="outline">Auth · {spec.authentication}</Badge>
           </div>
         </div>

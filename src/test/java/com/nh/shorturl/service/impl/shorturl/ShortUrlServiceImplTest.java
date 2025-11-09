@@ -6,6 +6,8 @@ import com.nh.shorturl.entity.ShortUrl;
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.ShortUrlRepository;
 import com.nh.shorturl.repository.UserRepository;
+import com.nh.shorturl.service.shorturl.ShortUrlServiceImpl;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

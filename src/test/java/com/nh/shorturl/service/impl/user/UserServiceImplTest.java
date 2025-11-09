@@ -2,6 +2,7 @@ package com.nh.shorturl.service.impl.user;
 
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.UserRepository;
+import com.nh.shorturl.service.user.UserServiceImpl;
 import com.nh.shorturl.util.JwtProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

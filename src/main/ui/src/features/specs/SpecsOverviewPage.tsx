@@ -52,17 +52,6 @@ export function SpecsOverviewPage() {
                             {spec.summary}
                           </p>
                         </div>
-                        <Badge
-                          variant={
-                            spec.status === "승인됨"
-                              ? "success"
-                              : spec.status === "검토 대기"
-                              ? "warning"
-                              : "outline"
-                          }
-                        >
-                          {spec.status}
-                        </Badge>
                       </CardHeader>
                       <CardContent className="flex flex-col gap-3">
                         <div className="flex flex-wrap gap-2 text-xs">

@@ -1,4 +1,4 @@
-package com.nh.shorturl.service.impl.shorturl;
+package com.nh.shorturl.service.shorturl;
 
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
@@ -6,7 +6,6 @@ import com.nh.shorturl.entity.ShortUrl;
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.ShortUrlRepository;
 import com.nh.shorturl.repository.UserRepository;
-import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.util.Base62;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,8 +1,7 @@
-package com.nh.shorturl.service.impl.auth;
+package com.nh.shorturl.service.auth;
 
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.UserRepository;
-import com.nh.shorturl.service.auth.AuthService;
 import com.nh.shorturl.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

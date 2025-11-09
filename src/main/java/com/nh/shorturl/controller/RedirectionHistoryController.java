@@ -1,4 +1,4 @@
-package com.nh.shorturl.controller.history;
+package com.nh.shorturl.controller;
 
 import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;

@@ -1,8 +1,7 @@
-package com.nh.shorturl.service.impl.user;
+package com.nh.shorturl.service.user;
 
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.UserRepository;
-import com.nh.shorturl.service.user.UserService;
 import com.nh.shorturl.util.Base62;
 import com.nh.shorturl.util.JwtProvider;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
