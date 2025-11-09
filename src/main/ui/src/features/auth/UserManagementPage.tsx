@@ -41,7 +41,6 @@ export function UserManagementPage() {
   });
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
-  const [tokenResult, setTokenResult] = useState<(TokenPayload & { username: string; issuedAt: string }) | null>(null);
   const [tokenCache, setTokenCache] = useState<
     Record<string, TokenPayload & { username: string; issuedAt: string }>
   >({});
@@ -161,7 +160,6 @@ export function UserManagementPage() {
       });
       const issuedAt = new Date().toISOString();
       const payload = { ...tokens, username, issuedAt };
-      setTokenResult(payload);
       setTokenCache((prev) => ({ ...prev, [username]: payload }));
       setSuccess(`${username} 사용자에게 토큰이 발급되었습니다.`);
     });
@@ -180,7 +178,6 @@ export function UserManagementPage() {
         body: JSON.stringify({ username, refreshToken: cached.refreshToken })
       });
       const payload = { ...tokens, username, issuedAt: new Date().toISOString() };
-      setTokenResult(payload);
       setTokenCache((prev) => ({ ...prev, [username]: payload }));
       setSuccess(`${username} 사용자의 토큰을 재발급했습니다.`);
     });
@@ -376,43 +373,42 @@ export function UserManagementPage() {
                   {isBusy(`reissue-${formattedSelectedUser.username}`) && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  저장된 Refresh Token으로 재발급
+                  토큰 재발급
                 </Button>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {tokenResult && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">토큰 발급 결과</CardTitle>
-            <CardDescription>{new Date(tokenResult.issuedAt).toLocaleString()} 생성</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Badge variant="secondary">사용자</Badge>
-              <span>{tokenResult.username}</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">Access Token</p>
-              <div className="flex items-center gap-2">
-                <Input value={tokenResult.token} readOnly className="font-mono text-xs" />
-                <Button variant="outline" size="icon" onClick={() => copyToClipboard(tokenResult.token)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">Refresh Token</p>
-              <div className="flex items-center gap-2">
-                <Input value={tokenResult.refreshToken} readOnly className="font-mono text-xs" />
-                <Button variant="outline" size="icon" onClick={() => copyToClipboard(tokenResult.refreshToken)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            {(() => {
+              const cached = tokenCache[formattedSelectedUser.username];
+              if (!cached) {
+                return null;
+              }
+              return (
+                <div className="sm:col-span-2 space-y-3 rounded-lg border border-slate-200 p-3 text-sm dark:border-slate-700">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <Badge variant="secondary">최근 발급</Badge>
+                    <span>{new Date(cached.issuedAt).toLocaleString()}</span>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-slate-500">Access Token</p>
+                    <div className="flex items-center gap-2">
+                      <Input value={cached.token} readOnly className="font-mono text-xs" />
+                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(cached.token)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-slate-500">Refresh Token</p>
+                    <div className="flex items-center gap-2">
+                      <Input value={cached.refreshToken} readOnly className="font-mono text-xs" />
+                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(cached.refreshToken)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       )}
