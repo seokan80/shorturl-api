@@ -74,7 +74,7 @@ class UserServiceImplTest {
     void getAllUsers_returnsRepositoryResult() {
         User first = User.builder().id(1L).username("a").apiKey("key-a").build();
         User second = User.builder().id(2L).username("b").apiKey("key-b").build();
-        given(userRepository.findAllByDeletedFalse()).willReturn(List.of(first, second));
+        given(userRepository.findAllByDeletedFalseOrderByCreatedAtDesc()).willReturn(List.of(first, second));
 
         List<User> users = userService.getAllUsers();
 

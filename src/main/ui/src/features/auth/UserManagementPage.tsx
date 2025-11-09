@@ -288,9 +288,11 @@ export function UserManagementPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  users.map((user, index) => (
+                  users.map((user, index) => {
+                    const displayNo = users.length - index;
+                    return (
                     <TableRow key={user.id ?? user.username}>
-                      <TableCell className="text-center font-mono text-xs text-slate-500">{index + 1}</TableCell>
+                      <TableCell className="text-center font-mono text-xs text-slate-500">{displayNo}</TableCell>
                       <TableCell className="font-medium">{user.username}</TableCell>
                       <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                       <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
@@ -318,7 +320,7 @@ export function UserManagementPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                  );})
                 )}
               </TableBody>
             </Table>

@@ -15,5 +15,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsernameAndRefreshToken(String username, String refreshToken);
 
-    List<User> findAllByDeletedFalse();
+    List<User> findAllByDeletedFalseOrderByCreatedAtDesc();
 }
