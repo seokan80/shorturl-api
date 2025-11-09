@@ -9,7 +9,7 @@ export function SpecsOverviewPage() {
       <Card>
         <CardHeader>
           <CardTitle>API Specifications</CardTitle>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Categorised view of Oracle `API_SPEC` records with status and owner context.
           </p>
         </CardHeader>
@@ -22,21 +22,30 @@ export function SpecsOverviewPage() {
             return (
               <section key={category} className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-slate-100">{category}</h2>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                    {category}
+                  </h2>
                   <Badge variant="outline">{specsForCategory.length} endpoints</Badge>
                 </div>
                 <div className="grid gap-4 lg:grid-cols-2">
                   {specsForCategory.map((spec) => (
                     <Card
                       key={spec.id}
-                      className="border border-slate-800/70 bg-slate-900/50 transition hover:border-brand/50"
+                      className="border border-slate-200/70 bg-white/80 transition hover:border-brand/50 dark:border-slate-800/70 dark:bg-slate-900/50"
                     >
                       <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                          <CardTitle className="text-base text-slate-50">
-                            {spec.method} {spec.path}
+                          <CardTitle className="flex flex-wrap items-center gap-2 text-base text-slate-900 dark:text-slate-50">
+                            <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                              {spec.method}
+                            </span>
+                            <span className="font-mono text-sm text-slate-800 dark:text-slate-200">
+                              {spec.path}
+                            </span>
                           </CardTitle>
-                          <p className="text-xs text-slate-400">{spec.summary}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {spec.summary}
+                          </p>
                         </div>
                         <Badge
                           variant={

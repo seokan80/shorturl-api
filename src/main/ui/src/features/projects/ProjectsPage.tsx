@@ -25,28 +25,28 @@ export function ProjectsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Project Overview</CardTitle>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Oracle `PROJECT` table snapshot · Active: {activeCount} · Archived:{" "}
             {archivedCount}
           </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-              <p className="text-sm text-slate-400">Total Specs</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-50">
+            <div className="rounded-xl border border-slate-200 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Total Specs</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">
                 {projects.reduce((acc, project) => acc + project.specs, 0)}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-              <p className="text-sm text-slate-400">Drafts In Progress</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-50">
+            <div className="rounded-xl border border-slate-200 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Drafts In Progress</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">
                 {projects.reduce((acc, project) => acc + project.drafts, 0)}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-              <p className="text-sm text-slate-400">Pending Approvals</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-50">
+            <div className="rounded-xl border border-slate-200 bg-white/90 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Pending Approvals</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">
                 {projects.reduce((acc, project) => acc + project.pending, 0)}
               </p>
             </div>
@@ -72,7 +72,7 @@ export function ProjectsPage() {
               {projects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell>{project.id}</TableCell>
-                  <TableCell className="font-medium text-slate-100">
+                  <TableCell className="font-medium text-slate-900 dark:text-slate-100">
                     {project.name}
                   </TableCell>
                     <TableCell>{project.owner}</TableCell>

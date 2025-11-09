@@ -42,10 +42,12 @@ export function DashboardPage() {
           <Card key={metric.id}>
             <CardHeader>
               <CardTitle>{metric.label}</CardTitle>
-              <span className="text-xs text-slate-400">{metric.delta}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                {metric.delta}
+              </span>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold text-slate-50">
+              <div className="text-3xl font-semibold text-slate-900 dark:text-slate-50">
                 {metric.value}
               </div>
             </CardContent>
@@ -57,7 +59,7 @@ export function DashboardPage() {
         <Card className="h-full">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               Latest updates synced from Oracle audit log
             </span>
           </CardHeader>
@@ -65,8 +67,10 @@ export function DashboardPage() {
             {activityLogs.map((activity) => (
               <div key={activity.id} className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-medium text-slate-100">{activity.action}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="font-medium text-slate-900 dark:text-slate-100">
+                    {activity.action}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {activity.context} ·{" "}
                     {new Date(activity.timestamp).toLocaleString()}
                   </p>
@@ -80,7 +84,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Workflow Highlights</CardTitle>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               Triage items requiring attention
             </span>
           </CardHeader>
@@ -88,14 +92,19 @@ export function DashboardPage() {
             {workflowItems.map((item) => {
               const overdue = new Date(item.dueDate).getTime() < Date.now();
               return (
-                <div key={item.id} className="rounded-lg border border-slate-800/70 p-3">
+                <div
+                  key={item.id}
+                  className="rounded-lg border border-slate-200 bg-white/80 p-3 dark:border-slate-800/70 dark:bg-transparent"
+                >
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-slate-200">{item.specName}</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {item.specName}
+                    </span>
                     <Badge variant={overdue ? "destructive" : "warning"}>
                       {item.stage}
                     </Badge>
                   </div>
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     Due {new Date(item.dueDate).toLocaleString()} · Assigned to{" "}
                     {item.assignee}
                   </p>

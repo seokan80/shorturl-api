@@ -42,13 +42,20 @@ export function SpecDetailPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-slate-400">
+          <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {spec.category}
           </p>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-50">
-            {spec.method} {spec.path}
+          <h1 className="mt-2 flex flex-wrap items-center gap-3 text-2xl font-semibold text-slate-900 dark:text-slate-50">
+            <span className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              {spec.method}
+            </span>
+            <span className="font-mono text-xl text-slate-900 dark:text-slate-100">
+              {spec.path}
+            </span>
           </h1>
-          <p className="mt-2 text-sm text-slate-300">{spec.summary}</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            {spec.summary}
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="outline">Owner · {spec.owner}</Badge>
             <Badge variant="outline">Version {spec.version}</Badge>
@@ -81,10 +88,10 @@ export function SpecDetailPage() {
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="space-y-4 text-sm text-slate-200">
+          <div className="space-y-4 text-sm text-slate-700 dark:text-slate-200">
             <p>{spec.description}</p>
             <div>
-              <h2 className="mb-2 text-xs font-semibold uppercase text-slate-400">
+              <h2 className="mb-2 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
                 Tags
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -96,7 +103,7 @@ export function SpecDetailPage() {
               </div>
             </div>
             <div>
-              <h2 className="mb-2 text-xs font-semibold uppercase text-slate-400">
+              <h2 className="mb-2 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
                 Headers
               </h2>
               <Table>

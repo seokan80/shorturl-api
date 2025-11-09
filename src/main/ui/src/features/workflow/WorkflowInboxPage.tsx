@@ -17,12 +17,12 @@ export function WorkflowInboxPage() {
       <Card>
         <CardHeader>
           <CardTitle>Workflow Inbox</CardTitle>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Items pulled from Oracle `WORKFLOW_ITEM` table awaiting action.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+          <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-400">
             <Badge variant="outline">
               Total {workflowItems.length}
             </Badge>
@@ -52,7 +52,7 @@ export function WorkflowInboxPage() {
                 return (
                   <TableRow key={item.id}>
                     <TableCell>{item.id}</TableCell>
-                    <TableCell className="font-medium text-slate-100">
+                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">
                       {item.specName}
                     </TableCell>
                     <TableCell>
@@ -62,7 +62,7 @@ export function WorkflowInboxPage() {
                     <TableCell>
                       {new Date(item.dueDate).toLocaleString()}
                       {overdue && (
-                        <span className="ml-2 rounded bg-rose-600/20 px-2 py-0.5 text-xs text-rose-200">
+                        <span className="ml-2 rounded bg-rose-500/10 px-2 py-0.5 text-xs text-rose-600 dark:bg-rose-600/20 dark:text-rose-200">
                           overdue
                         </span>
                       )}

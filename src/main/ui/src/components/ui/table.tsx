@@ -9,7 +9,7 @@ export const Table = React.forwardRef<
     <table
       ref={ref}
       className={cn(
-        "w-full border-collapse text-left text-sm text-slate-200",
+        "w-full border-collapse text-left text-sm text-slate-800 dark:text-slate-200",
         className
       )}
       {...props}
@@ -25,7 +25,10 @@ export const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("bg-slate-900/80 text-xs uppercase tracking-wide", className)}
+    className={cn(
+      "bg-slate-100 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/80 dark:text-slate-300",
+      className
+    )}
     {...props}
   />
 ));
@@ -38,7 +41,10 @@ export const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("divide-y divide-slate-800", className)}
+    className={cn(
+      "divide-y divide-slate-200 dark:divide-slate-800",
+      className
+    )}
     {...props}
   />
 ));
@@ -51,7 +57,10 @@ export const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={cn("hover:bg-slate-900/60 transition-colors", className)}
+    className={cn(
+      "transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/60",
+      className
+    )}
     {...props}
   />
 ));
@@ -64,7 +73,7 @@ export const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
-    className={cn("px-4 py-3 font-semibold text-slate-300", className)}
+    className={cn("px-4 py-3 font-semibold text-slate-600 dark:text-slate-300", className)}
     {...props}
   />
 ));

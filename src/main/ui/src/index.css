@@ -3,13 +3,21 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 font-sans;
+  @apply bg-slate-50 text-slate-900 font-sans transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-slate-950 text-slate-100;
 }
 
 a {
-  @apply text-brand underline-offset-2 hover:underline;
+  @apply text-blue-600 underline-offset-2 hover:underline dark:text-brand;
 }

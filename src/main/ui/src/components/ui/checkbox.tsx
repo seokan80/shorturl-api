@@ -1,30 +1,23 @@
 import * as React from "react";
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check } from "lucide-react";
 import { cn } from "../../lib/utils";
 
-export interface CheckboxProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {}
-
-export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, checked, ...props }, ref) => (
-    <label className={cn("inline-flex items-center gap-2 text-sm", className)}>
-      <span className="relative inline-flex h-5 w-5 items-center justify-center rounded border border-slate-700 bg-slate-900 transition-colors">
-        <input
-          ref={ref}
-          type="checkbox"
-          className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
-          checked={!!checked}
-          {...props}
-        />
-        <Check
-          className={cn(
-            "h-3.5 w-3.5 text-brand opacity-0 transition-opacity peer-checked:opacity-100"
-          )}
-        />
-      </span>
-      {props.title && <span>{props.title}</span>}
-    </label>
-  )
-);
-
-Checkbox.displayName = "Checkbox";
+export const Checkbox = React.forwardRef<
+  React.ElementRef<typeof CheckboxPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <CheckboxPrimitive.Root
+    ref={ref}
+    className={cn(
+      "peer h-4 w-4 shrink-0 rounded border border-slate-300 bg-white shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-brand data-[state=checked]:bg-brand data-[state=checked]:text-brand-foreground dark:border-slate-700 dark:bg-slate-900 dark:focus-visible:ring-offset-slate-950",
+      className
+    )}
+    {...props}
+  >
+    <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
+      <Check className="h-3 w-3" />
+    </CheckboxPrimitive.Indicator>
+  </CheckboxPrimitive.Root>
+));
+Checkbox.displayName = CheckboxPrimitive.Root.displayName;

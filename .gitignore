@@ -34,4 +34,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
 logs/
+src/main/ui/node_modules/
+src/main/ui/dist/
+.DS_Store

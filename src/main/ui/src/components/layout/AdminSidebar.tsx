@@ -13,8 +13,8 @@ const navItems = [
 
 export function AdminSidebar() {
   return (
-    <aside className="flex h-full flex-col gap-6 border-r border-slate-800 bg-slate-950/80 px-4 py-6">
-      <div className="flex items-center gap-2 text-lg font-semibold text-slate-100">
+    <aside className="flex h-full flex-col gap-6 border-r border-slate-200 bg-white/90 px-4 py-6 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
+      <div className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
         <div className="h-3 w-3 rounded-full bg-brand"></div>
         Short URL CMS
       </div>
@@ -28,7 +28,7 @@ export function AdminSidebar() {
                 "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
                 isActive
                   ? "bg-brand/10 text-brand"
-                  : "text-slate-300 hover:bg-slate-900 hover:text-slate-100"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100"
               )
             }
             end={to === "/"}
@@ -38,7 +38,7 @@ export function AdminSidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-400">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
         Oracle-backed storage. All changes are audited and versioned.
       </div>
     </aside>
