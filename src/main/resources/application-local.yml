@@ -31,3 +31,7 @@ jwt:
   secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
 
 base-url: http://localhost:8080/
+
+jasypt:
+  encryptor:
+    password: shortUrlApi # 로컬 개발용 마스터 키
