@@ -39,9 +39,13 @@ public class User extends BaseEntity implements UserDetails {
     @Comment("사용자")
     private String username;
 
-    @Column(name = "API_KEY", nullable = false)
+    @Column(name = "API_KEY")
     @Comment("고객별 발급 API Key")
     private String apiKey;
+
+    @Column(name = "REFRESH_TOKEN")
+    @Comment("API Key 재발급용 Refresh Token")
+    private String refreshToken;
 
     @Column(name = "IS_DEL", length = 1)
     @Comment("삭제 여부")
@@ -55,6 +59,10 @@ public class User extends BaseEntity implements UserDetails {
     public User(String username, String apiKey) {
         this.username = username;
         this.apiKey = apiKey;
+    }
+
+    public User(String username) {
+        this.username = username;
     }
 
     @Override

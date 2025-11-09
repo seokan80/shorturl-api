@@ -1,57 +1,101 @@
 package com.nh.shorturl.controller;
 
 import com.nh.shorturl.config.RegistrationConfig;
-import com.nh.shorturl.dto.request.auth.TokenRequest;
 import com.nh.shorturl.dto.request.auth.UserRequest;
-import com.nh.shorturl.dto.response.auth.TokenResponse;
+import com.nh.shorturl.dto.response.auth.UserDetailResponse;
 import com.nh.shorturl.dto.response.auth.UserResponse;
 import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.entity.User;
-import com.nh.shorturl.service.auth.AuthService;
 import com.nh.shorturl.service.user.UserService;
 import com.nh.shorturl.type.ApiResult;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
     private final UserService userService;
     private final RegistrationConfig registrationConfig;
 
-    @PostMapping("/register")
-    public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,
-                                               @RequestBody UserRequest request) {
-        if (!registrationConfig.getRegistrationKey().equals(key)) {
+    @GetMapping("/users")
+    public ResultEntity<?> getUsers(@RequestHeader("X-REGISTRATION-KEY") String key) {
+        if (!isRegistrationKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
         try {
-            User user = userService.createUser(request.getUsername());
-            return new ResultEntity<>(new UserResponse(user.getUsername(), user.getApiKey()));
+            List<UserResponse> users = userService.getAllUsers()
+                    .stream()
+                    .map(user -> new UserResponse(user.getUsername()))
+                    .toList();
+            return ResultEntity.ok(users);
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
+    }
+    
+    @PostMapping("/users")
+    public ResultEntity<?> register(@RequestHeader("X-REGISTRATION-KEY") String key,
+                                    @RequestBody UserRequest request) {
+        if (!isRegistrationKeyValid(key)) {
+            return ResultEntity.of(ApiResult.UNAUTHORIZED);
+        }
+
+        try {
+            User user = userService.createUser(request);
+            return new ResultEntity<>(new UserResponse(user.getUsername()));
         } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
     }
 
-    @PostMapping("/token")
-    public ResultEntity<?> getToken(@RequestHeader("X-REGISTRATION-KEY") String key,
-                                                  @RequestBody TokenRequest request) {
-        if (!registrationConfig.getRegistrationKey().equals(key)) {
+    @DeleteMapping("/users/{username}")
+    public ResultEntity<?> deleteUser(@RequestHeader("X-REGISTRATION-KEY") String key,
+                                      @PathVariable String username) {
+        if (!isRegistrationKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
         try {
-            String newApiKey = authService.reissueToken(request.getUsername(), request.getApiKey());
-            return new ResultEntity<>(new TokenResponse(newApiKey));
+            userService.deleteUser(username);
+            return ResultEntity.True();
         } catch (IllegalArgumentException e) {
-            // 사용자가 존재하지 않거나 기존 apiKey가 일치하지 않는 경우
-            return ResultEntity.of(ApiResult.FORBIDDEN);
+            return ResultEntity.of(ApiResult.USER_NOT_FOUND);
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
         }
+    }
+
+    @GetMapping("/users/{username}")
+    public ResultEntity<?> getUser(@RequestHeader("X-REGISTRATION-KEY") String key,
+                                   @PathVariable String username) {
+        if (!isRegistrationKeyValid(key)) {
+            return ResultEntity.of(ApiResult.UNAUTHORIZED);
+        }
+
+        try {
+            User user = userService.getUser(username);
+            UserDetailResponse response = new UserDetailResponse(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getCreatedAt(),
+                    user.getUpdatedAt()
+            );
+            return new ResultEntity<>(response);
+        } catch (IllegalArgumentException e) {
+            return ResultEntity.of(ApiResult.USER_NOT_FOUND);
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
+    }
+
+    
+
+    private boolean isRegistrationKeyValid(String key) {
+        return registrationConfig.getRegistrationKey().equals(key);
     }
 }

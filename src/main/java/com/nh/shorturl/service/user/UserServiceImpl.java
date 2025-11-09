@@ -1,40 +1,53 @@
 package com.nh.shorturl.service.user;
 
+import com.nh.shorturl.dto.request.auth.UserRequest;
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.UserRepository;
-import com.nh.shorturl.util.Base62;
-import com.nh.shorturl.util.JwtProvider;
-import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final JwtProvider jwtProvider;
 
-    public UserServiceImpl(UserRepository userRepository, JwtProvider jwtProvider) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.jwtProvider = jwtProvider;
     }
 
-    public User createUser(String username) {
+    @Override
+    @Transactional
+    public User createUser(UserRequest request) {
+        return createUserInternal(request.getUsername());
+    }
+
+    private User createUserInternal(String username) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        // 랜덤 문자열 대신 JWT를 생성하여 API Key로 설정
-        String apiKeyAsJwt = jwtProvider.createToken(username);
-
-        User user = new User(username, apiKeyAsJwt);
+        User user = new User(username);
         return userRepository.save(user);
     }
 
     @Override
-    public Optional<User> findByUsernameAndApiKey(String username, String apiKey) {
-        return userRepository.findByUsernameAndApiKey(username, apiKey);
+    public List<User> getAllUsers() {
+        return userRepository.findAllByDeletedFalse();
+    }
+
+    @Override
+    public User getUser(String username) {
+        return userRepository.findByUsernameAndDeletedFalse(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(String username) {
+        User user = getUser(username);
+        userRepository.delete(user);
     }
 }

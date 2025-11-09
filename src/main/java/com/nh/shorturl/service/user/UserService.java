@@ -1,10 +1,13 @@
 package com.nh.shorturl.service.user;
 
+import com.nh.shorturl.dto.request.auth.UserRequest;
 import com.nh.shorturl.entity.User;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface UserService {
-    Optional<User> findByUsernameAndApiKey(String username, String apiKey);
-    User createUser(String username);
+    User createUser(UserRequest request);
+    List<User> getAllUsers();
+    void deleteUser(String username);
+    User getUser(String username);
 }

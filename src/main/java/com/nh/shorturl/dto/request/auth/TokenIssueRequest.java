@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TokenRequest {
+public class TokenIssueRequest {
     private String username;
-    private String apiKey;
 }
