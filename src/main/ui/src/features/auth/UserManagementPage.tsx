@@ -41,12 +41,11 @@ export function UserManagementPage() {
   });
   const [users, setUsers] = useState<UserSummary[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
-  const [tokenResult, setTokenResult] = useState<(TokenPayload & { username: string; issuedAt: string }) | null>(
-    null
-  );
+  const [tokenResult, setTokenResult] = useState<(TokenPayload & { username: string; issuedAt: string }) | null>(null);
+  const [tokenCache, setTokenCache] = useState<
+    Record<string, TokenPayload & { username: string; issuedAt: string }>
+  >({});
   const [newUsername, setNewUsername] = useState("");
-  const [reissueUsername, setReissueUsername] = useState("");
-  const [reissueRefreshToken, setReissueRefreshToken] = useState("");
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
 
@@ -161,27 +160,28 @@ export function UserManagementPage() {
         body: JSON.stringify({ username })
       });
       const issuedAt = new Date().toISOString();
-      setTokenResult({ ...tokens, username, issuedAt });
-      setReissueUsername(username);
-      setReissueRefreshToken(tokens.refreshToken);
+      const payload = { ...tokens, username, issuedAt };
+      setTokenResult(payload);
+      setTokenCache((prev) => ({ ...prev, [username]: payload }));
       setSuccess(`${username} 사용자에게 토큰이 발급되었습니다.`);
     });
   };
 
-  const handleReissueToken = async () => {
-    const username = reissueUsername.trim();
-    const refreshToken = reissueRefreshToken.trim();
-    if (!username || !refreshToken) {
-      setError("재발급할 사용자명과 Refresh Token을 모두 입력해주세요.");
+  const handleReissueFromCache = async (username: string) => {
+    const cached = tokenCache[username];
+    if (!cached?.refreshToken) {
+      setError("저장된 리프레시 토큰이 없습니다. 먼저 토큰을 발급해주세요.");
       return;
     }
-    await runWithStatus("reissue", async () => {
+
+    await runWithStatus(`reissue-${username}`, async () => {
       const tokens = await request<TokenPayload>("/api/auth/token/re-issue", {
         method: "POST",
-        body: JSON.stringify({ username, refreshToken })
+        body: JSON.stringify({ username, refreshToken: cached.refreshToken })
       });
-      setTokenResult({ ...tokens, username, issuedAt: new Date().toISOString() });
-      setReissueRefreshToken(tokens.refreshToken);
+      const payload = { ...tokens, username, issuedAt: new Date().toISOString() };
+      setTokenResult(payload);
+      setTokenCache((prev) => ({ ...prev, [username]: payload }));
       setSuccess(`${username} 사용자의 토큰을 재발급했습니다.`);
     });
   };
@@ -291,36 +291,37 @@ export function UserManagementPage() {
                   users.map((user, index) => {
                     const displayNo = users.length - index;
                     return (
-                    <TableRow key={user.id ?? user.username}>
-                      <TableCell className="text-center font-mono text-xs text-slate-500">{displayNo}</TableCell>
-                      <TableCell className="font-medium">{user.username}</TableCell>
-                      <TableCell>{formatDateTime(user.createdAt)}</TableCell>
-                      <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            aria-label="상세 조회"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleSelectUser(user.username)}
-                            disabled={isBusy(`detail-${user.username}`)}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            aria-label="사용자 삭제"
-                            variant="ghost"
-                            size="icon"
-                            className="text-rose-600 hover:text-rose-700"
-                            onClick={() => handleDeleteUser(user.username)}
-                            disabled={isBusy(`delete-${user.username}`)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );})
+                      <TableRow key={user.id ?? user.username}>
+                        <TableCell className="text-center font-mono text-xs text-slate-500">{displayNo}</TableCell>
+                        <TableCell className="font-medium">{user.username}</TableCell>
+                        <TableCell>{formatDateTime(user.createdAt)}</TableCell>
+                        <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
+                        <TableCell>
+                          <div className="flex justify-center gap-2">
+                            <Button
+                              aria-label="상세 조회"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleSelectUser(user.username)}
+                              disabled={isBusy(`detail-${user.username}`)}
+                            >
+                              <Search className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              aria-label="사용자 삭제"
+                              variant="ghost"
+                              size="icon"
+                              className="text-rose-600 hover:text-rose-700"
+                              onClick={() => handleDeleteUser(user.username)}
+                              disabled={isBusy(`delete-${user.username}`)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -361,53 +362,27 @@ export function UserManagementPage() {
                 onClick={() => handleIssueToken(formattedSelectedUser.username)}
                 disabled={isBusy(`issue-${formattedSelectedUser.username}`)}
               >
-                {isBusy(`issue-${formattedSelectedUser.username}`) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isBusy(`issue-${formattedSelectedUser.username}`) && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 토큰 발급
               </Button>
+              {tokenCache[formattedSelectedUser.username]?.refreshToken && (
+                <Button
+                  type="button"
+                  onClick={() => handleReissueFromCache(formattedSelectedUser.username)}
+                  disabled={isBusy(`reissue-${formattedSelectedUser.username}`)}
+                >
+                  {isBusy(`reissue-${formattedSelectedUser.username}`) && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  저장된 Refresh Token으로 재발급
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">토큰 재발급</CardTitle>
-          <CardDescription>Refresh Token으로 Access Token을 재발급합니다.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500">사용자명</p>
-            <Input value={reissueUsername} onChange={(event) => setReissueUsername(event.target.value)} />
-          </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500">Refresh Token</p>
-            <Input
-              value={reissueRefreshToken}
-              onChange={(event) => setReissueRefreshToken(event.target.value)}
-              placeholder="최근 발급된 Refresh Token"
-            />
-          </div>
-          <div className="md:col-span-2 flex flex-wrap gap-2">
-            <Button type="button" onClick={handleReissueToken} disabled={isBusy("reissue")}>
-              {isBusy("reissue") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              재발급 실행
-            </Button>
-            {tokenResult && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setReissueUsername(tokenResult.username);
-                  setReissueRefreshToken(tokenResult.refreshToken);
-                }}
-              >
-                최근 토큰 값 사용
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {tokenResult && (
         <Card>
