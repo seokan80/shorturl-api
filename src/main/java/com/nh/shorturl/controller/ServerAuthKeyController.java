@@ -20,10 +20,7 @@ public class ServerAuthKeyController {
     private final ServerAuthKeyService serverAuthKeyService;
 
     @GetMapping
-    public ResultEntity<?> list(@RequestHeader("X-REGISTRATION-KEY") String key) {
-        if (!isAuthorized(key)) {
-            return ResultEntity.of(ApiResult.UNAUTHORIZED);
-        }
+    public ResultEntity<?> list() {
         List<ServerAuthKeyResponse> response = serverAuthKeyService.getKeys().stream()
             .map(ServerAuthKeyResponse::from)
             .toList();
@@ -31,22 +28,14 @@ public class ServerAuthKeyController {
     }
 
     @PostMapping
-    public ResultEntity<?> issue(@RequestHeader("X-REGISTRATION-KEY") String key,
-                                 @RequestBody ServerAuthKeyCreateRequest request) {
-        if (!isAuthorized(key)) {
-            return ResultEntity.of(ApiResult.UNAUTHORIZED);
-        }
+    public ResultEntity<?> issue(@RequestBody ServerAuthKeyCreateRequest request) {
         ServerAuthKey created = serverAuthKeyService.create(request);
         return new ResultEntity<>(ServerAuthKeyResponse.from(created));
     }
 
     @PutMapping("/{id}")
-    public ResultEntity<?> update(@RequestHeader("X-REGISTRATION-KEY") String key,
-                                  @PathVariable Long id,
+    public ResultEntity<?> update(@PathVariable Long id,
                                   @RequestBody ServerAuthKeyUpdateRequest request) {
-        if (!isAuthorized(key)) {
-            return ResultEntity.of(ApiResult.UNAUTHORIZED);
-        }
         try {
             ServerAuthKey updated = serverAuthKeyService.update(id, request);
             return new ResultEntity<>(ServerAuthKeyResponse.from(updated));
@@ -56,25 +45,12 @@ public class ServerAuthKeyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResultEntity<?> delete(@RequestHeader("X-REGISTRATION-KEY") String key,
-                                   @PathVariable Long id) {
-        if (!isAuthorized(key)) {
-            return ResultEntity.of(ApiResult.UNAUTHORIZED);
-        }
+    public ResultEntity<?> delete(@PathVariable Long id) {
         try {
             serverAuthKeyService.delete(id);
             return ResultEntity.True();
         } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.NOT_FOUND);
-        }
-    }
-
-    private boolean isAuthorized(String key) {
-        try {
-            serverAuthKeyService.validateActiveKey(key);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
         }
     }
 }

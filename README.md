@@ -221,7 +221,7 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 - **성공 응답**: `ServerAuthKeyResponse[]` (각 항목에 `id`, `name`, `keyValue`, `issuedBy`, `description`, `expiresAt`, `lastUsedAt`, `active`, `createdAt`, `updatedAt` 포함)
 
 #### `POST /api/server-keys`
-- **설명**: 새로운 서버 인증 키를 발급합니다.
+- **설명**: 새로운 서버 인증 키를 발급합니다. 이 엔드포인트는 별도의 헤더 인증 없이 호출할 수 있습니다.
 - **Body**:
   ```json
   {
