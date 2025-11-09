@@ -1,9 +1,9 @@
-package com.nh.shorturl.service.serverauth;
+package com.nh.shorturl.service.clientaccess;
 
-import com.nh.shorturl.dto.request.serverauth.ServerAuthKeyCreateRequest;
-import com.nh.shorturl.dto.request.serverauth.ServerAuthKeyUpdateRequest;
-import com.nh.shorturl.entity.ServerAuthKey;
-import com.nh.shorturl.repository.ServerAuthKeyRepository;
+import com.nh.shorturl.dto.request.clientaccess.ClientAccessKeyCreateRequest;
+import com.nh.shorturl.dto.request.clientaccess.ClientAccessKeyUpdateRequest;
+import com.nh.shorturl.entity.ClientAccessKey;
+import com.nh.shorturl.repository.ClientAccessKeyRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,32 +21,32 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ServerAuthKeyServiceImplTest {
+class ClientAccessKeyServiceImplTest {
 
     @Mock
-    private ServerAuthKeyRepository repository;
+    private ClientAccessKeyRepository repository;
 
     @InjectMocks
-    private ServerAuthKeyServiceImpl service;
+    private ClientAccessKeyServiceImpl service;
 
     @Test
-    @DisplayName("서버 인증 키 생성 시 랜덤 키 값이 저장된다")
+    @DisplayName("클라이언트 키 생성 시 랜덤 키 값이 저장된다")
     void createGeneratesKeyValue() {
-        ServerAuthKey saved = ServerAuthKey.builder()
+        ClientAccessKey saved = ClientAccessKey.builder()
             .id(1L)
             .name("demo")
             .keyValue("abc123")
             .build();
-        given(repository.save(any(ServerAuthKey.class))).willReturn(saved);
+        given(repository.save(any(ClientAccessKey.class))).willReturn(saved);
 
-        ServerAuthKeyCreateRequest request = new ServerAuthKeyCreateRequest();
+        ClientAccessKeyCreateRequest request = new ClientAccessKeyCreateRequest();
         request.setName("demo");
         request.setIssuedBy("tester");
 
-        ServerAuthKey result = service.create(request);
+        ClientAccessKey result = service.create(request);
 
         assertThat(result).isEqualTo(saved);
-        verify(repository).save(any(ServerAuthKey.class));
+        verify(repository).save(any(ClientAccessKey.class));
     }
 
     @Test
@@ -54,7 +54,7 @@ class ServerAuthKeyServiceImplTest {
     void updateThrowsWhenMissing() {
         given(repository.findById(99L)).willReturn(Optional.empty());
 
-        ServerAuthKeyUpdateRequest request = new ServerAuthKeyUpdateRequest();
+        ClientAccessKeyUpdateRequest request = new ClientAccessKeyUpdateRequest();
         request.setName("new");
 
         assertThatThrownBy(() -> service.update(99L, request))
@@ -65,7 +65,7 @@ class ServerAuthKeyServiceImplTest {
     @Test
     @DisplayName("활성화된 키만 검증에 성공한다")
     void validateRequiresActiveKey() {
-        ServerAuthKey key = ServerAuthKey.builder()
+        ClientAccessKey key = ClientAccessKey.builder()
             .id(10L)
             .name("demo")
             .keyValue("value")
@@ -73,7 +73,7 @@ class ServerAuthKeyServiceImplTest {
             .build();
         given(repository.findByKeyValueAndDeletedFalse("value")).willReturn(Optional.of(key));
 
-        ServerAuthKey validated = service.validateActiveKey("value");
+        ClientAccessKey validated = service.validateActiveKey("value");
 
         assertThat(validated).isEqualTo(key);
         assertThat(validated.getLastUsedAt()).isNotNull();
@@ -82,7 +82,7 @@ class ServerAuthKeyServiceImplTest {
     @Test
     @DisplayName("비활성 키 검증 시 예외")
     void validateInactiveThrows() {
-        ServerAuthKey key = ServerAuthKey.builder()
+        ClientAccessKey key = ClientAccessKey.builder()
             .id(10L)
             .name("demo")
             .keyValue("value")
@@ -98,7 +98,7 @@ class ServerAuthKeyServiceImplTest {
     @Test
     @DisplayName("만료된 키 검증 시 예외")
     void validateExpiredThrows() {
-        ServerAuthKey key = ServerAuthKey.builder()
+        ClientAccessKey key = ClientAccessKey.builder()
             .id(10L)
             .name("demo")
             .keyValue("value")

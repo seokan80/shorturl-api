@@ -13,7 +13,7 @@ import { ShortUrlControlsPage } from "./features/controls/ShortUrlControlsPage";
 import { RedirectionControlsPage } from "./features/controls/RedirectionControlsPage";
 import { AnalyticsControlsPage } from "./features/controls/AnalyticsControlsPage";
 import { UserManagementPage } from "./features/auth/UserManagementPage";
-import { ServerAuthKeyPage } from "./features/auth/ServerAuthKeyPage";
+import { ClientAccessKeyPage } from "./features/auth/ClientAccessKeyPage";
 
 function App() {
   return (
@@ -29,7 +29,7 @@ function App() {
           <Route index element={<AuthControlsPage />} />
         </Route>
         <Route path="users" element={<UserManagementPage />} />
-        <Route path="server-keys" element={<ServerAuthKeyPage />} />
+        <Route path="client-keys" element={<ClientAccessKeyPage />} />
         <Route path="short-url" element={<ControlsLayout />}>
           <Route index element={<ShortUrlControlsPage />} />
         </Route>

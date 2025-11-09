@@ -25,8 +25,8 @@ public class SecurityConfig {
                 // JWT 기반의 무상태(Stateless) API로 운영하기 위해 세션 정책을 STATELESS로 설정합니다.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // /api/auth/, /r/ 하위 경로 및 /error 경로는 인증 없이 허용
-                        .requestMatchers("/api/server-keys/**", "/api/auth/**", "/r/**", "/error").permitAll()
+                        // /api/client-keys/, /api/auth/, /r/ 하위 경로 및 /error 경로는 인증 없이 허용
+                        .requestMatchers("/api/client-keys/**", "/api/auth/**", "/r/**", "/error").permitAll()
                         // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
                         .anyRequest().authenticated()
                 )

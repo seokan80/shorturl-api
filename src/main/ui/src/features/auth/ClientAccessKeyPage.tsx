@@ -14,7 +14,7 @@ type ApiEnvelope<T> = {
   data: T;
 };
 
-type ServerAuthKeyInfo = {
+type ClientAccessKeyInfo = {
   id: number;
   name: string;
   keyValue: string;
@@ -27,12 +27,12 @@ type ServerAuthKeyInfo = {
   updatedAt?: string;
 };
 
-export function ServerAuthKeyPage() {
-  const [items, setItems] = useState<ServerAuthKeyInfo[]>([]);
+export function ClientAccessKeyPage() {
+  const [items, setItems] = useState<ClientAccessKeyInfo[]>([]);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [createForm, setCreateForm] = useState({ name: "", issuedBy: "", description: "", expiresAt: "" });
-  const [editing, setEditing] = useState<ServerAuthKeyInfo | null>(null);
+  const [editing, setEditing] = useState<ClientAccessKeyInfo | null>(null);
   const [editForm, setEditForm] = useState({ name: "", description: "", expiresAt: "", active: true });
 
   const request = useCallback(async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
@@ -70,20 +70,20 @@ export function ServerAuthKeyPage() {
 
   const handleFetch = async () => {
     await runWithStatus("fetch", async () => {
-      const list = await request<ServerAuthKeyInfo[]>("/api/server-keys");
+      const list = await request<ClientAccessKeyInfo[]>("/api/client-keys");
       setItems(list);
-      setStatus({ type: "success", message: `총 ${list.length}개의 서버 인증 키를 불러왔습니다.` });
+      setStatus({ type: "success", message: `총 ${list.length}개의 클라이언트 키를 불러왔습니다.` });
     });
   };
 
   const handleCreate = async () => {
     if (!createForm.name.trim()) {
-      setStatus({ type: "error", message: "이름을 입력해주세요." });
+      setStatus({ type: "error", message: "클라이언트명을 입력해주세요." });
       return;
     }
 
     await runWithStatus("create", async () => {
-      const payload = await request<ServerAuthKeyInfo>("/api/server-keys", {
+      const payload = await request<ClientAccessKeyInfo>("/api/client-keys", {
         method: "POST",
         body: JSON.stringify({
           ...createForm,
@@ -96,7 +96,7 @@ export function ServerAuthKeyPage() {
     });
   };
 
-  const handleEdit = (item: ServerAuthKeyInfo) => {
+  const handleEdit = (item: ClientAccessKeyInfo) => {
     setEditing(item);
     setEditForm({
       name: item.name,
@@ -109,7 +109,7 @@ export function ServerAuthKeyPage() {
   const handleUpdate = async () => {
     if (!editing) return;
     await runWithStatus(`update-${editing.id}`, async () => {
-      const payload = await request<ServerAuthKeyInfo>(`/api/server-keys/${editing.id}`, {
+      const payload = await request<ClientAccessKeyInfo>(`/api/client-keys/${editing.id}`, {
         method: "PUT",
         body: JSON.stringify({
           name: editForm.name,
@@ -124,10 +124,10 @@ export function ServerAuthKeyPage() {
     });
   };
 
-  const handleDelete = async (item: ServerAuthKeyInfo) => {
+  const handleDelete = async (item: ClientAccessKeyInfo) => {
     if (!confirm(`'${item.name}' 키를 삭제하시겠습니까?`)) return;
     await runWithStatus(`delete-${item.id}`, async () => {
-      await request(`/api/server-keys/${item.id}`, { method: "DELETE" });
+      await request(`/api/client-keys/${item.id}`, { method: "DELETE" });
       setItems((prev) => prev.filter((entry) => entry.id !== item.id));
       if (editing?.id === item.id) {
         setEditing(null);
@@ -146,12 +146,12 @@ export function ServerAuthKeyPage() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">서버 인증 키 관리</CardTitle>
-          <CardDescription>서비스 별로 사용할 서버 인증 키를 발급합니다.</CardDescription>
+          <CardTitle className="text-base">클라이언트 키 관리</CardTitle>
+          <CardDescription>조직·애플리케이션 별로 사용할 클라이언트 키를 발급합니다.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500">이름 *</p>
+            <p className="text-xs text-slate-500">클라이언트명 *</p>
             <Input
               value={createForm.name}
               onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))}
@@ -185,7 +185,7 @@ export function ServerAuthKeyPage() {
           <div className="md:col-span-2 flex flex-wrap gap-2">
             <Button type="button" onClick={handleCreate} disabled={isBusy("create")}>
               {isBusy("create") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              서버 인증 키 발급
+              클라이언트 키 발급
             </Button>
             <Button
               type="button"
@@ -215,8 +215,8 @@ export function ServerAuthKeyPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>No</TableHead>
-                  <TableHead>이름</TableHead>
-                  <TableHead>키 값</TableHead>
+                  <TableHead>클라이언트명</TableHead>
+                  <TableHead>클라이언트 키</TableHead>
                   <TableHead>발급자</TableHead>
                   <TableHead>만료일</TableHead>
                   <TableHead>상태</TableHead>
@@ -225,9 +225,9 @@ export function ServerAuthKeyPage() {
               </TableHeader>
               <TableBody>
                 {items.length === 0 ? (
-                  <TableRow>
+                    <TableRow>
                     <TableCell colSpan={7} className="py-6 text-center text-sm text-slate-500">
-                      등록된 서버 인증 키가 없습니다. 상단의 발급 폼을 사용해 생성하세요.
+                      등록된 클라이언트 키가 없습니다. 상단의 발급 폼을 사용해 생성하세요.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -280,7 +280,7 @@ export function ServerAuthKeyPage() {
         <Card>
           <CardHeader className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="text-base">서버 인증 키 상세</CardTitle>
+              <CardTitle className="text-base">클라이언트 키 상세</CardTitle>
               <CardDescription>{editing.name}의 속성과 사용 이력을 확인합니다.</CardDescription>
             </div>
             <div className="flex gap-2">
@@ -303,7 +303,7 @@ export function ServerAuthKeyPage() {
               <p className="text-sm text-slate-700">{formatDateTime(editing.lastUsedAt)}</p>
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-xs text-slate-500">이름</p>
+              <p className="text-xs text-slate-500">클라이언트명</p>
               <Input value={editForm.name} onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))} />
             </div>
             <div className="flex flex-col gap-2">

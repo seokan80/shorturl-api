@@ -3,7 +3,7 @@ import { FileText, ShieldCheck, Link2, Shuffle, BarChart3, Users, KeyRound } fro
 import { cn } from "../../lib/utils";
 
 const navItems = [
-  { to: "/server-keys", label: "서버 키 관리", icon: KeyRound },
+  { to: "/client-keys", label: "클라이언트 키 관리", icon: KeyRound },
   { to: "/users", label: "사용자 관리", icon: Users },
   { to: "/short-url", label: "단축 URL 제어", icon: Link2 },
   { to: "/redirection", label: "리디렉션 제어", icon: Shuffle },

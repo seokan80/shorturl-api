@@ -64,7 +64,7 @@ export function UserManagementPage() {
     async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
       const key = registrationKey.trim();
       if (!key) {
-        throw new Error("먼저 서버 인증 키를 입력해주세요.");
+        throw new Error("먼저 클라이언트 키를 입력해주세요.");
       }
 
       const headers = new Headers(init.headers);
@@ -210,7 +210,7 @@ export function UserManagementPage() {
         <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Shield className="h-4 w-4" />
-              서버 인증 키
+              클라이언트 키
             </CardTitle>
             <CardDescription>백엔드와 통신할 때 사용할 `X-REGISTRATION-KEY` 값을 저장합니다.</CardDescription>
         </CardHeader>
@@ -218,7 +218,7 @@ export function UserManagementPage() {
           <Input
             value={registrationKey}
             onChange={(event) => setRegistrationKey(event.target.value)}
-            placeholder="서버 인증 키를 입력하세요"
+            placeholder="클라이언트 키를 입력하세요"
           />
           <div className="flex gap-2">
             <Button

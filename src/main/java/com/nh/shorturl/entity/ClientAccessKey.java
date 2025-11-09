@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = SchemaConstants.TABLE_PREFIX + "SERVER_AUTH_KEY",
-    uniqueConstraints = @UniqueConstraint(name = "UK_SERVER_AUTH_KEY_VALUE", columnNames = "KEY_VALUE"))
-@SQLDelete(sql = "UPDATE " + SchemaConstants.TABLE_PREFIX + "SERVER_AUTH_KEY SET IS_DEL = 'Y', DELETED_AT = CURRENT_TIMESTAMP WHERE id = ?")
+@Table(name = SchemaConstants.TABLE_PREFIX + "CLIENT_ACCESS_KEY",
+    uniqueConstraints = @UniqueConstraint(name = "UK_CLIENT_ACCESS_KEY_VALUE", columnNames = "KEY_VALUE"))
+@SQLDelete(sql = "UPDATE " + SchemaConstants.TABLE_PREFIX + "CLIENT_ACCESS_KEY SET IS_DEL = 'Y', DELETED_AT = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("IS_DEL = 'N'")
-public class ServerAuthKey extends BaseEntity {
+public class ClientAccessKey extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,7 +4,7 @@ import com.nh.shorturl.dto.request.auth.TokenIssueRequest;
 import com.nh.shorturl.dto.request.auth.TokenReissueRequest;
 import com.nh.shorturl.dto.response.auth.TokenResponse;
 import com.nh.shorturl.dto.response.common.ResultEntity;
-import com.nh.shorturl.service.serverauth.ServerAuthKeyService;
+import com.nh.shorturl.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.service.token.TokenService;
 import com.nh.shorturl.type.ApiResult;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class TokenController {
 
     private final TokenService tokenService;
-    private final ServerAuthKeyService serverAuthKeyService;
+    private final ClientAccessKeyService clientAccessKeyService;
 
     @PostMapping("/issue")
     public ResultEntity<?> issueToken(@RequestHeader("X-REGISTRATION-KEY") String key,
                                       @RequestBody TokenIssueRequest request) {
-        if (!isServerKeyValid(key)) {
+        if (!isAccessKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -38,7 +38,7 @@ public class TokenController {
     @PostMapping("/re-issue")
     public ResultEntity<?> reissueToken(@RequestHeader("X-REGISTRATION-KEY") String key,
                                         @RequestBody TokenReissueRequest request) {
-        if (!isServerKeyValid(key)) {
+        if (!isAccessKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
 
@@ -52,9 +52,9 @@ public class TokenController {
         }
     }
 
-    private boolean isServerKeyValid(String key) {
+    private boolean isAccessKeyValid(String key) {
         try {
-            serverAuthKeyService.validateActiveKey(key);
+            clientAccessKeyService.validateActiveKey(key);
             return true;
         } catch (IllegalArgumentException e) {
             return false;

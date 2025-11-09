@@ -1,6 +1,6 @@
-package com.nh.shorturl.dto.response.serverauth;
+package com.nh.shorturl.dto.response.clientaccess;
 
-import com.nh.shorturl.entity.ServerAuthKey;
+import com.nh.shorturl.entity.ClientAccessKey;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ServerAuthKeyResponse {
+public class ClientAccessKeyResponse {
     private Long id;
     private String name;
     private String keyValue;
@@ -22,8 +22,8 @@ public class ServerAuthKeyResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ServerAuthKeyResponse from(ServerAuthKey entity) {
-        return new ServerAuthKeyResponse(
+    public static ClientAccessKeyResponse from(ClientAccessKey entity) {
+        return new ClientAccessKeyResponse(
             entity.getId(),
             entity.getName(),
             entity.getKeyValue(),

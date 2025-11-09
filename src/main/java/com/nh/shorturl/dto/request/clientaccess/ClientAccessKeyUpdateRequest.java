@@ -1,4 +1,4 @@
-package com.nh.shorturl.dto.request.serverauth;
+package com.nh.shorturl.dto.request.clientaccess;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ServerAuthKeyUpdateRequest {
+public class ClientAccessKeyUpdateRequest {
     private String name;
     private String description;
     private Boolean active;

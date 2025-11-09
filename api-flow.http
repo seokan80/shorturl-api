@@ -7,15 +7,15 @@
 @long_url = https://github.com/google/gemini-api
 
 ### =================================================================
-### 1. 서버 인증 키 목록 확인
+### 1. 클라이언트 키 목록 확인
 ### =================================================================
-GET {{hostname}}/api/server-keys
+GET {{hostname}}/api/client-keys
 X-REGISTRATION-KEY: {{registration_key}}
 
 ### =================================================================
-### 2. 서버 인증 키 발급
+### 2. 클라이언트 키 발급
 ### =================================================================
-POST {{hostname}}/api/server-keys
+POST {{hostname}}/api/client-keys
 Content-Type: application/json
 X-REGISTRATION-KEY: {{registration_key}}
 
