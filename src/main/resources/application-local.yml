@@ -20,11 +20,6 @@ spring:
 server:
   port: 8080
 
-# 로컬 환경용 등록 키 (환경변수 우선)
-registration:
-  # key: ${LOCAL_REGISTRATION_KEY:local-registration-key}
-  key: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
-
 # 로컬 환경용 JWT 비밀키 (환경변수 우선, Base64 기본값 제공)
 jwt:
   # secret: ${LOCAL_JWT_SECRET:dAvU+ok0uxdNJADgmnhryNETOxcJCIK6ETe9khKhoPK9WT96GspP7VQ81n9QQJ3f2VLznWXa4VEDF3ejwUmUEA==}
