@@ -35,3 +35,9 @@ base-url: http://localhost:8080/
 jasypt:
   encryptor:
     password: shortUrlApi # 로컬 개발용 마스터 키
+
+logging:
+  level:
+    root: INFO
+    '[org.springframework.security]': DEBUG
+    '[com.nh.shorturl]': DEBUG
