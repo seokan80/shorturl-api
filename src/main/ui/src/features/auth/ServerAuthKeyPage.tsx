@@ -280,8 +280,8 @@ export function ServerAuthKeyPage() {
         <Card>
           <CardHeader className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="text-base">서버 인증 키 수정</CardTitle>
-              <CardDescription>{editing.name} 설정을 변경합니다.</CardDescription>
+              <CardTitle className="text-base">서버 인증 키 상세</CardTitle>
+              <CardDescription>{editing.name}의 속성과 사용 이력을 확인합니다.</CardDescription>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setEditing(null)}>
@@ -294,6 +294,14 @@ export function ServerAuthKeyPage() {
             </div>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-slate-500">발급자</p>
+              <p className="text-sm font-medium text-slate-700">{editing.issuedBy || "-"}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-slate-500">키값 마지막 사용일</p>
+              <p className="text-sm text-slate-700">{formatDateTime(editing.lastUsedAt)}</p>
+            </div>
             <div className="flex flex-col gap-2">
               <p className="text-xs text-slate-500">이름</p>
               <Input value={editForm.name} onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))} />

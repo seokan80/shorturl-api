@@ -1,8 +1,8 @@
-package com.nh.shorturl.entity.history;
+package com.nh.shorturl.entity;
 
 
 import com.nh.shorturl.constants.SchemaConstants;
-import com.nh.shorturl.entity.ShortUrl;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;

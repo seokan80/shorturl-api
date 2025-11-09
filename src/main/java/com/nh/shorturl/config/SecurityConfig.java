@@ -26,12 +26,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // /api/auth/, /r/ 하위 경로 및 /error 경로는 인증 없이 허용
-                        .requestMatchers("/api/auth/**", "/r/**", "/error").permitAll()
+                        .requestMatchers("/api/server-keys/**", "/api/auth/**", "/r/**", "/error").permitAll()
                         // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
                         .anyRequest().authenticated()
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class);
+                );
+                // .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
+                //         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

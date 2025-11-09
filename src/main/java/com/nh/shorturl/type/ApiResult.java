@@ -97,28 +97,7 @@ public enum ApiResult {
 
 	// 인증 오류
 	UNAUTHORIZED("1401", "인증이 필요합니다."),
-	FORBIDDEN("1403", "권한이 없습니다"),
-	// sso
-	PORTAL_SUCCESS("OK", "정상적으로 처리 되었습니다."),
-
-	// 파일
-	FILE_SAVE_ERROR("1005", "파일 저장 실패하였습니다."),
-	EMPTY_FILE("1006", "파일이 비어 있습니다."),
-	// 채널 진입 수 제한 초과
-	MAX_CHANNEL_COUNT_OVERFLOW("1429", "Max channel count overflew"),
-
-	// 오류는 아니지만 처리해야할 대상이 아니라 스킵
-	SUCCESS_SKIPPED("0001", "처리 대상이 아닙니다."),
-
-	DUPLICATE_API_NAME_CODE("9999", "API 이름이나 API 코드가 이미 존재합니다."),
-
-	// LLM
-	LLM_MODEL_NOT_FOUND("1404", "LLM 모델 정보가 존재하지 않습니다."),
-	LLM_MODEL_NAME_EMPTY("9001", "모델명이 설정되지 않았습니다."),
-	LLM_API_KEY_NAME_EMPTY("9001", "Api Key가 설정되지 않았습니다."),
-	LLM_NO_RESPONSE("2000", "LLM 모델의 응답을 받지 못했습니다."),
-	LLM_INVALID_RESPONSE("2000", "LLM 모델의 응답이 잘못되었습니다."),
-	LLM_NETWORK_ERROR("2000", "LLM 모델과 연동하지 못하였습니다.");
+	FORBIDDEN("1403", "권한이 없습니다");
 
 	public static final String CODE_NOT_FOUND = "1404";
 	public static final String CODE_INVALID = "9001";
