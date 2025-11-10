@@ -9,6 +9,7 @@ import { Loader2, RefreshCw, Trash2, Copy, Shield, Users, XCircle, Search } from
 type UserSummary = {
   id: number;
   username: string;
+  groupName?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -16,6 +17,7 @@ type UserSummary = {
 type UserDetail = {
   id: number;
   username: string;
+  groupName?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -272,6 +274,7 @@ export function UserManagementPage() {
                 <TableRow>
                   <TableHead className="w-16 text-center">No</TableHead>
                   <TableHead>사용자명</TableHead>
+                  <TableHead>클라이언트명</TableHead>
                   <TableHead>생성일</TableHead>
                   <TableHead>수정일</TableHead>
                   <TableHead className="w-32 text-center">작업</TableHead>
@@ -280,7 +283,7 @@ export function UserManagementPage() {
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-6 text-center text-sm text-slate-500">
+                    <TableCell colSpan={6} className="py-6 text-center text-sm text-slate-500">
                       조회된 사용자가 없습니다. 새로고침을 눌러 목록을 불러오세요.
                     </TableCell>
                   </TableRow>
@@ -291,6 +294,7 @@ export function UserManagementPage() {
                       <TableRow key={user.id ?? user.username}>
                         <TableCell className="text-center font-mono text-xs text-slate-500">{displayNo}</TableCell>
                         <TableCell className="font-medium">{user.username}</TableCell>
+                        <TableCell className="text-slate-600">{user.groupName || "-"}</TableCell>
                         <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                         <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
                         <TableCell>
@@ -343,6 +347,10 @@ export function UserManagementPage() {
             <div>
               <p className="text-xs text-slate-500">ID</p>
               <p className="font-mono text-sm">{formattedSelectedUser.id}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">클라이언트명</p>
+              <p>{formattedSelectedUser.groupName || "-"}</p>
             </div>
             <div>
               <p className="text-xs text-slate-500">생성일</p>
