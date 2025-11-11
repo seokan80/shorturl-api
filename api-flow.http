@@ -2,7 +2,7 @@
 ### 변수 설정 (실제 환경에 맞게 수정)
 ### =================================================================
 @hostname = http://localhost:8080
-@access_key = password
+@access_key = shortUrlApi
 @username = my-awesome-service
 @long_url = https://github.com/google/gemini-api
 

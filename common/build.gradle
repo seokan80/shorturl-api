@@ -1,0 +1,13 @@
+dependencies {
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // DTO 유효성 검사 어노테이션(@NotEmpty 등)
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 테스트
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

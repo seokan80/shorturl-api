@@ -1,0 +1,30 @@
+# --- Production 환경 설정 ---
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
+    username: my_user
+    password: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: none # !!절대!! 스키마를 자동으로 변경하지 않도록 설정
+    show-sql: false # 성능을 위해 SQL 로그 비활성화
+    database-platform: org.hibernate.dialect.OracleDialect
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO # 불필요한 로그를 줄이고 INFO 레벨 이상만 기록
+
+# 운영 환경용 JWT 비밀키 (암호화)
+jwt:
+  secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
+
+base-url: https://your-domain.com/
+
+# short-url-redirect 모듈의 API 주소
+short-url:
+  redirect:
+    api.base-url: http://localhost:8081

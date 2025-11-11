@@ -1,0 +1,20 @@
+dependencies {
+    implementation project(':common')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Web, Cache
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // WebClient (API 호출용)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // Caffeine Cache
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    
+    // 테스트
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

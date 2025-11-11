@@ -5,3 +5,7 @@ pluginManagement {
 	}
 }
 rootProject.name = 'short-url'
+
+include 'common'
+include 'short-url-admin'
+include 'short-url-redirect'

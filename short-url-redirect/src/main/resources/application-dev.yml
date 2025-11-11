@@ -1,0 +1,8 @@
+server:
+  port: 8081
+
+# short-url-admin 모듈의 주소
+short-url:
+  admin:
+    api:
+      base-url: http://localhost:8080

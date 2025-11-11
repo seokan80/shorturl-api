@@ -1,69 +1,46 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.7-SNAPSHOT'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
 }
 
-group = 'com.nh'
-version = '0.0.1-SNAPSHOT'
+allprojects {
+    group = 'com.nh'
+    version = '0.0.1-SNAPSHOT'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
+    apply plugin: 'java'
+    sourceCompatibility = '17'
 
-repositories {
-	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
-}
-
-dependencies {
-
-    // Web + JPA + Validation
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    // Security + JWT
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation 'com.oracle.database.jdbc:ojdbc8:21.10.0.0'
-
-    // Jasypt 암호화 모듈
-    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
-
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    // h2
-    runtimeOnly 'com.h2database:h2'
-
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    // Test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
-}
-
-// 빌드 시 사용할 프로파일을 파라미터로 받기 (기본값: local)
-// 사용법: ./gradlew build -Pprofile=prod
-def profile = project.hasProperty('profile') ? project.getProperty('profile') : 'local'
-
-// Spring Boot의 bootJar 태스크 설정
-bootJar {
-    // 1. 빌드된 JAR 파일 이름에 프로파일명 추가
-    archiveFileName = "${archiveBaseName.get()}-${profile}-${archiveVersion.get()}.${archiveExtension.get()}"
-
-    // 2. JAR 파일의 Manifest에 기본 활성 프로파일을 지정
-    // 이렇게 하면 별도 옵션 없이 java -jar로 실행해도 해당 프로파일로 동작함
-    manifest {
-        attributes 'Spring-Profiles-Active': profile
+    repositories {
+        mavenCentral()
     }
+}
+
+subprojects {
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.springframework.boot'
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.5"
+        }
+    }
+
+    // "lombok 같은 것들이 오류 발생" 문제의 원인이었던 이 블록을 반드시 비워두거나 삭제해야 합니다.
+    // dependencies { ... }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+// 루트 프로젝트는 래퍼 역할만 하므로 bootJar 생성을 비활성화합니다.
+bootJar {
+    enabled = false
+}
+
+// --- 이 부분을 올바른 구문으로 수정합니다 ---
+// 이 프로젝트 전체가 사용할 Gradle 버전을 설정합니다.
+wrapper {
+    gradleVersion = '8.7'
 }

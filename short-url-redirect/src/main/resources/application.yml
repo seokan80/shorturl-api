@@ -1,0 +1,4 @@
+spring:
+  # 1. 기본 활성화 프로파일 지정
+  profiles:
+    active: local
