@@ -18,7 +18,7 @@ public class ShortUrlCacheService {
     }
 
     /**
-     * shortUrl 캐시에서 항목을 제거합니다.
+     * shortUrl 캐시에서 항목을 제거.
      */
     @CacheEvict(value = "shortUrl", key = "#shortUrlKey")
     public void evictShortUrlFromCache(String shortUrlKey) {
