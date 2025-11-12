@@ -1,10 +1,13 @@
 package com.nh.shorturl.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nh.shorturl.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.service.user.CustomUserDetailsService;
 import com.nh.shorturl.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +21,13 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ClientAccessKeyService clientAccessKeyService;
+    private final ObjectMapper objectMapper;
+
+    @Bean
+    public ClientAccessKeyValidationFilter clientAccessKeyValidationFilter() {
+        return new ClientAccessKeyValidationFilter(clientAccessKeyService, objectMapper);
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,9 +37,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // /api/client-keys/, /api/auth/, /r/ 하위 경로 및 /error 경로는 인증 없이 허용
                         .requestMatchers("/api/client-keys/**", "/api/auth/**", "/r/**", "/error").permitAll()
+                        // /api/short-url POST는 X-access-key로 검증되므로 permitAll
+                        .requestMatchers(HttpMethod.POST, "/api/short-url").permitAll()
                         // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
                         .anyRequest().authenticated()
                 )
+                // ClientAccessKeyValidationFilter를 JwtAuthenticationFilter 앞에 추가
+                .addFilterBefore(clientAccessKeyValidationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
 

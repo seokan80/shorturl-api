@@ -1,9 +1,12 @@
 package com.nh.shorturl.controller;
 
+import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
+import com.nh.shorturl.entity.ClientAccessKey;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.type.ApiResult;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +24,28 @@ public class ShortUrlController {
 
     /**
      * 단축 URL 생성 API.
+     * 로그인 사용자(JWT) 또는 비회원(X-access-key) 모두 지원
      */
     @PostMapping
-    public ResultEntity<?> create(@RequestBody ShortUrlRequest request, Principal principal) {
+    public ResultEntity<?> create(@RequestBody ShortUrlRequest request,
+                                  Principal principal,
+                                  HttpServletRequest httpRequest) {
         try {
-            // JWT 토큰에서 추출한 username을 서비스로 전달
-            return new ResultEntity<>(shortUrlService.createShortUrl(request, principal.getName()));
+            // 로그인 사용자 (JWT 인증)
+            if (principal != null) {
+                return new ResultEntity<>(shortUrlService.createShortUrl(request, principal.getName()));
+            }
+
+            // 비회원 (X-access-key 인증)
+            ClientAccessKey validatedKey = (ClientAccessKey) httpRequest.getAttribute(
+                    ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE);
+
+            if (validatedKey != null) {
+                return new ResultEntity<>(shortUrlService.createShortUrlForClient(request, validatedKey));
+            }
+
+            // 둘 다 없으면 인증 실패
+            return ResultEntity.of(ApiResult.UNAUTHORIZED);
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
