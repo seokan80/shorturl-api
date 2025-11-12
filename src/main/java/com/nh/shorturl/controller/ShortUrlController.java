@@ -2,12 +2,19 @@ package com.nh.shorturl.controller;
 
 import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
+import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
+import com.nh.shorturl.dto.response.common.ResultList;
+import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.entity.ClientAccessKey;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.type.ApiResult;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -83,6 +90,64 @@ public class ShortUrlController {
         try {
             shortUrlService.deleteShortUrl(id);
             return ResultEntity.True();
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
+    }
+
+    /**
+     * 단축 URL 목록 조회 (페이징).
+     * 로그인한 사용자는 자신이 생성한 URL만 조회, 비로그인 시 전체 조회
+     *
+     * @param page 페이지 번호 (0부터 시작, 기본값: 0)
+     * @param size 페이지 크기 (기본값: 10)
+     * @param sort 정렬 기준 (기본값: createdAt,desc)
+     */
+    @GetMapping
+    public ResultEntity<ResultList<ShortUrlResponse>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            Principal principal) {
+        try {
+            // Sort 파라미터 파싱
+            String[] sortParams = sort.split(",");
+            String sortField = sortParams[0];
+            Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC;
+
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+            String username = principal != null ? principal.getName() : null;
+            ResultList<ShortUrlResponse> result = shortUrlService.listShortUrls(pageable, username);
+
+            return ResultEntity.ok(result);
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
+    }
+
+    /**
+     * 단축 URL 만료일 수정.
+     * 로그인한 사용자만 자신이 생성한 URL의 만료일을 수정할 수 있음
+     */
+    @PutMapping("/{id}/expiration")
+    public ResultEntity<ShortUrlResponse> updateExpiration(
+            @PathVariable Long id,
+            @Valid @RequestBody ShortUrlUpdateRequest request,
+            Principal principal) {
+        try {
+            if (principal == null) {
+                return ResultEntity.of(ApiResult.UNAUTHORIZED);
+            }
+
+            ShortUrlResponse response = shortUrlService.updateShortUrlExpiration(id, request, principal.getName());
+            return ResultEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResultEntity.of(ApiResult.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return ResultEntity.of(ApiResult.FORBIDDEN);
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
