@@ -2,6 +2,7 @@ package com.nh.shorturl.service.shorturl;
 
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
+import com.nh.shorturl.entity.ClientAccessKey;
 import com.nh.shorturl.entity.ShortUrl;
 import com.nh.shorturl.entity.User;
 import com.nh.shorturl.repository.ShortUrlRepository;
@@ -10,6 +11,7 @@ import com.nh.shorturl.util.Base62;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -40,6 +42,39 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .longUrl(request.getLongUrl())
                 .createBy(user.getUsername())
                 .user(user)
+                .expiredAt(LocalDateTime.now().plusDays(1L))
+                .build();
+
+        shortUrlRepository.save(entity);
+
+        return toResponse(entity);
+    }
+
+    @Override
+    @Transactional
+    public ShortUrlResponse createShortUrlForClient(ShortUrlRequest request, ClientAccessKey clientAccessKey) {
+        // 중복 방지를 위해 UUID → Base62 8자리 인코딩
+        String shortUrl;
+        do {
+            shortUrl = Base62.encodeUUID(UUID.randomUUID());
+        } while (shortUrlRepository.existsByShortUrl(shortUrl));
+
+        // anonymous 사용자 조회 또는 생성
+        User anonymousUser = userRepository.findByUsername("anonymous")
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .username("anonymous")
+                            .groupName("anonymous")
+                            .build();
+                    return userRepository.save(newUser);
+                });
+
+        ShortUrl entity = ShortUrl.builder()
+                .shortUrl(shortUrl)
+                .longUrl(request.getLongUrl())
+                .createBy("anonymous")
+                .user(anonymousUser)
+                .clientAccessKey(clientAccessKey)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
                 .build();
 
