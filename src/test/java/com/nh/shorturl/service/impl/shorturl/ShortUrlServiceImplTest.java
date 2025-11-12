@@ -1,6 +1,8 @@
 package com.nh.shorturl.service.impl.shorturl;
 
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
+import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
+import com.nh.shorturl.dto.response.common.ResultList;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.entity.ShortUrl;
 import com.nh.shorturl.entity.User;
@@ -16,9 +18,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -210,5 +218,150 @@ class ShortUrlServiceImplTest {
         String longUrl = shortUrlService.resolveOriginalUrl("redirectKey");
 
         assertThat(longUrl).isEqualTo("https://example.com/original");
+    }
+
+    @Test
+    @DisplayName("사용자별 단축 URL 목록을 페이징하여 조회한다")
+    void listShortUrls_withUsername_returnsUserUrls() {
+        User user = User.builder()
+                .id(1L)
+                .username("testuser")
+                .apiKey("key")
+                .build();
+
+        ShortUrl url1 = ShortUrl.builder()
+                .id(1L)
+                .shortUrl("abc123")
+                .longUrl("https://example.com/1")
+                .createBy("testuser")
+                .user(user)
+                .expiredAt(LocalDateTime.now().plusDays(1))
+                .build();
+
+        ShortUrl url2 = ShortUrl.builder()
+                .id(2L)
+                .shortUrl("def456")
+                .longUrl("https://example.com/2")
+                .createBy("testuser")
+                .user(user)
+                .expiredAt(LocalDateTime.now().plusDays(2))
+                .build();
+
+        ReflectionTestUtils.setField(url1, "createdAt", LocalDateTime.of(2025, 1, 1, 10, 0));
+        ReflectionTestUtils.setField(url2, "createdAt", LocalDateTime.of(2025, 1, 2, 10, 0));
+
+        List<ShortUrl> content = Arrays.asList(url1, url2);
+        Page<ShortUrl> page = new PageImpl<>(content, PageRequest.of(0, 10), 2);
+
+        given(userRepository.findByUsername("testuser")).willReturn(Optional.of(user));
+        given(shortUrlRepository.findByUser(user, PageRequest.of(0, 10))).willReturn(page);
+
+        ResultList<ShortUrlResponse> result = shortUrlService.listShortUrls(PageRequest.of(0, 10), "testuser");
+
+        assertThat(result.getTotalCount()).isEqualTo(2);
+        assertThat(result.getElements()).hasSize(2);
+        assertThat(result.getElements().get(0).getId()).isEqualTo(1L);
+        assertThat(result.getElements().get(1).getId()).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("사용자 없이 단축 URL 목록을 페이징하여 전체 조회한다")
+    void listShortUrls_withoutUsername_returnsAllUrls() {
+        User user1 = User.builder().id(1L).username("user1").apiKey("key1").build();
+        User user2 = User.builder().id(2L).username("user2").apiKey("key2").build();
+
+        ShortUrl url1 = ShortUrl.builder()
+                .id(1L)
+                .shortUrl("abc123")
+                .longUrl("https://example.com/1")
+                .createBy("user1")
+                .user(user1)
+                .expiredAt(LocalDateTime.now().plusDays(1))
+                .build();
+
+        ShortUrl url2 = ShortUrl.builder()
+                .id(2L)
+                .shortUrl("def456")
+                .longUrl("https://example.com/2")
+                .createBy("user2")
+                .user(user2)
+                .expiredAt(LocalDateTime.now().plusDays(2))
+                .build();
+
+        ReflectionTestUtils.setField(url1, "createdAt", LocalDateTime.of(2025, 1, 1, 10, 0));
+        ReflectionTestUtils.setField(url2, "createdAt", LocalDateTime.of(2025, 1, 2, 10, 0));
+
+        List<ShortUrl> content = Arrays.asList(url1, url2);
+        Page<ShortUrl> page = new PageImpl<>(content, PageRequest.of(0, 10), 2);
+
+        given(shortUrlRepository.findAll(PageRequest.of(0, 10))).willReturn(page);
+
+        ResultList<ShortUrlResponse> result = shortUrlService.listShortUrls(PageRequest.of(0, 10), null);
+
+        assertThat(result.getTotalCount()).isEqualTo(2);
+        assertThat(result.getElements()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("단축 URL의 만료일을 수정한다")
+    void updateShortUrlExpiration_updatesExpiration() {
+        User user = User.builder()
+                .id(1L)
+                .username("testuser")
+                .apiKey("key")
+                .build();
+
+        ShortUrl entity = ShortUrl.builder()
+                .id(100L)
+                .shortUrl("abc123")
+                .longUrl("https://example.com/test")
+                .createBy("testuser")
+                .user(user)
+                .expiredAt(LocalDateTime.now().plusDays(1))
+                .build();
+
+        ReflectionTestUtils.setField(entity, "createdAt", LocalDateTime.of(2025, 1, 1, 10, 0));
+
+        LocalDateTime newExpiration = LocalDateTime.of(2025, 12, 31, 23, 59, 59);
+        ShortUrlUpdateRequest request = new ShortUrlUpdateRequest();
+        request.setExpiredAt(newExpiration);
+
+        given(shortUrlRepository.findById(100L)).willReturn(Optional.of(entity));
+        given(shortUrlRepository.save(entity)).willReturn(entity);
+
+        ShortUrlResponse response = shortUrlService.updateShortUrlExpiration(100L, request, "testuser");
+
+        assertThat(response.getId()).isEqualTo(100L);
+        assertThat(entity.getExpiredAt()).isEqualTo(newExpiration);
+        verify(shortUrlRepository).save(entity);
+    }
+
+    @Test
+    @DisplayName("다른 사용자의 단축 URL 만료일을 수정하려 하면 예외를 던진다")
+    void updateShortUrlExpiration_throwsWhenUnauthorized() {
+        User owner = User.builder()
+                .id(1L)
+                .username("owner")
+                .apiKey("key")
+                .build();
+
+        ShortUrl entity = ShortUrl.builder()
+                .id(100L)
+                .shortUrl("abc123")
+                .longUrl("https://example.com/test")
+                .createBy("owner")
+                .user(owner)
+                .expiredAt(LocalDateTime.now().plusDays(1))
+                .build();
+
+        LocalDateTime newExpiration = LocalDateTime.of(2025, 12, 31, 23, 59, 59);
+        ShortUrlUpdateRequest request = new ShortUrlUpdateRequest();
+        request.setExpiredAt(newExpiration);
+
+        given(shortUrlRepository.findById(100L)).willReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> shortUrlService.updateShortUrlExpiration(100L, request, "attacker"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("자신이 생성한 URL만 수정할 수 있습니다");
     }
 }
