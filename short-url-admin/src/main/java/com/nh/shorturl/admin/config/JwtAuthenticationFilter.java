@@ -22,6 +22,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // /api/short-url POST 요청은 JWT 검증 스킵 (X-access-key로 검증)
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        return "/api/short-url".equals(path) && "POST".equalsIgnoreCase(method);
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)

@@ -1,10 +1,14 @@
 package com.nh.shorturl.admin.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nh.shorturl.admin.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.admin.service.user.CustomUserDetailsService;
 import com.nh.shorturl.admin.util.JwtProvider;
+import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -19,6 +23,13 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ClientAccessKeyService clientAccessKeyService;
+    private final ObjectMapper objectMapper;
+
+    @Bean
+    public ClientAccessKeyValidationFilter clientAccessKeyValidationFilter() {
+        return new ClientAccessKeyValidationFilter(clientAccessKeyService, objectMapper);
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,13 +38,24 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // /api/client-keys/, /api/auth/, /r/ 하위 경로 및 /error 경로는 인증 없이 허용
-                        .requestMatchers("/api/client-keys/**", "/api/auth/**", "/r/**", "/error", "/api/internal/**", "/h2-console/**").permitAll()
+                        .requestMatchers(
+                                "/api/client-keys/**",
+                                "/api/auth/**",
+                                "/r/**",
+                                "/error",
+                                "/api/internal/**",
+                                "/h2-console/**",
+                                "/api/short-url"
+                        )
+                        .permitAll()
                         // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
+                // ClientAccessKeyValidationFilter를 JwtAuthenticationFilter 앞에 추가
+                .addFilterBefore(clientAccessKeyValidationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
 

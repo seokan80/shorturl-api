@@ -9,7 +9,7 @@ import { ActivityPage } from "./features/activity/ActivityPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
 import { ControlsLayout } from "./layouts/ControlsLayout";
 import { AuthControlsPage } from "./features/controls/AuthControlsPage";
-import { ShortUrlControlsPage } from "./features/controls/ShortUrlControlsPage";
+import { ShortUrlManagementPage } from "./features/shorturl/ShortUrlManagementPage";
 import { RedirectionControlsPage } from "./features/controls/RedirectionControlsPage";
 import { AnalyticsControlsPage } from "./features/controls/AnalyticsControlsPage";
 import { UserManagementPage } from "./features/auth/UserManagementPage";
@@ -31,7 +31,7 @@ function App() {
         <Route path="users" element={<UserManagementPage />} />
         <Route path="client-keys" element={<ClientAccessKeyPage />} />
         <Route path="short-url" element={<ControlsLayout />}>
-          <Route index element={<ShortUrlControlsPage />} />
+          <Route index element={<ShortUrlManagementPage />} />
         </Route>
         <Route path="redirection" element={<ControlsLayout />}>
           <Route index element={<RedirectionControlsPage />} />
