@@ -1,0 +1,60 @@
+plugins {
+    id 'com.github.node-gradle.node' version '7.0.2'
+}
+
+node {
+    download = true
+    version = '20.11.1'
+    yarnVersion = '1.22.22'
+    workDir = file("${project.buildDir}/node")
+    yarnWorkDir = file("${project.buildDir}/yarn")
+    nodeProjectDir = projectDir
+}
+
+def frontendSources = files(
+        'package.json',
+        'yarn.lock',
+        'vite.config.ts',
+        'tsconfig.json',
+        'tailwind.config.ts',
+        'postcss.config.cjs',
+        'index.html',
+        'src'
+)
+
+tasks.register('yarnInstallDeps', com.github.gradle.node.yarn.task.YarnTask) {
+    group = 'build setup'
+    description = 'Install frontend dependencies via Yarn.'
+    workingDir = node.nodeProjectDir.get().asFile
+    args = ['install', '--frozen-lockfile']
+    inputs.files('package.json', 'yarn.lock')
+    outputs.dir(layout.buildDirectory.dir('yarn'))
+}
+
+tasks.register('yarnBuild', com.github.gradle.node.yarn.task.YarnTask) {
+    dependsOn tasks.named('yarnInstallDeps')
+    group = 'build'
+    description = 'Install dependencies and run the production build for the admin UI.'
+    workingDir = node.nodeProjectDir.get().asFile
+    args = ['build']
+    inputs.files(frontendSources)
+    outputs.dir(layout.buildDirectory.dir('dist'))
+    doLast {
+        // Copy Vite output into Gradle build directory for consistent artifacts
+        def targetDir = layout.buildDirectory.dir('dist').get().asFile
+        project.delete(targetDir)
+        project.copy {
+            from project.file('dist')
+            into targetDir
+        }
+    }
+}
+
+tasks.named('build').configure {
+    dependsOn tasks.named('yarnBuild')
+}
+
+tasks.named('clean').configure {
+    delete(layout.buildDirectory)
+    delete(file('dist'))
+}
