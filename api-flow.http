@@ -2,7 +2,7 @@
 ### 변수 설정 (실제 환경에 맞게 수정)
 ### =================================================================
 @hostname = http://localhost:8080
-@access_key = shortUrlApi
+#@access_key = shortUrlApi
 @username = my-awesome-service
 @long_url = https://github.com/google/gemini-api
 
@@ -10,28 +10,32 @@
 ### 1. 클라이언트 키 목록 확인
 ### =================================================================
 GET {{hostname}}/api/client-keys
-X-CLIENTACCESS-KEY: {{access_key}}
+#X-CLIENTACCESS-KEY: {{access_key}}
+X-CLIENTACCESS-KEY: shortUrlApi
 
 ### =================================================================
 ### 2. 클라이언트 키 발급
 ### =================================================================
 POST {{hostname}}/api/client-keys
 Content-Type: application/json
-X-CLIENTACCESS-KEY: {{access_key}}
 
 {
   "name": "demo-key",
   "issuedBy": "platform",
   "description": "로컬 테스트"
 }
+> {%
+    client.global.set("access_key", response.body.data.keyValue);
+%}
 
 ### =================================================================
 ### 3. 최초 사용자 등록 (토큰은 별도 발급)
 ### @name: register
 ### =================================================================
-POST {{hostname}}/api/auth/register
+POST {{hostname}}/api/auth/users
 Content-Type: application/json
 X-CLIENTACCESS-KEY: {{access_key}}
+#X-CLIENTACCESS-KEY: 25b7983e0dc14908a1b2fc762deaf47b
 
 {
   "username": "{{username}}"
@@ -44,6 +48,7 @@ X-CLIENTACCESS-KEY: {{access_key}}
 POST {{hostname}}/api/auth/token/issue
 Content-Type: application/json
 X-CLIENTACCESS-KEY: {{access_key}}
+#X-CLIENTACCESS-KEY: 25b7983e0dc14908a1b2fc762deaf47b
 
 {
   "username": "{{username}}"
@@ -60,7 +65,8 @@ X-CLIENTACCESS-KEY: {{access_key}}
 ### =================================================================
 POST {{hostname}}/api/short-url
 Content-Type: application/json
-Authorization: Bearer {{initialApiKey}}
+X-CLIENTACCESS-KEY: {{access_key}}
+#Authorization: Bearer {{initialApiKey}}
 
 {
   "longUrl": "{{long_url}}"

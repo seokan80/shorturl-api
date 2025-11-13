@@ -63,7 +63,7 @@ public class AuthController {
                     user.getUpdatedAt()
             ));
         } catch (IllegalArgumentException e) {
-            return ResultEntity.of(ApiResult.FAIL);
+            return ResultEntity.of(ApiResult.FAIL.getCode(), e.getMessage());
         }
     }
 
