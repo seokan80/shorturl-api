@@ -1,13 +1,13 @@
 package com.nh.shorturl.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nh.shorturl.entity.ClientAccessKey;
-import com.nh.shorturl.service.clientaccess.ClientAccessKeyService;
+import com.nh.shorturl.admin.entity.ClientAccessKey;
+import com.nh.shorturl.admin.service.clientaccess.ClientAccessKeyService;
+
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
