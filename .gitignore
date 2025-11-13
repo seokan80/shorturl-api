@@ -36,7 +36,7 @@ out/
 .vscode/
 
 logs/
-src/main/ui/node_modules/
-short-url-admin/src/main/ui/node_modules/
+short-url-admin-ui/node_modules/
+short-url-admin-ui/dist/
 src/main/ui/dist/
 .DS_Store
