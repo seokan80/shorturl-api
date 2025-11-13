@@ -48,8 +48,8 @@ public class ClientAccessKeyValidationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // X-access-key 헤더 검증
-        String accessKey = request.getHeader("X-access-key");
+        // X-access-key / X-CLIENTACCESS-KEY 헤더 검증 (대소문자 구분 없이 허용)
+        String accessKey = resolveAccessKey(request);
         if (accessKey == null || accessKey.trim().isEmpty()) {
             sendErrorResponse(response, ApiResult.UNAUTHORIZED, "X-access-key header is required");
             return;
@@ -74,5 +74,13 @@ public class ClientAccessKeyValidationFilter extends OncePerRequestFilter {
 
         ResultEntity<?> errorResponse = ResultEntity.of(apiResult);
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+    }
+
+    private String resolveAccessKey(HttpServletRequest request) {
+        String header = request.getHeader("X-CLIENTACCESS-KEY");
+        if (header != null && !header.isBlank()) {
+            return header;
+        }
+        return null;
     }
 }

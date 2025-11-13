@@ -31,8 +31,9 @@ public interface ShortUrlService {
 
     /**
      * 단축 URL 삭제.
+     * 자신이 생성한 URL만 삭제 가능.
      */
-    void deleteShortUrl(Long id);
+    void deleteShortUrl(Long id, String username);
 
     /**
      * 단축 URL을 통해 원본 URL로 리다이렉션할 때 원본 URL 반환.

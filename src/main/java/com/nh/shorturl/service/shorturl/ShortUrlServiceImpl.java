@@ -109,9 +109,13 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     }
 
     @Override
-    public void deleteShortUrl(Long id) {
+    public void deleteShortUrl(Long id, String username) {
         ShortUrl shortUrl = shortUrlRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 URL을 찾을 수 없습니다. ID: " + id));
+
+        if (username == null || !username.equals(shortUrl.getCreateBy())) {
+            throw new IllegalStateException("자신이 생성한 URL만 삭제할 수 있습니다.");
+        }
 
         shortUrlRepository.delete(shortUrl);
     }

@@ -7,6 +7,7 @@ import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.dto.response.common.ResultList;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.entity.ClientAccessKey;
+import com.nh.shorturl.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.type.ApiResult;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ import java.security.Principal;
 public class ShortUrlController {
 
     private final ShortUrlService shortUrlService;
+    private final ClientAccessKeyService clientAccessKeyService;
 
     /**
      * 단축 URL 생성 API.
@@ -47,11 +49,21 @@ public class ShortUrlController {
             ClientAccessKey validatedKey = (ClientAccessKey) httpRequest.getAttribute(
                     ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE);
 
+            if (validatedKey == null) {
+                String headerKey = resolveAccessKey(httpRequest);
+                if (headerKey != null) {
+                    validatedKey = clientAccessKeyService.validateActiveKey(headerKey);
+                    httpRequest.setAttribute(ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE, validatedKey);
+                }
+            }
+
             if (validatedKey != null) {
                 return new ResultEntity<>(shortUrlService.createShortUrlForClient(request, validatedKey));
             }
 
             // 둘 다 없으면 인증 실패
+            return ResultEntity.of(ApiResult.UNAUTHORIZED);
+        } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
@@ -84,12 +96,20 @@ public class ShortUrlController {
 
     /**
      * 단축 URL 삭제.
+     * 로그인한 사용자만 자신이 생성한 URL을 삭제할 수 있음
      */
-    @PostMapping("/delete/{id}")
-    public ResultEntity<?> delete(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResultEntity<?> delete(@PathVariable Long id, Principal principal) {
         try {
-            shortUrlService.deleteShortUrl(id);
+            if (principal == null) {
+                return ResultEntity.of(ApiResult.UNAUTHORIZED);
+            }
+            shortUrlService.deleteShortUrl(id, principal.getName());
             return ResultEntity.True();
+        } catch (IllegalArgumentException e) {
+            return ResultEntity.of(ApiResult.NOT_FOUND);
+        } catch (IllegalStateException e) {
+            return ResultEntity.of(ApiResult.FORBIDDEN);
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
@@ -151,5 +171,17 @@ public class ShortUrlController {
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
+    }
+
+    private String resolveAccessKey(HttpServletRequest request) {
+        String header = request.getHeader("X-access-key");
+        if (header != null && !header.isBlank()) {
+            return header.trim();
+        }
+        header = request.getHeader("X-CLIENTACCESS-KEY");
+        if (header != null && !header.isBlank()) {
+            return header.trim();
+        }
+        return null;
     }
 }
