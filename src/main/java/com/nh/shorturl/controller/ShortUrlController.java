@@ -2,12 +2,17 @@ package com.nh.shorturl.controller;
 
 import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
+import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.entity.ClientAccessKey;
 import com.nh.shorturl.service.shorturl.ShortUrlService;
 import com.nh.shorturl.type.ApiResult;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -72,6 +77,35 @@ public class ShortUrlController {
             return ResultEntity.ok(shortUrlService.getShortUrlByKey(shortUrl));
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.NOT_FOUND);
+        }
+    }
+
+    /**
+     * 단축 URL 목록 조회 (페이징).
+     * 기본 정렬: 생성일 내림차순, 기본 페이지 크기: 20
+     */
+    @GetMapping("/list")
+    public ResultEntity<?> getList(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        try {
+            Page<?> result = shortUrlService.getShortUrlList(pageable);
+            return ResultEntity.ok(result);
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
+        }
+    }
+
+    /**
+     * 단축 URL 수정 (만료기간).
+     */
+    @PutMapping("/{id}")
+    public ResultEntity<?> update(@PathVariable Long id, @RequestBody ShortUrlUpdateRequest request) {
+        try {
+            return ResultEntity.ok(shortUrlService.updateShortUrl(id, request));
+        } catch (IllegalArgumentException e) {
+            return ResultEntity.of(ApiResult.NOT_FOUND);
+        } catch (Exception e) {
+            return ResultEntity.of(ApiResult.FAIL);
         }
     }
 

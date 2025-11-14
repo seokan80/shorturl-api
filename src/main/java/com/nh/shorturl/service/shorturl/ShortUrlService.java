@@ -1,8 +1,11 @@
 package com.nh.shorturl.service.shorturl;
 
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
+import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.entity.ClientAccessKey;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ShortUrlService {
 
@@ -25,6 +28,16 @@ public interface ShortUrlService {
      * 단축 키 기반 단축 URL 조회.
      */
     ShortUrlResponse getShortUrlByKey(String shortUrl);
+
+    /**
+     * 단축 URL 목록 조회 (페이징).
+     */
+    Page<ShortUrlResponse> getShortUrlList(Pageable pageable);
+
+    /**
+     * 단축 URL 수정 (만료기간).
+     */
+    ShortUrlResponse updateShortUrl(Long id, ShortUrlUpdateRequest request);
 
     /**
      * 단축 URL 삭제.

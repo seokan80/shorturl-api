@@ -1,6 +1,7 @@
 package com.nh.shorturl.service.shorturl;
 
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
+import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.entity.ClientAccessKey;
 import com.nh.shorturl.entity.ShortUrl;
@@ -10,6 +11,8 @@ import com.nh.shorturl.repository.UserRepository;
 import com.nh.shorturl.util.Base62;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,6 +103,28 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         }
 
         return toResponse(entity);
+    }
+
+    @Override
+    public Page<ShortUrlResponse> getShortUrlList(Pageable pageable) {
+        return shortUrlRepository.findAll(pageable)
+                .map(this::toResponse);
+    }
+
+    @Override
+    @Transactional
+    public ShortUrlResponse updateShortUrl(Long id, ShortUrlUpdateRequest request) {
+        ShortUrl shortUrl = shortUrlRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("수정할 URL을 찾을 수 없습니다. ID: " + id));
+
+        // 만료일 수정
+        if (request.getExpiredAt() != null) {
+            shortUrl.setExpiredAt(request.getExpiredAt());
+        }
+
+        shortUrlRepository.save(shortUrl);
+
+        return toResponse(shortUrl);
     }
 
     @Override
