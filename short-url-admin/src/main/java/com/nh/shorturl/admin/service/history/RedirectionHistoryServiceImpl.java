@@ -6,11 +6,15 @@ import com.nh.shorturl.admin.repository.ShortUrlRepository;
 import com.nh.shorturl.admin.repository.history.RedirectionHistoryRepository;
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
 import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
+import com.nh.shorturl.dto.response.common.ResultList;
+import com.nh.shorturl.dto.response.history.RedirectionHistoryResponse;
 import com.nh.shorturl.type.GroupingType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.nh.shorturl.admin.util.RequestInfoUtils.*;
 
@@ -103,5 +108,43 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
 
         // 3. 데이터베이스에 저장합니다.
         redirectionHistoryRepository.save(history);
+    }
+
+    @Override
+    public ResultList<RedirectionHistoryResponse> listRedirectionHistories(Pageable pageable) {
+        log.info("listRedirectionHistories: pageable={}", pageable);
+
+        Page<RedirectionHistory> page = redirectionHistoryRepository.findAll(pageable);
+
+        List<RedirectionHistoryResponse> responses = page.getContent().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return new ResultList<>(page.getTotalElements(), responses);
+    }
+
+    @Override
+    public RedirectionHistoryResponse getRedirectionHistory(Long id) {
+        log.info("getRedirectionHistory: id={}", id);
+
+        RedirectionHistory history = redirectionHistoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Redirection history not found"));
+
+        return toResponse(history);
+    }
+
+    /**
+     * Entity → DTO 변환.
+     */
+    private RedirectionHistoryResponse toResponse(RedirectionHistory entity) {
+        return RedirectionHistoryResponse.builder()
+                .id(entity.getId())
+                .shortUrlId(entity.getShortUrl().getId())
+                .shortUrlKey(entity.getShortUrl().getShortUrl())
+                .referer(entity.getReferer())
+                .userAgent(entity.getUserAgent())
+                .ip(entity.getIp())
+                .redirectAt(entity.getRedirectAt())
+                .build();
     }
 }
