@@ -96,7 +96,7 @@
 
 ---
 
-## TokenController (별도)
+## AuthController (별도)
 
 기본 경로: `/api/auth/token`
 

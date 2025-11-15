@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/token")
-public class TokenController {
+public class AuthController {
 
     private final TokenService tokenService;
     private final ClientAccessKeyService clientAccessKeyService;
