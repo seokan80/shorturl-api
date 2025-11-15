@@ -1,4 +1,4 @@
-package com.nh.shorturl.admin.repository.history;
+package com.nh.shorturl.admin.repository;
 
 import com.nh.shorturl.admin.entity.RedirectionHistory;
 import org.springframework.data.jpa.repository.JpaRepository;

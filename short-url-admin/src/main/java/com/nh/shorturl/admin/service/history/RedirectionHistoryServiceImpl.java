@@ -2,8 +2,8 @@ package com.nh.shorturl.admin.service.history;
 
 import com.nh.shorturl.admin.entity.RedirectionHistory;
 import com.nh.shorturl.admin.entity.ShortUrl;
+import com.nh.shorturl.admin.repository.RedirectionHistoryRepository;
 import com.nh.shorturl.admin.repository.ShortUrlRepository;
-import com.nh.shorturl.admin.repository.history.RedirectionHistoryRepository;
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
 import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
 import com.nh.shorturl.type.GroupingType;
