@@ -1,8 +1,13 @@
 package com.nh.shorturl.admin.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nh.shorturl.admin.entity.ClientAccessKey;
+import com.nh.shorturl.admin.entity.User;
+import com.nh.shorturl.admin.repository.ClientAccessKeyRepository;
+import com.nh.shorturl.admin.repository.UserRepository;
 import com.nh.shorturl.dto.request.auth.TokenIssueRequest;
 import com.nh.shorturl.dto.request.auth.TokenReissueRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * AuthController 통합 테스트.
  *
  * 테스트 데이터:
- * - data.sql에서 로드되는 ClientAccessKey:
+ * - @BeforeEach에서 생성하는 ClientAccessKey:
  *   - key: "dev-test-key-12345"
  *   - name: "Development Test Key"
  *
- * - data.sql에서 로드되는 User:
+ * - @BeforeEach에서 생성하는 User:
  *   - username: "test-user", groupName: "test-group"
  *   - username: "admin-user", groupName: "admin-group"
  */
@@ -41,14 +46,50 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // data.sql에 정의된 테스트용 ClientAccessKey
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ClientAccessKeyRepository clientAccessKeyRepository;
+
+    // 테스트용 ClientAccessKey
     private static final String VALID_ACCESS_KEY = "dev-test-key-12345";
     private static final String INVALID_ACCESS_KEY = "invalid-key-xxx";
 
-    // data.sql에 정의된 테스트용 User
+    // 테스트용 User
     private static final String TEST_USERNAME = "test-user";
     private static final String ADMIN_USERNAME = "admin-user";
     private static final String NON_EXISTENT_USERNAME = "non-existent-user";
+
+    @BeforeEach
+    void setUp() {
+        // ClientAccessKey 생성
+        ClientAccessKey clientAccessKey = ClientAccessKey.builder()
+                .name("Development Test Key")
+                .keyValue(VALID_ACCESS_KEY)
+                .issuedBy("System")
+                .description("Default client access key for development and testing purposes")
+                .active(true)
+                .deleted(false)
+                .build();
+        clientAccessKeyRepository.save(clientAccessKey);
+
+        // 테스트용 User 생성
+        User testUser = User.builder()
+                .username(TEST_USERNAME)
+                .groupName("test-group")
+                .deleted(false)
+                .build();
+        userRepository.save(testUser);
+
+        // 관리자용 User 생성
+        User adminUser = User.builder()
+                .username(ADMIN_USERNAME)
+                .groupName("admin-group")
+                .deleted(false)
+                .build();
+        userRepository.save(adminUser);
+    }
 
     @Test
     @DisplayName("유효한 access-key로 JWT 토큰을 발급한다")
@@ -67,8 +108,8 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.code").value("0000"))
                 .andExpect(jsonPath("$.message").value("Success"))
                 .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.apiKey").exists())
-                .andExpect(jsonPath("$.data.apiKey").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").exists())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andExpect(jsonPath("$.data.refreshToken").exists())
                 .andExpect(jsonPath("$.data.refreshToken").isNotEmpty());
     }
@@ -161,7 +202,7 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0000"))
                 .andExpect(jsonPath("$.message").value("Success"))
-                .andExpect(jsonPath("$.data.apiKey").exists())
+                .andExpect(jsonPath("$.data.token").exists())
                 .andExpect(jsonPath("$.data.refreshToken").exists());
     }
 
@@ -236,7 +277,7 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0000"))
-                .andExpect(jsonPath("$.data.apiKey").exists())
+                .andExpect(jsonPath("$.data.token").exists())
                 .andExpect(jsonPath("$.data.refreshToken").exists());
     }
 }

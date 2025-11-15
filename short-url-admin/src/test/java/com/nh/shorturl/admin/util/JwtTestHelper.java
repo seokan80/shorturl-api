@@ -15,7 +15,8 @@ import java.util.Date;
 public class JwtTestHelper {
 
     // 테스트용 Base64 인코딩된 시크릿 (test/resources/application.yml과 동일)
-    private static final String TEST_SECRET = "dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItdW5pdC10ZXN0aW5nLXB1cnBvc2Utb25seS1kby1ub3QtdXNlLWluLXByb2R1Y3Rpb24=";
+    // HS512 알고리즘 요구사항: 최소 512비트 (64바이트)
+    private static final String TEST_SECRET = "dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItdW5pdC10ZXN0aW5nLXB1cnBvc2Utb25seS1kb3Qtbm90LXVzZS1pbi1wcm9kdWN0aW9uLWVudmlyb25tZW50LXRoaXMtaXMtYS12ZXJ5LWxvbmctc2VjcmV0LWtleQ==";
     private static final long DEFAULT_VALIDITY_IN_MS = 3600000L; // 1 hour
     private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(TEST_SECRET));
 
@@ -73,8 +74,8 @@ public class JwtTestHelper {
      * @return 잘못된 서명의 JWT 토큰
      */
     public static String createInvalidSignatureToken(String username) {
-        // 다른 시크릿 키로 서명
-        String wrongSecret = "d3Jvbmctc2VjcmV0LWtleS1mb3ItdGVzdGluZy1pbnZhbGlkLXNpZ25hdHVyZQ==";
+        // 다른 시크릿 키로 서명 (HS512 요구사항 충족: 512비트)
+        String wrongSecret = "d3Jvbmctc2VjcmV0LWtleS1mb3ItdGVzdGluZy1pbnZhbGlkLXNpZ25hdHVyZS10aGlzLWlzLWEtdmVyeS1sb25nLXdyb25nLXNlY3JldC1rZXktZm9yLXRlc3Rpbmc=";
         Key wrongKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(wrongSecret));
 
         Date now = new Date();

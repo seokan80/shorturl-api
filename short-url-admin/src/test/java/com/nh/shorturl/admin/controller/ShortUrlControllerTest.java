@@ -1,9 +1,14 @@
 package com.nh.shorturl.admin.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nh.shorturl.admin.entity.ClientAccessKey;
+import com.nh.shorturl.admin.entity.User;
+import com.nh.shorturl.admin.repository.ClientAccessKeyRepository;
+import com.nh.shorturl.admin.repository.UserRepository;
 import com.nh.shorturl.admin.util.JwtTestHelper;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * ShortUrlController 통합 테스트.
  *
  * 테스트 데이터:
- * - data.sql에서 로드되는 User:
+ * - @BeforeEach에서 생성하는 User:
  *   - username: "test-user", groupName: "test-group"
  *   - username: "admin-user", groupName: "admin-group"
  *
- * - data.sql에서 로드되는 ClientAccessKey:
+ * - @BeforeEach에서 생성하는 ClientAccessKey:
  *   - key: "dev-test-key-12345"
  *
  * JWT 토큰 생성:
@@ -50,13 +55,49 @@ class ShortUrlControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // data.sql에 정의된 테스트용 User
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ClientAccessKeyRepository clientAccessKeyRepository;
+
+    // 테스트용 User
     private static final String TEST_USERNAME = "test-user";
     private static final String ADMIN_USERNAME = "admin-user";
 
-    // data.sql에 정의된 테스트용 ClientAccessKey
+    // 테스트용 ClientAccessKey
     private static final String VALID_ACCESS_KEY = "dev-test-key-12345";
     private static final String INVALID_ACCESS_KEY = "invalid-access-key";
+
+    @BeforeEach
+    void setUp() {
+        // ClientAccessKey 생성
+        ClientAccessKey clientAccessKey = ClientAccessKey.builder()
+                .name("Development Test Key")
+                .keyValue(VALID_ACCESS_KEY)
+                .issuedBy("System")
+                .description("Default client access key for development and testing purposes")
+                .active(true)
+                .deleted(false)
+                .build();
+        clientAccessKeyRepository.save(clientAccessKey);
+
+        // 테스트용 User 생성
+        User testUser = User.builder()
+                .username(TEST_USERNAME)
+                .groupName("test-group")
+                .deleted(false)
+                .build();
+        userRepository.save(testUser);
+
+        // 관리자용 User 생성
+        User adminUser = User.builder()
+                .username(ADMIN_USERNAME)
+                .groupName("admin-group")
+                .deleted(false)
+                .build();
+        userRepository.save(adminUser);
+    }
 
     // =========================
     // JWT 인증 기반 테스트

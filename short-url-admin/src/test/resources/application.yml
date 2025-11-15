@@ -10,20 +10,21 @@ spring:
       ddl-auto: create-drop
     show-sql: false
     database-platform: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
   h2:
     console:
       enabled: false
+  sql:
+    init:
+      mode: never  # data.sql 실행 비활성화
 
-# JWT settings for test (plain text secret for testing)
+# JWT settings for test (512-bit secret for HS512)
 jwt:
-  # Base64 encoded test secret
-  secret: dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItdW5pdC10ZXN0aW5nLXB1cnBvc2Utb25seS1kby1ub3QtdXNlLWluLXByb2R1Y3Rpb24=
+  secret: dGVzdC1qd3Qtc2VjcmV0LWtleS1mb3ItdW5pdC10ZXN0aW5nLXB1cnBvc2Utb25seS1kb3Etbm90LXVzZS1pbi1wcm9kdWN0aW9uLWVudmlyb25tZW50LXRoaXMtaXMtYS12ZXJ5LWxvbmctc2VjcmV0LWtleQ==
   expiration: 3600000 # 1 hour
 
 base-url: http://localhost:8080/
 
-# Jasypt encryption (disabled for tests with plain password)
+# Jasypt encryption (disabled for tests)
 jasypt:
   encryptor:
     algorithm: PBEWithMD5AndDES
