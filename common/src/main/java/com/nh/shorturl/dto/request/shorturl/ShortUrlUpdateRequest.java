@@ -6,13 +6,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-/**
- * Short URL 생성 요청 DTO
- */
 @Getter
 @Setter
 @NoArgsConstructor
-public class ShortUrlRequest {
-    private String longUrl;
+public class ShortUrlUpdateRequest {
     private LocalDateTime expireDate;
 }

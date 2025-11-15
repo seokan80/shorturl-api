@@ -49,14 +49,6 @@ public class ShortUrlController {
             ClientAccessKey validatedKey = (ClientAccessKey) httpRequest.getAttribute(
                     ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE);
 
-            if (validatedKey == null) {
-                String headerKey = resolveAccessKey(httpRequest);
-                if (headerKey != null) {
-                    validatedKey = clientAccessKeyService.validateActiveKey(headerKey);
-                    httpRequest.setAttribute(ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE, validatedKey);
-                }
-            }
-
             if (validatedKey != null) {
                 return new ResultEntity<>(shortUrlService.createShortUrlForClient(request, validatedKey));
             }

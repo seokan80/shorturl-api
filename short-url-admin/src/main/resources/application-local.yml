@@ -11,6 +11,7 @@ spring:
       ddl-auto: create-drop # 로컬에서는 실행 시 스키마를 생성하고 종료 시 삭제
     show-sql: true # SQL 쿼리를 로그로 보여줌
     database-platform: org.hibernate.dialect.H2Dialect # H2 Dialect로 변경
+    defer-datasource-initialization: true # data.sql이 스키마 생성 후 실행되도록 보장
   # H2 웹 콘솔 활성화
   h2:
     console:
