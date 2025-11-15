@@ -9,10 +9,10 @@ describe("SpecDetailPage", () => {
       <Routes>
         <Route path="/specs/:specId" element={<SpecDetailPage />} />
       </Routes>,
-      { initialEntries: ["/specs/auth-register"] }
+      { initialEntries: ["/specs/user-register"] }
     );
 
-    expect(screen.getByText("/api/auth/register")).toBeInTheDocument();
+    expect(screen.getByText("/api/users")).toBeInTheDocument();
     expect(screen.getByText("Owner · 플랫폼 스쿼드")).toBeInTheDocument();
     expect(screen.getByText("Headers")).toBeInTheDocument();
   });

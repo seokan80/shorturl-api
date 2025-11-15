@@ -43,15 +43,15 @@ export interface ApiSpec {
 
 export const apiSpecs: ApiSpec[] = [
   {
-    id: "auth-register",
+    id: "user-register",
     category: "인증",
     name: "사용자 등록",
     method: "POST",
-    path: "/api/auth/register",
-    summary: "등록 키로 신규 서비스 계정을 추가",
+    path: "/api/users",
+    summary: "클라이언트 키로 신규 사용자 계정을 추가",
     description:
-      "사전에 공유된 등록 키를 검증한 뒤 신규 서비스 계정을 생성합니다. 토큰 발급은 별도의 엔드포인트에서 수행됩니다.",
-    tags: ["인증", "등록"],
+      "사전에 공유된 클라이언트 키를 검증한 뒤 신규 사용자 계정을 생성합니다. 토큰 발급은 별도의 엔드포인트에서 수행됩니다.",
+    tags: ["사용자", "등록"],
     authentication: "등록 키",
     headers: [
       {

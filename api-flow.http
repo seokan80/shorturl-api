@@ -32,7 +32,7 @@ Content-Type: application/json
 ### 3. 최초 사용자 등록 (토큰은 별도 발급)
 ### @name: register
 ### =================================================================
-POST {{hostname}}/api/auth/users
+POST {{hostname}}/api/users
 Content-Type: application/json
 X-CLIENTACCESS-KEY: {{access_key}}
 #X-CLIENTACCESS-KEY: 25b7983e0dc14908a1b2fc762deaf47b

@@ -110,7 +110,7 @@ export function UserManagementPage() {
 
   const handleFetchUsers = async () => {
     await runWithStatus("fetchUsers", async () => {
-      const list = await request<UserSummary[]>("/api/auth/users");
+      const list = await request<UserSummary[]>("/api/users");
       setUsers(list);
       setSuccess(`총 ${list.length}명의 사용자를 불러왔습니다.`);
     });
@@ -123,7 +123,7 @@ export function UserManagementPage() {
       return;
     }
     await runWithStatus("createUser", async () => {
-      await request("/api/auth/users", {
+      await request("/api/users", {
         method: "POST",
         body: JSON.stringify({ username })
       });
@@ -136,7 +136,7 @@ export function UserManagementPage() {
   const handleDeleteUser = async (username: string) => {
     if (!confirm(`${username} 사용자를 삭제하시겠습니까?`)) return;
     await runWithStatus(`delete-${username}`, async () => {
-      await request(`/api/auth/users/${encodeURIComponent(username)}`, {
+      await request(`/api/users/${encodeURIComponent(username)}`, {
         method: "DELETE"
       });
       setUsers((prev) => prev.filter((user) => user.username !== username));
@@ -149,7 +149,7 @@ export function UserManagementPage() {
 
   const handleSelectUser = async (username: string) => {
     await runWithStatus(`detail-${username}`, async () => {
-      const detail = await request<UserDetail>(`/api/auth/users/${encodeURIComponent(username)}`);
+      const detail = await request<UserDetail>(`/api/users/${encodeURIComponent(username)}`);
       setSelectedUser(detail);
     });
   };
@@ -260,7 +260,7 @@ export function UserManagementPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base">사용자 목록</CardTitle>
-            <CardDescription>/api/auth/users</CardDescription>
+            <CardDescription>/api/users</CardDescription>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={handleFetchUsers} disabled={isBusy("fetchUsers")}>
             {isBusy("fetchUsers") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

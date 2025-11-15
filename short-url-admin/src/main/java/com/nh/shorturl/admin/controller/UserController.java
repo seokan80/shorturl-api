@@ -16,13 +16,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth")
-public class AuthController {
+@RequestMapping("/api/users")
+public class UserController {
 
     private final UserService userService;
     private final ClientAccessKeyService clientAccessKeyService;
 
-    @GetMapping("/users")
+    @GetMapping("")
     public ResultEntity<?> getUsers(@RequestHeader("X-CLIENTACCESS-KEY") String key) {
         if (getValidatedAccessKey(key) == null) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
@@ -45,7 +45,7 @@ public class AuthController {
         }
     }
     
-    @PostMapping("/users")
+    @PostMapping("")
     public ResultEntity<?> register(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                     @RequestBody UserRequest request) {
         ClientAccessKey clientAccessKey = getValidatedAccessKey(key);
@@ -67,7 +67,7 @@ public class AuthController {
         }
     }
 
-    @DeleteMapping("/users/{username}")
+    @DeleteMapping("/{username}")
     public ResultEntity<?> deleteUser(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                       @PathVariable String username) {
         if (getValidatedAccessKey(key) == null) {
@@ -84,7 +84,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/users/{username}")
+    @GetMapping("/{username}")
     public ResultEntity<?> getUser(@RequestHeader("X-CLIENTACCESS-KEY") String key,
                                    @PathVariable String username) {
         if (getValidatedAccessKey(key) == null) {

@@ -117,11 +117,11 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
 
 ---
 
-### 5.1. 인증
+### 5.1. 사용자 관리
 
-#### `POST /api/auth/register`
+#### `POST /api/users`
 
-- **설명**: 새로운 사용자를 등록합니다. 토큰 발급은 별도의 `/token/issue` 엔드포인트에서 수행됩니다.
+- **설명**: 새로운 사용자를 등록합니다. 토큰 발급은 별도의 `/api/auth/token/issue` 엔드포인트에서 수행됩니다.
 - **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
 - **Body**:
   ```json
@@ -134,10 +134,28 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
   {
     "id": 42,
     "username": "my-awesome-service",
+    "groupName": "default",
     "createdAt": "2025-01-13T12:00:00",
     "updatedAt": "2025-01-13T12:00:00"
   }
   ```
+
+#### `GET /api/users/{username}`
+
+- **설명**: 특정 사용자의 기본 정보를 조회합니다. API Key, Refresh Token 등 민감 정보는 포함하지 않습니다.
+- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
+- **성공 응답 (`data` 필드 내부)**:
+  ```json
+  {
+    "id": 1,
+    "username": "my-awesome-service",
+    "groupName": "default",
+    "createdAt": "2025-01-13T12:00:00",
+    "updatedAt": "2025-01-13T12:00:00"
+  }
+  ```
+
+### 5.2. 인증 (Token)
 
 #### `POST /api/auth/token/issue`
 
@@ -176,44 +194,13 @@ java -jar build/libs/short-url-prod-0.0.1-SNAPSHOT.jar
   }
   ```
 
-### 5.2. 단축 URL
-
-- **설명**: Refresh Token을 검증하고 Access/Refresh Token을 재발급합니다.
-- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
-- **Body**:
-  ```json
-  {
-    "username": "my-awesome-service",
-    "refreshToken": "{저장된_Refresh_Token}"
-  }
-  ```
-- **성공 응답 (`data` 필드 내부)**:
-  ```json
-  {
-    "token": "{재발급된_API_Key}",
-    "refreshToken": "{재발급된_Refresh_Token}"
-  }
-  ```
-
-#### `GET /api/auth/users/{username}`
-
-- **설명**: 특정 사용자의 기본 정보를 조회합니다. API Key, Refresh Token 등 민감 정보는 포함하지 않습니다.
-- **Header**: `X-CLIENTACCESS-KEY: {{access_key}}`
-- **성공 응답 (`data` 필드 내부)**:
-  ```json
-  {
-    "id": 1,
-    "username": "my-awesome-service",
-    "createdAt": "2025-01-13T12:00:00",
-    "updatedAt": "2025-01-13T12:00:00"
-  }
-  ```
+### 5.3. 단축 URL
 
 #### `POST /api/short-url`
 
 ### 5.1.1. 클라이언트 키
 
-클라이언트 키는 `/api/auth/**` 계열 API를 호출할 때 사용하는 상위 자격 증명입니다. 아래 API로 발급/조회할 수 있습니다.
+클라이언트 키는 `/api/users/**` 및 `/api/auth/**` 계열 API를 호출할 때 사용하는 상위 자격 증명입니다. 아래 API로 발급/조회할 수 있습니다.
 
 #### `GET /api/client-keys`
 - **설명**: 발급된 클라이언트 키 목록을 조회합니다.
@@ -376,7 +363,7 @@ bash export JASYPT_ENCRYPTOR_PASSWORD=aaa
 이 단계는 사용자가 시스템에 처음 등록하고, 별도의 토큰 발급 요청을 통해 API Key/Refresh Token 쌍을 획득하는 과정입니다.
 
 1.  **회원가입 요청**:
-    *   사용자는 자신의 `username`을 포함하여 `/api/auth/register` 엔드포인트로 `POST` 요청을 전송합니다.
+    *   사용자는 자신의 `username`을 포함하여 `/api/users` 엔드포인트로 `POST` 요청을 전송합니다.
     *   컨트롤러는 `UserService.createUser`를 호출해 중복 여부를 확인하고 사용자를 저장합니다.
 
 2.  **토큰 발급 요청**:

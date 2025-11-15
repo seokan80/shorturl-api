@@ -21,7 +21,7 @@
 - **문자 인코딩**: JSON 본문은 UTF-8 인코딩을 사용합니다.
 
 ## 컨트롤러별 상세 문서
-- [AuthController 명세](auth-controller.md)
+- [UserController 명세](user-controller.md)
 - [ShortUrlController 명세](short-url-controller.md)
 - [ShortUrlRedirectController 명세](short-url-redirect-controller.md)
 - [RedirectionHistoryController 명세](redirection-history-controller.md)

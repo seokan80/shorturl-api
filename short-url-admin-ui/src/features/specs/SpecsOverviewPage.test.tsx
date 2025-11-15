@@ -8,6 +8,6 @@ describe("SpecsOverviewPage", () => {
 
     expect(screen.getByText("API Specifications")).toBeInTheDocument();
     expect(screen.getAllByText("인증")[0]).toBeInTheDocument();
-    expect(screen.getByText("/api/auth/register")).toBeInTheDocument();
+    expect(screen.getByText("/api/users")).toBeInTheDocument();
   });
 });

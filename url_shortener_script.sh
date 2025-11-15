@@ -35,7 +35,7 @@ fail_if_http_error() {
 # 1. 최초 사용자 등록
 # =================================================================
 step 1 "최초 사용자 등록"
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${HOSTNAME}/api/auth/register" \
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${HOSTNAME}/api/users" \
     -H "Content-Type: application/json" \
     -H "X-CLIENTACCESS-KEY: ${access_key}" \
     -d "{\"username\": \"${USERNAME}\"}")

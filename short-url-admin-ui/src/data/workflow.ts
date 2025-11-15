@@ -20,8 +20,8 @@ export const workflowItems: WorkflowItem[] = [
   },
   {
     id: 498,
-    specId: "auth-register",
-    specName: "/api/auth/register (POST)",
+    specId: "user-register",
+    specName: "/api/users (POST)",
     stage: "Approve",
     assignee: "seo.kan",
     dueDate: "2025-01-13T12:00:00",
