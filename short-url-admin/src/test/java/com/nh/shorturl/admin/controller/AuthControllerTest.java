@@ -144,8 +144,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")) // UNAUTHORIZED
-                .andExpect(jsonPath("$.message").value("Unauthorized"));
+                .andExpect(jsonPath("$.code").value("1401")) // UNAUTHORIZED
+                .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
     }
 
     @Test
@@ -162,8 +162,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("1001")) // USER_NOT_FOUND
-                .andExpect(jsonPath("$.message").value("User not found"));
+                .andExpect(jsonPath("$.code").value("1404")) // USER_NOT_FOUND
+                .andExpect(jsonPath("$.message").value("User resource not found"));
     }
 
     @Test
@@ -221,8 +221,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9997")) // FORBIDDEN
-                .andExpect(jsonPath("$.message").value("Forbidden"));
+                .andExpect(jsonPath("$.code").value("1403")) // FORBIDDEN
+                .andExpect(jsonPath("$.message").value("권한이 없습니다"));
     }
 
     @Test
@@ -258,8 +258,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(reissueRequest)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9997")) // FORBIDDEN
-                .andExpect(jsonPath("$.message").value("Forbidden"));
+                .andExpect(jsonPath("$.code").value("1403")) // FORBIDDEN
+                .andExpect(jsonPath("$.message").value("권한이 없습니다"));
     }
 
     @Test
