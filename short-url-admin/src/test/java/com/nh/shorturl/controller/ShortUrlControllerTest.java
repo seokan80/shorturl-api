@@ -4,6 +4,7 @@ import com.nh.shorturl.admin.controller.ShortUrlController;
 import com.nh.shorturl.admin.entity.ClientAccessKey;
 import com.nh.shorturl.admin.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.admin.service.shorturl.ShortUrlService;
+import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
@@ -45,13 +46,14 @@ class ShortUrlControllerTest {
 
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
         servletRequest.addHeader("X-CLIENTACCESS-KEY", "abc");
+        // ClientAccessKeyValidationFilter가 설정하는 attribute를 직접 설정
+        servletRequest.setAttribute(ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE, key);
 
         ResultEntity<?> result = controller.create(request, null, servletRequest);
 
         assertThat(result.getCode()).isEqualTo(ApiResult.SUCCESS.getCode());
         assertThat(result.getData()).isEqualTo(expectedResponse);
 
-        verify(clientAccessKeyService).validateActiveKey("abc");
         verify(shortUrlService).createShortUrlForClient(request, key);
     }
 }

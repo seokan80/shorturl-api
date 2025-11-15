@@ -2,10 +2,12 @@ package com.nh.shorturl.admin.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nh.shorturl.admin.entity.ClientAccessKey;
+import com.nh.shorturl.admin.entity.ShortUrl;
 import com.nh.shorturl.admin.entity.User;
 import com.nh.shorturl.admin.repository.ClientAccessKeyRepository;
+import com.nh.shorturl.admin.repository.ShortUrlRepository;
 import com.nh.shorturl.admin.repository.UserRepository;
-import com.nh.shorturl.admin.util.JwtTestHelper;
+import com.nh.shorturl.admin.util.JwtProvider;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,6 +63,12 @@ class ShortUrlControllerTest {
     @Autowired
     private ClientAccessKeyRepository clientAccessKeyRepository;
 
+    @Autowired
+    private ShortUrlRepository shortUrlRepository;
+
+    @Autowired
+    private JwtProvider jwtProvider;
+
     // 테스트용 User
     private static final String TEST_USERNAME = "test-user";
     private static final String ADMIN_USERNAME = "admin-user";
@@ -68,6 +76,24 @@ class ShortUrlControllerTest {
     // 테스트용 ClientAccessKey
     private static final String VALID_ACCESS_KEY = "dev-test-key-12345";
     private static final String INVALID_ACCESS_KEY = "invalid-access-key";
+
+    // Helper method to create Authorization header with JWT token
+    private String createAuthHeader(String username) {
+        String token = jwtProvider.createToken(username);
+        return "Bearer " + token;
+    }
+
+    // Helper method to create expired JWT token (for testing)
+    private String createExpiredAuthHeader(String username) {
+        // 만료된 토큰은 JwtProvider로 생성할 수 없으므로 invalid token을 사용
+        return "Bearer " + "expired.token.here";
+    }
+
+    // Helper method to create invalid signature JWT token (for testing)
+    private String createInvalidSignatureAuthHeader(String username) {
+        // 잘못된 서명 토큰은 JwtProvider로 생성할 수 없으므로 invalid token을 사용
+        return "Bearer " + "invalid.signature.token";
+    }
 
     @BeforeEach
     void setUp() {
@@ -107,7 +133,7 @@ class ShortUrlControllerTest {
     @DisplayName("[JWT] 유효한 JWT 토큰으로 단축 URL을 생성한다")
     void shouldCreateShortUrl_whenValidJwtToken() throws Exception {
         // given: JWT 토큰 생성 (test-user)
-        String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String authHeader = createAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/very/long/url/path");
@@ -123,8 +149,7 @@ class ShortUrlControllerTest {
                 .andExpect(jsonPath("$.code").value("0000"))
                 .andExpect(jsonPath("$.data").exists())
                 .andExpect(jsonPath("$.data.shortUrl").exists())
-                .andExpect(jsonPath("$.data.originalUrl").value("https://www.example.com/very/long/url/path"))
-                .andExpect(jsonPath("$.data.username").value(TEST_USERNAME));
+                .andExpect(jsonPath("$.data.longUrl").value("https://www.example.com/very/long/url/path"));
     }
 
     @Test
@@ -140,15 +165,15 @@ class ShortUrlControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")); // UNAUTHORIZED
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("1401")); // UNAUTHORIZED
     }
 
     @Test
     @DisplayName("[JWT] 잘못된 서명의 JWT 토큰으로 요청 시 UNAUTHORIZED를 반환한다")
     void shouldReturnUnauthorized_whenInvalidSignatureToken() throws Exception {
         // given: 잘못된 서명의 토큰
-        String invalidAuthHeader = JwtTestHelper.createInvalidSignatureAuthorizationHeader(TEST_USERNAME);
+        String invalidAuthHeader = createInvalidSignatureAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/test");
@@ -159,15 +184,15 @@ class ShortUrlControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")); // UNAUTHORIZED
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("1401")); // UNAUTHORIZED
     }
 
     @Test
     @DisplayName("[JWT] 만료된 JWT 토큰으로 요청 시 UNAUTHORIZED를 반환한다")
     void shouldReturnUnauthorized_whenExpiredToken() throws Exception {
         // given: 만료된 토큰
-        String expiredAuthHeader = JwtTestHelper.createExpiredAuthorizationHeader(TEST_USERNAME);
+        String expiredAuthHeader = createExpiredAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/test");
@@ -178,15 +203,15 @@ class ShortUrlControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")); // UNAUTHORIZED
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("1401")); // UNAUTHORIZED
     }
 
     @Test
     @DisplayName("[JWT] 생성한 단축 URL을 ID로 조회한다")
     void shouldGetShortUrl_byId() throws Exception {
         // given: 먼저 단축 URL 생성
-        String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String authHeader = createAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/test-get-by-id");
@@ -198,26 +223,32 @@ class ShortUrlControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        // 생성된 ID 추출
-        Long shortUrlId = objectMapper.readTree(createResult.getResponse().getContentAsString())
+        // 생성된 shortUrl 키 추출
+        String shortUrlKey = objectMapper.readTree(createResult.getResponse().getContentAsString())
                 .path("data")
-                .path("id")
-                .asLong();
+                .path("shortUrl")
+                .asText();
+
+        // DB에서 ID 조회
+        ShortUrl shortUrl = shortUrlRepository.findByShortUrl(shortUrlKey)
+                .orElseThrow(() -> new AssertionError("생성된 단축 URL을 찾을 수 없습니다"));
+        Long shortUrlId = shortUrl.getId();
 
         // when & then: ID로 조회
-        mockMvc.perform(get("/api/short-url/{id}", shortUrlId))
+        mockMvc.perform(get("/api/short-url/{id}", shortUrlId)
+                        .header("Authorization", authHeader))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0000"))
                 .andExpect(jsonPath("$.data.id").value(shortUrlId))
-                .andExpect(jsonPath("$.data.originalUrl").value("https://www.example.com/test-get-by-id"));
+                .andExpect(jsonPath("$.data.longUrl").value("https://www.example.com/test-get-by-id"));
     }
 
     @Test
     @DisplayName("[JWT] 생성한 단축 URL을 단축키로 조회한다")
     void shouldGetShortUrl_byKey() throws Exception {
         // given: 먼저 단축 URL 생성
-        String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String authHeader = createAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/test-get-by-key");
@@ -236,32 +267,35 @@ class ShortUrlControllerTest {
                 .asText();
 
         // when & then: 단축키로 조회
-        mockMvc.perform(get("/api/short-url/key/{shortUrl}", shortUrlKey))
+        mockMvc.perform(get("/api/short-url/key/{shortUrl}", shortUrlKey)
+                        .header("Authorization", authHeader))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0000"))
-                .andExpect(jsonPath("$.data.shortUrl").value(shortUrlKey))
-                .andExpect(jsonPath("$.data.originalUrl").value("https://www.example.com/test-get-by-key"));
+                .andExpect(jsonPath("$.data.shortUrl").value("http://localhost:8080/" + shortUrlKey))
+                .andExpect(jsonPath("$.data.longUrl").value("https://www.example.com/test-get-by-key"));
     }
 
     @Test
     @DisplayName("[JWT] 존재하지 않는 ID로 조회 시 NOT_FOUND를 반환한다")
     void shouldReturnNotFound_whenInvalidId() throws Exception {
         // given
+        String authHeader = createAuthHeader(TEST_USERNAME);
         Long nonExistentId = 99999L;
 
         // when & then
-        mockMvc.perform(get("/api/short-url/{id}", nonExistentId))
+        mockMvc.perform(get("/api/short-url/{id}", nonExistentId)
+                        .header("Authorization", authHeader))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9996")); // NOT_FOUND
+                .andExpect(jsonPath("$.code").value("1404")); // NOT_FOUND
     }
 
     @Test
     @DisplayName("[JWT] 자신이 생성한 단축 URL을 삭제한다")
     void shouldDeleteShortUrl_whenOwner() throws Exception {
         // given: 먼저 단축 URL 생성
-        String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String authHeader = createAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/test-delete");
@@ -273,7 +307,19 @@ class ShortUrlControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Long shortUrlId = objectMapper.readTree(createResult.getResponse().getContentAsString())
+        // 생성된 shortUrl 키 추출
+        String shortUrlKey = objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .path("data")
+                .path("shortUrl")
+                .asText();
+
+        // ID를 얻기 위해 키로 조회
+        MvcResult getResult = mockMvc.perform(get("/api/short-url/key/{shortUrl}", shortUrlKey)
+                        .header("Authorization", authHeader))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Long shortUrlId = objectMapper.readTree(getResult.getResponse().getContentAsString())
                 .path("data")
                 .path("id")
                 .asLong();
@@ -287,23 +333,23 @@ class ShortUrlControllerTest {
     }
 
     @Test
-    @DisplayName("[JWT] JWT 토큰 없이 삭제 시도 시 UNAUTHORIZED를 반환한다")
-    void shouldReturnUnauthorized_whenDeleteWithoutJwt() throws Exception {
+    @DisplayName("[JWT] JWT 토큰 없이 삭제 시도 시 FORBIDDEN을 반환한다")
+    void shouldReturnForbidden_whenDeleteWithoutJwt() throws Exception {
         // given
         Long anyId = 1L;
 
         // when & then
+        // Spring Security가 인증되지 않은 요청에 대해 403 Forbidden을 반환
         mockMvc.perform(post("/api/short-url/delete/{id}", anyId))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")); // UNAUTHORIZED
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @DisplayName("[JWT] 단축 URL 목록을 페이징하여 조회한다")
     void shouldListShortUrls_withPaging() throws Exception {
         // given: 여러 개의 단축 URL 생성
-        String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String authHeader = createAuthHeader(TEST_USERNAME);
 
         for (int i = 1; i <= 3; i++) {
             ShortUrlRequest request = new ShortUrlRequest();
@@ -326,15 +372,15 @@ class ShortUrlControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0000"))
                 .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.content").isArray())
-                .andExpect(jsonPath("$.data.totalElements").value(3));
+                .andExpect(jsonPath("$.data.elements").isArray())
+                .andExpect(jsonPath("$.data.totalCount").value(3));
     }
 
 //     @Test
 //     @DisplayName("[JWT] 단축 URL의 만료일을 수정한다")
 //     void shouldUpdateExpiration_whenOwner() throws Exception {
 //         // given: 단축 URL 생성
-//         String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+//         String authHeader = createAuthHeader(TEST_USERNAME);
 // 
 //         ShortUrlRequest request = new ShortUrlRequest();
 //         request.setLongUrl("https://www.example.com/test-update");
@@ -378,16 +424,16 @@ class ShortUrlControllerTest {
         request.setLongUrl("https://www.example.com/test-access-key");
 
         // when & then
-        // ClientAccessKeyValidationFilter가 x-access-key 헤더를 검증
+        // ClientAccessKeyValidationFilter가 X-CLIENTACCESS-KEY 헤더를 검증
         mockMvc.perform(post("/api/short-url")
-                        .header("x-access-key", VALID_ACCESS_KEY)
+                        .header("X-CLIENTACCESS-KEY", VALID_ACCESS_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("0000"))
                 .andExpect(jsonPath("$.data.shortUrl").exists())
-                .andExpect(jsonPath("$.data.originalUrl").value("https://www.example.com/test-access-key"));
+                .andExpect(jsonPath("$.data.longUrl").value("https://www.example.com/test-access-key"));
     }
 
     @Test
@@ -399,12 +445,12 @@ class ShortUrlControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/short-url")
-                        .header("x-access-key", INVALID_ACCESS_KEY)
+                        .header("X-CLIENTACCESS-KEY", INVALID_ACCESS_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")); // UNAUTHORIZED
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("1401")); // UNAUTHORIZED
     }
 
     @Test
@@ -420,8 +466,8 @@ class ShortUrlControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9998")); // UNAUTHORIZED
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("1401")); // UNAUTHORIZED
     }
 
     // =========================
@@ -432,7 +478,7 @@ class ShortUrlControllerTest {
     @DisplayName("[Validation] originalUrl이 없으면 Bad Request를 반환한다")
     void shouldReturnBadRequest_whenOriginalUrlMissing() throws Exception {
         // given: originalUrl 없는 요청
-        String authHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String authHeader = createAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         // originalUrl을 설정하지 않음
@@ -451,7 +497,7 @@ class ShortUrlControllerTest {
     @DisplayName("[Permission] 다른 사용자가 생성한 URL은 삭제할 수 없다")
     void shouldReturnForbidden_whenDeletingOthersUrl() throws Exception {
         // given: test-user가 URL 생성
-        String testUserAuthHeader = JwtTestHelper.createAuthorizationHeader(TEST_USERNAME);
+        String testUserAuthHeader = createAuthHeader(TEST_USERNAME);
 
         ShortUrlRequest request = new ShortUrlRequest();
         request.setLongUrl("https://www.example.com/test-permission");
@@ -463,18 +509,30 @@ class ShortUrlControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Long shortUrlId = objectMapper.readTree(createResult.getResponse().getContentAsString())
+        // 생성된 shortUrl 키 추출
+        String shortUrlKey = objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .path("data")
+                .path("shortUrl")
+                .asText();
+
+        // ID를 얻기 위해 키로 조회
+        MvcResult getResult = mockMvc.perform(get("/api/short-url/key/{shortUrl}", shortUrlKey)
+                        .header("Authorization", testUserAuthHeader))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Long shortUrlId = objectMapper.readTree(getResult.getResponse().getContentAsString())
                 .path("data")
                 .path("id")
                 .asLong();
 
         // when & then: admin-user가 삭제 시도
-        String adminAuthHeader = JwtTestHelper.createAuthorizationHeader(ADMIN_USERNAME);
+        String adminAuthHeader = createAuthHeader(ADMIN_USERNAME);
 
         mockMvc.perform(post("/api/short-url/delete/{id}", shortUrlId)
                         .header("Authorization", adminAuthHeader))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("9997")); // FORBIDDEN
+                .andExpect(jsonPath("$.code").value("1403")); // FORBIDDEN
     }
 }

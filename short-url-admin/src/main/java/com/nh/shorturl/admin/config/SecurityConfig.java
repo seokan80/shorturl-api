@@ -55,10 +55,11 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
-                // ClientAccessKeyValidationFilter를 JwtAuthenticationFilter 앞에 추가
-                .addFilterBefore(clientAccessKeyValidationFilter(), UsernamePasswordAuthenticationFilter.class)
+                // JwtAuthenticationFilter를 먼저 실행하고, 그 다음 ClientAccessKeyValidationFilter 실행
+                // 이렇게 하면 JWT 토큰이 있는 경우 먼저 인증되어 ClientAccessKey 검증을 스킵할 수 있음
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(clientAccessKeyValidationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
