@@ -1,0 +1,45 @@
+FROM gradle:8.7-jdk17-alpine AS backend-builder
+WORKDIR /workspace
+
+COPY gradlew gradlew.bat settings.gradle build.gradle ./
+COPY gradle gradle
+RUN chmod +x gradlew
+
+COPY common common
+COPY short-url-admin short-url-admin
+COPY short-url-redirect short-url-redirect
+COPY short-url-admin-ui short-url-admin-ui
+
+ARG PROFILE=local
+RUN ./gradlew --no-daemon :short-url-admin:bootJar :short-url-redirect:bootJar -Pprofile=${PROFILE} -x test
+
+FROM node:20-alpine AS ui-builder
+WORKDIR /app
+
+COPY short-url-admin-ui/package.json short-url-admin-ui/yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+COPY short-url-admin-ui .
+RUN yarn build
+
+FROM eclipse-temurin:17-jre-alpine AS runtime
+WORKDIR /app
+
+RUN apk add --no-cache nginx supervisor && \
+    mkdir -p /run/nginx /var/log/supervisor
+
+ARG PROFILE=local
+ENV SPRING_PROFILES_ACTIVE=${PROFILE}
+ENV JASYPT_ENCRYPTOR_PASSWORD=shortUrlApi
+ENV SHORT_URL_REDIRECT_API_BASE_URL=http://127.0.0.1:8081
+ENV SHORT_URL_ADMIN_API_BASE_URL=http://127.0.0.1:8080
+
+COPY --from=backend-builder /workspace/short-url-admin/build/libs/short-url-admin-0.0.1-SNAPSHOT.jar /app/admin-api.jar
+COPY --from=backend-builder /workspace/short-url-redirect/build/libs/short-url-redirect-0.0.1-SNAPSHOT.jar /app/redirect.jar
+COPY --from=ui-builder /app/dist /usr/share/nginx/html
+
+COPY docker/nginx-all.conf /etc/nginx/conf.d/default.conf
+COPY docker/supervisord-all.conf /etc/supervisord.conf
+
+EXPOSE 80
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

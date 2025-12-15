@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  all-in-one:
+    image: short-url-all-in-one:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.all-in-one
+      args:
+        PROFILE: ${PROFILE:-local}
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD:-shortUrlApi}
+      SHORT_URL_REDIRECT_API_BASE_URL: ${SHORT_URL_REDIRECT_API_BASE_URL:-http://127.0.0.1:8081}
+      SHORT_URL_ADMIN_API_BASE_URL: ${SHORT_URL_ADMIN_API_BASE_URL:-http://127.0.0.1:8080}
+    ports:
+      - "80:80"
