@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  admin-api:
+    image: short-url-admin-api:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.admin-api
+      args:
+        PROFILE: ${PROFILE:-local}
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD:-shortUrlApi}
+      SHORT_URL_REDIRECT_API_BASE_URL: ${SHORT_URL_REDIRECT_API_BASE_URL:-http://redirect:8081}
+    ports:
+      - "8080:8080"
+
+  redirect:
+    image: short-url-redirect:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.redirect
+      args:
+        PROFILE: ${PROFILE:-local}
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD:-shortUrlApi}
+      SHORT_URL_ADMIN_API_BASE_URL: ${SHORT_URL_ADMIN_API_BASE_URL:-http://admin-api:8080}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - admin-api
+
+  admin-ui:
+    image: short-url-admin-ui:${IMAGE_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.admin-ui
+    ports:
+      - "80:80"
+    depends_on:
+      - admin-api
+      - redirect

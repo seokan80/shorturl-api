@@ -1,0 +1,25 @@
+FROM gradle:8.7-jdk17-alpine AS builder
+WORKDIR /workspace
+
+COPY gradlew gradlew.bat settings.gradle build.gradle ./
+COPY gradle gradle
+RUN chmod +x gradlew
+
+COPY common common
+COPY short-url-admin short-url-admin
+COPY short-url-redirect short-url-redirect
+COPY short-url-admin-ui short-url-admin-ui
+
+ARG PROFILE=local
+RUN ./gradlew --no-daemon :short-url-redirect:bootJar -Pprofile=${PROFILE} -x test
+
+FROM eclipse-temurin:17-jre-alpine AS runtime
+WORKDIR /app
+
+ARG PROFILE=local
+ENV SPRING_PROFILES_ACTIVE=${PROFILE}
+ENV SHORT_URL_ADMIN_API_BASE_URL=http://admin-api:8080
+COPY --from=builder /workspace/short-url-redirect/build/libs/short-url-redirect-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

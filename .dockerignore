@@ -1,0 +1,12 @@
+.git
+.gradle
+**/build
+**/out
+**/tmp
+**/.idea
+**/.vscode
+**/node_modules
+**/.yarn
+**/.DS_Store
+short-url-admin-ui/build
+short-url-admin-ui/dist
