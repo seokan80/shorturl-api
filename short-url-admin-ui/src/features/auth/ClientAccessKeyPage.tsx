@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -68,13 +68,14 @@ export function ClientAccessKeyPage() {
     }
   };
 
-  const handleFetch = async () => {
+  const handleFetch = useCallback(async () => {
     await runWithStatus("fetch", async () => {
       const list = await request<ClientAccessKeyInfo[]>("/api/client-keys");
       setItems(list);
       setStatus({ type: "success", message: `총 ${list.length}개의 클라이언트 키를 불러왔습니다.` });
+      setBusyAction(null);
     });
-  };
+  }, [request]);
 
   const handleCreate = async () => {
     if (!createForm.name.trim()) {
@@ -141,6 +142,10 @@ export function ClientAccessKeyPage() {
   };
 
   const isBusy = (label: string) => busyAction === label;
+
+  useEffect(() => {
+      void handleFetch();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
