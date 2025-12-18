@@ -35,6 +35,26 @@ public class RedirectionHistory {
     @Comment("IP")
     private String ip;
 
+    @Column(length = 20)
+    @Comment("디바이스 유형")
+    private String deviceType;
+
+    @Column(length = 50)
+    @Comment("운영체제")
+    private String os;
+
+    @Column(length = 50)
+    @Comment("브라우저")
+    private String browser;
+
+    @Column(length = 10)
+    @Comment("국가 코드")
+    private String country;
+
+    @Column(length = 100)
+    @Comment("도시")
+    private String city;
+
     @Comment("Redirect 일시")
     private LocalDateTime redirectAt;
 }

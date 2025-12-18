@@ -363,7 +363,7 @@ export const apiSpecs: ApiSpec[] = [
         name: "groupBy",
         type: "GroupingType[]",
         required: true,
-        description: "REFERER, YEAR, MONTH, USER_AGENT 등의 그룹 목록"
+        description: "REFERER, USER_AGENT, DEVICE_TYPE, OS, BROWSER, COUNTRY, CITY, YEAR, MONTH, DAY, HOUR 등의 그룹 목록"
       }
     ],
     responses: [

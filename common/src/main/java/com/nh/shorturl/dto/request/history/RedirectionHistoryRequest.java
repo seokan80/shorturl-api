@@ -14,4 +14,9 @@ public class RedirectionHistoryRequest {
     private String referer;
     private String userAgent;
     private String ip;
+    private String deviceType;
+    private String os;
+    private String browser;
+    private String country;
+    private String city;
 }
