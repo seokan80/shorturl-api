@@ -7,20 +7,24 @@ import com.nh.shorturl.admin.repository.ShortUrlRepository;
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
 import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
 import com.nh.shorturl.type.GroupingType;
+import com.nh.shorturl.admin.util.UserAgentParser.UserAgentMetadata;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.nh.shorturl.admin.util.RequestInfoUtils.*;
+import static com.nh.shorturl.admin.util.UserAgentParser.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,8 +53,12 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
         shortUrlRepository.findById(shortUrlId)
                 .orElseThrow(() -> new IllegalArgumentException("URL not found"));
 
-        List<Object[]> results = redirectionHistoryRepository.getStatsByShortUrlId(shortUrlId, request.getGroupBy());
-        List<GroupingType> groupByEnums = request.getGroupBy();
+        List<GroupingType> groupByEnums = Optional.ofNullable(request.getGroupBy()).orElseGet(List::of);
+        if (CollectionUtils.isEmpty(groupByEnums)) {
+            return List.of();
+        }
+
+        List<Object[]> results = redirectionHistoryRepository.getStatsByShortUrlId(shortUrlId, groupByEnums);
 
         List<Map<String, Object>> stats = new ArrayList<>();
         for (Object[] row : results) {
@@ -72,11 +80,19 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
             ShortUrl shortUrlEntity = shortUrlRepository.findByShortUrl(shortUrl)
                     .orElseThrow(() -> new IllegalArgumentException("URL not found"));
 
+            String userAgent = getUserAgent(request);
+            UserAgentMetadata userAgentMetadata = parse(userAgent);
+
             RedirectionHistory redirectionHistory = RedirectionHistory.builder()
                     .ip(getClientIp(request))
                     .shortUrl(shortUrlEntity)
                     .referer(getReferer(request))
-                    .userAgent(getUserAgent(request))
+                    .userAgent(userAgent)
+                    .deviceType(userAgentMetadata.deviceType())
+                    .os(userAgentMetadata.os())
+                    .browser(userAgentMetadata.browser())
+                    .country(getCountry(request))
+                    .city(getCity(request))
                     .redirectAt(LocalDateTime.now())
                     .build();
 
@@ -92,12 +108,19 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
         ShortUrl shortUrl = shortUrlRepository.findByShortUrl(request.getShortUrlKey())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 단축 URL 키입니다: " + request.getShortUrlKey()));
 
+        UserAgentMetadata userAgentMetadata = parse(request.getUserAgent());
+
         // 2. DTO의 정보를 바탕으로 RedirectionHistory 엔티티를 생성합니다.
         RedirectionHistory history = RedirectionHistory.builder()
                 .shortUrl(shortUrl)
                 .referer(request.getReferer())
                 .userAgent(request.getUserAgent())
                 .ip(request.getIp())
+                .deviceType(userAgentMetadata.deviceType())
+                .os(userAgentMetadata.os())
+                .browser(userAgentMetadata.browser())
+                .country(request.getCountry())
+                .city(request.getCity())
                 .redirectAt(LocalDateTime.now()) // 저장 시점의 시간 기록
                 .build();
 
