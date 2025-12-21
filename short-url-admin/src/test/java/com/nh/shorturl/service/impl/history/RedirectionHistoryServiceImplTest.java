@@ -23,6 +23,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -90,6 +92,27 @@ class RedirectionHistoryServiceImplTest {
     }
 
     @Test
+    @DisplayName("그룹 기준이 비어 있으면 빈 리스트를 반환한다")
+    void getStats_returnsEmptyList_whenGroupByMissing() {
+        ShortUrl shortUrl = ShortUrl.builder()
+                .id(4L)
+                .shortUrl("a4")
+                .longUrl("https://example.com")
+                .createBy("tester")
+                .user(User.builder().id(13L).username("tester").apiKey("api").build())
+                .build();
+
+        RedirectionStatsRequest request = new RedirectionStatsRequest();
+
+        given(shortUrlRepository.findById(4L)).willReturn(Optional.of(shortUrl));
+
+        List<Map<String, Object>> stats = redirectionHistoryService.getStats(4L, request);
+
+        assertThat(stats).isEmpty();
+        verify(redirectionHistoryRepository, never()).getStatsByShortUrlId(anyLong(), any());
+    }
+
+    @Test
     @DisplayName("리다이렉션 이력을 저장할 때 요청 메타데이터를 캡처한다")
     void saveRedirectionHistory_persistsRequestInfo() {
         ShortUrl shortUrl = ShortUrl.builder()
@@ -102,8 +125,11 @@ class RedirectionHistoryServiceImplTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("X-Forwarded-For", "10.0.0.1");
-        request.addHeader("User-Agent", "JUnit");
+        request.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                + "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
         request.addHeader("Referer", "https://google.com");
+        request.addHeader("CF-IPCountry", "KR");
+        request.addHeader("X-AppEngine-City", "Seoul");
         request.setRemoteAddr("127.0.0.1");
 
         given(shortUrlRepository.findByShortUrl("abc12345")).willReturn(Optional.of(shortUrl));
@@ -116,8 +142,13 @@ class RedirectionHistoryServiceImplTest {
         assertThat(history.getShortUrl()).isEqualTo(shortUrl);
         assertThat(history.getIp()).isEqualTo("10.0.0.1");
         assertThat(history.getReferer()).isEqualTo("https://google.com");
-        assertThat(history.getUserAgent()).isEqualTo("JUnit");
+        assertThat(history.getUserAgent()).contains("Chrome/122");
         assertThat(history.getRedirectAt()).isNotNull();
+        assertThat(history.getDeviceType()).isEqualTo("DESKTOP");
+        assertThat(history.getOs()).isEqualTo("WINDOWS");
+        assertThat(history.getBrowser()).isEqualTo("CHROME");
+        assertThat(history.getCountry()).isEqualTo("KR");
+        assertThat(history.getCity()).isEqualTo("Seoul");
     }
 
     @Test

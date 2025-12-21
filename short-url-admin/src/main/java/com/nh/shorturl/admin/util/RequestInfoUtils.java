@@ -1,6 +1,9 @@
 package com.nh.shorturl.admin.util;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 public class RequestInfoUtils {
 
@@ -29,5 +32,23 @@ public class RequestInfoUtils {
 
     public static String getReferer(HttpServletRequest request) {
         return request.getHeader("Referer");
+    }
+
+    public static String getCountry(HttpServletRequest request) {
+        return getFirstHeaderValue(request, List.of("CF-IPCountry", "X-AppEngine-Country", "X-Country-Code", "X-Country"));
+    }
+
+    public static String getCity(HttpServletRequest request) {
+        return getFirstHeaderValue(request, List.of("X-AppEngine-City", "X-City"));
+    }
+
+    private static String getFirstHeaderValue(HttpServletRequest request, List<String> headerNames) {
+        for (String headerName : headerNames) {
+            String headerValue = request.getHeader(headerName);
+            if (StringUtils.hasText(headerValue)) {
+                return headerValue;
+            }
+        }
+        return null;
     }
 }

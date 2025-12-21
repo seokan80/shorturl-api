@@ -46,6 +46,11 @@ public class RedirectionHistoryRepositoryCustomImpl implements RedirectionHistor
         return switch (type) {
             case REFERER -> "h.referer";
             case USER_AGENT -> "h.userAgent";
+            case DEVICE_TYPE -> "h.deviceType";
+            case OS -> "h.os";
+            case BROWSER -> "h.browser";
+            case COUNTRY -> "h.country";
+            case CITY -> "h.city";
             case YEAR -> "YEAR(h.redirectAt)";
             case MONTH -> "MONTH(h.redirectAt)";
             case DAY -> "DAY(h.redirectAt)";

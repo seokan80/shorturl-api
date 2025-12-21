@@ -26,7 +26,7 @@
   ```json
   { "groupBy": ["REFERER", "YEAR"] }
   ```
-  - `groupBy` 값은 `GroupingType` 열거형(`REFERER`, `USER_AGENT`, `YEAR`, `MONTH`, `DAY`, `HOUR`)만 허용됩니다.
+  - `groupBy` 값은 `GroupingType` 열거형(`REFERER`, `USER_AGENT`, `DEVICE_TYPE`, `OS`, `BROWSER`, `COUNTRY`, `CITY`, `YEAR`, `MONTH`, `DAY`, `HOUR`)만 허용됩니다.
 - **성공 응답 (`200`, code `0000`)**
   ```json
   {
