@@ -224,7 +224,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         return ShortUrlResponse.builder()
                 .id(entity.getId())
                 .shortKey(entity.getShortUrl())
-                .shortUrl(baseUrl + entity.getShortUrl())
+                .shortUrl(entity.getShortUrl())
                 .longUrl(entity.getLongUrl())
                 .createdBy(entity.getCreateBy())
                 .userId(entity.getUser().getId())

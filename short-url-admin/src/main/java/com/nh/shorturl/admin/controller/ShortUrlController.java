@@ -13,10 +13,12 @@ import com.nh.shorturl.type.ApiResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.Principal;
 
@@ -26,10 +28,12 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/short-url")
 @RequiredArgsConstructor
+@Slf4j
 public class ShortUrlController {
 
     private final ShortUrlService shortUrlService;
     private final ClientAccessKeyService clientAccessKeyService;
+    private final WebClient redirectApiClient;
 
     /**
      * 단축 URL 생성 API.
@@ -50,14 +54,24 @@ public class ShortUrlController {
                     ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE);
 
             if (validatedKey != null) {
-                return new ResultEntity<>(shortUrlService.createShortUrlForClient(request, validatedKey));
+                ShortUrlResponse response = shortUrlService.createShortUrlForClient(request, validatedKey);
+                redirectApiClient.put()
+                        .uri("/api/internal/cache/short-urls")
+                        .bodyValue(response)
+                        .retrieve()
+                        .toBodilessEntity()
+                        .doOnError(e -> log.error("Failed to update short-url cache for {}", response.getShortKey(), e))
+                        .subscribe();
+                return new ResultEntity<>(response);
             }
 
             // 둘 다 없으면 인증 실패
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
+            log.error(e.getMessage(), e);
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         } catch (Exception e) {
+            log.error(e.getLocalizedMessage(), e);
             return ResultEntity.of(ApiResult.FAIL);
         }
     }

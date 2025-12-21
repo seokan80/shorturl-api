@@ -34,7 +34,7 @@ public class ShortUrlCacheWarmer implements ApplicationRunner {
             Cache cache = cacheManager.getCache("shortUrl");
             if (cache != null && allShortUrls != null) {
                 allShortUrls.forEach(shortUrl -> {
-                    log.debug("Caching: key={}, value={}", shortUrl.getShortUrl(), shortUrl.getLongUrl());
+                    log.info("Caching: key={}, value={}", shortUrl.getShortUrl(), shortUrl.getLongUrl());
                     cache.put(shortUrl.getShortUrl(), shortUrl);
                 });
                 log.info("Short URL cache warming completed. {} items cached.", allShortUrls.size());

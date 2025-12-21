@@ -25,6 +25,8 @@ dependencies {
     // Database
     runtimeOnly 'com.h2database:h2' // 로컬 환경용 H2 드라이버
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11' // 운영 환경용 Oracle 드라이버 추가
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
