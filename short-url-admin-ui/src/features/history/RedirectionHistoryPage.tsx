@@ -28,6 +28,10 @@ type RedirectionHistoryItem = {
     country: string;
     city: string;
     redirectAt: string;
+    botType: "CALLBOT" | "CHATBOT" | null;
+    botServiceKey: string | null;
+    surveyId: string | null;
+    surveyVer: string | null;
 };
 
 type PageResponse<T> = {
@@ -60,6 +64,13 @@ const GROUP_BY_OPTIONS = [
 ];
 
 const REG_STORAGE_KEY = "shorturl:accessKey";
+
+const DUMMY_SURVEYS = [
+    { id: "S001", name: "농협 고객 만족도 통합 조사", version: "V1.2" },
+    { id: "S002", name: "대출 상담 프로세스 만족도 조사", version: "V2.0" },
+    { id: "S003", name: "전자금융 서비스 이용 만족도 조사", version: "V1.0" },
+    { id: "S004", name: "영업점 친절도 정기 조사", version: "V3.1" },
+];
 
 export function RedirectionHistoryPage() {
     const [accessKey, setAccessKey] = useState(() => {
@@ -105,7 +116,7 @@ export function RedirectionHistoryPage() {
 
             return payload.data;
         },
-        []
+        [accessKey]
     );
 
     const fetchList = useCallback(
@@ -251,8 +262,8 @@ export function RedirectionHistoryPage() {
                                             <TableHead className="w-16 text-center">ID</TableHead>
                                             <TableHead className="w-32">Short Key</TableHead>
                                             <TableHead className="w-48 text-center">접속 일시</TableHead>
-                                            <TableHead className="w-32 text-center">IP 주소</TableHead>
-                                            <TableHead className="w-24 text-center">국가</TableHead>
+                                            <TableHead className="w-32 text-center">봇 구분</TableHead>
+                                            <TableHead className="w-40 text-center">참조 키</TableHead>
                                             <TableHead className="w-24 text-center">디바이스</TableHead>
                                             <TableHead className="w-36 text-center">OS / 브라우저</TableHead>
                                             <TableHead className="w-16 text-center">작업</TableHead>
@@ -275,10 +286,14 @@ export function RedirectionHistoryPage() {
                                                     <TableCell className="text-center font-mono text-[11px] text-slate-400">{item.id}</TableCell>
                                                     <TableCell className="font-semibold text-blue-600 dark:text-blue-400">{item.shortKey}</TableCell>
                                                     <TableCell className="text-center text-xs">{formatDateTime(item.redirectAt)}</TableCell>
-                                                    <TableCell className="text-center font-mono text-[11px]">{item.ip}</TableCell>
                                                     <TableCell className="text-center">
-                                                        <span className="text-xs">{item.country || "-"}</span>
+                                                        {item.botType ? (
+                                                            <Badge variant="outline" className="text-[10px]">{item.botType === "CALLBOT" ? "콜봇" : "챗봇"}</Badge>
+                                                        ) : (
+                                                            <span className="text-slate-400 text-[10px]">-</span>
+                                                        )}
                                                     </TableCell>
+                                                    <TableCell className="text-center font-mono text-[11px] truncate max-w-[120px]">{item.botServiceKey || "-"}</TableCell>
                                                     <TableCell className="text-center">
                                                         <Badge variant="secondary" className="text-[10px] font-normal">{item.deviceType || "?"}</Badge>
                                                     </TableCell>
@@ -324,16 +339,33 @@ export function RedirectionHistoryPage() {
                                         <p className="text-xs break-all">{selected.referer || "Direct"}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] uppercase text-slate-500 font-bold">User Agent</p>
-                                        <p className="text-[10px] font-mono break-all">{selected.userAgent}</p>
+                                        <p className="text-[10px] uppercase text-slate-500 font-bold">Client Info</p>
+                                        <p className="text-xs">{selected.ip} ({selected.city}, {selected.country})</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[10px] uppercase text-slate-500 font-bold">Location</p>
-                                        <p className="text-xs">{selected.city}, {selected.country}</p>
+                                        <p className="text-[10px] uppercase text-slate-500 font-bold">봇 구분</p>
+                                        <p className="text-xs">
+                                            {selected.botType ? (selected.botType === "CALLBOT" ? "콜봇" : "챗봇") : "-"}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] uppercase text-slate-500 font-bold">참조 키</p>
+                                        <p className="text-xs font-mono">{selected.botServiceKey || "-"}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] uppercase text-slate-500 font-bold">설문 정보</p>
+                                        <p className="text-xs">
+                                            {selected.surveyId ? (DUMMY_SURVEYS.find(s => s.id === selected.surveyId)?.name || selected.surveyId) : "-"}
+                                            {selected.surveyVer ? ` (${selected.surveyVer})` : ""}
+                                        </p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] uppercase text-slate-500 font-bold">Redirect At</p>
                                         <p className="text-xs">{formatDateTime(selected.redirectAt)}</p>
+                                    </div>
+                                    <div className="space-y-1 lg:col-span-4">
+                                        <p className="text-[10px] uppercase text-slate-500 font-bold">User Agent</p>
+                                        <p className="text-[10px] font-mono break-all text-slate-400">{selected.userAgent}</p>
                                     </div>
                                 </div>
                             </CardContent>

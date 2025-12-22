@@ -1,8 +1,7 @@
-// 이 파일은 이전 답변의 내용과 거의 동일합니다.
-// (WebClient를 사용해 비동기로 통계 저장 API를 호출하는 구현체)
 package com.nh.shorturl.redirect.service;
 
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
+import com.nh.shorturl.type.BotType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +19,17 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
 
     @Async
     @Override
-    public void saveRedirectionHistory(String shortUrlKey, HttpServletRequest request) {
+    public void saveRedirectionHistory(String shortUrlKey, HttpServletRequest request, BotType botType,
+            String botServiceKey, String surveyId, String surveyVer) {
         RedirectionHistoryRequest historyRequest = RedirectionHistoryRequest.builder()
                 .shortUrlKey(shortUrlKey)
                 .referer(request.getHeader("Referer"))
                 .userAgent(request.getHeader("User-Agent"))
                 .ip(request.getRemoteAddr())
+                .botType(botType)
+                .botServiceKey(botServiceKey)
+                .surveyId(surveyId)
+                .surveyVer(surveyVer)
                 .build();
 
         webClient.post()

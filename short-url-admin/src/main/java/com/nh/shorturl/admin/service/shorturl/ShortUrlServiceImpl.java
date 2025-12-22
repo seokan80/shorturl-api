@@ -55,12 +55,18 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 사용자"));
 
+        log.info("Creating Short URL for user: {}, request: {}", username, request);
+
         ShortUrl newShortUrl = ShortUrl.builder()
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
                 .createBy(user.getUsername())
                 .user(user)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
+                .botType(request.getBotType())
+                .botServiceKey(request.getBotServiceKey())
+                .surveyId(request.getSurveyId())
+                .surveyVer(request.getSurveyVer())
                 .build();
 
         ShortUrl savedShortUrl = shortUrlRepository.save(newShortUrl);
@@ -92,6 +98,8 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                     return userRepository.save(newUser);
                 });
 
+        log.info("Creating Short URL for client key: {}, request: {}", clientAccessKey.getKeyValue(), request);
+
         ShortUrl entity = ShortUrl.builder()
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
@@ -99,6 +107,10 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .user(anonymousUser)
                 .clientAccessKey(clientAccessKey)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
+                .botType(request.getBotType())
+                .botServiceKey(request.getBotServiceKey())
+                .surveyId(request.getSurveyId())
+                .surveyVer(request.getSurveyVer())
                 .build();
 
         shortUrlRepository.save(entity);
@@ -224,6 +236,10 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .userId(entity.getUser().getId())
                 .createdAt(entity.getCreatedAt())
                 .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)
+                .botType(entity.getBotType())
+                .botServiceKey(entity.getBotServiceKey())
+                .surveyId(entity.getSurveyId())
+                .surveyVer(entity.getSurveyVer())
                 .build();
     }
 

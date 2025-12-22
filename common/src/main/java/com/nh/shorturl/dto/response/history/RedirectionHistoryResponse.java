@@ -1,5 +1,6 @@
 package com.nh.shorturl.dto.response.history;
 
+import com.nh.shorturl.type.BotType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,4 +23,12 @@ public class RedirectionHistoryResponse {
     private String country;
     private String city;
     private LocalDateTime redirectAt;
+
+    // 봇 정보
+    private BotType botType;
+    private String botServiceKey;
+
+    // 설문 정보
+    private String surveyId;
+    private String surveyVer;
 }

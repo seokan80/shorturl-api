@@ -22,6 +22,10 @@ type ShortUrlItem = {
   userId: number;
   createdAt: string;
   expiredAt: string | null;
+  botType: "CALLBOT" | "CHATBOT" | null;
+  botServiceKey: string | null;
+  surveyId: string | null;
+  surveyVer: string | null;
 };
 
 type ShortUrlList = {
@@ -31,6 +35,13 @@ type ShortUrlList = {
 
 const PAGE_SIZE = 10;
 const CLIENT_KEY_STORAGE_KEY = "shorturl:accessKey";
+
+const DUMMY_SURVEYS = [
+  { id: "S001", name: "농협 고객 만족도 통합 조사", version: "V1.2", url: "https://www.naver.com" },
+  { id: "S002", name: "대출 상담 프로세스 만족도 조사", version: "V2.0", url: "https://www.daum.net" },
+  { id: "S003", name: "전자금융 서비스 이용 만족도 조사", version: "V1.0", url: "https://www.google.com" },
+  { id: "S004", name: "영업점 친절도 정기 조사", version: "V3.1", url: "https://finance.naver.com/" },
+];
 
 const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : "-");
 const toInputValue = (value?: string | null) => {
@@ -45,7 +56,13 @@ export function ShortUrlManagementPage() {
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<ShortUrlItem | null>(null);
-  const [createForm, setCreateForm] = useState({ longUrl: "" });
+  const [createForm, setCreateForm] = useState<{
+    longUrl: string;
+    botType: "CALLBOT" | "CHATBOT" | "";
+    botServiceKey: string;
+    surveyId: string;
+    surveyVer: string;
+  }>({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" });
   const [editForm, setEditForm] = useState({ expiredAt: "" });
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
@@ -137,16 +154,27 @@ export function ShortUrlManagementPage() {
 
   const handleCreate = async () => {
     if (!createForm.longUrl.trim()) {
-      setError("원본 URL을 입력해주세요.");
+      setError("만족도조사를 선택하여 원본 URL을 확인해주세요.");
       return;
     }
 
     await runWithStatus("create", async () => {
+      const payload = {
+        longUrl: createForm.longUrl.trim(),
+        botType: createForm.botType || null,
+        botServiceKey: createForm.botServiceKey.trim() || null,
+        surveyId: createForm.surveyId || null,
+        surveyVer: createForm.surveyVer || null,
+      };
+
+      console.log("Creating Short URL with payload:", payload);
+
       await request<ShortUrlItem>("/api/short-url", {
         method: "POST",
-        body: JSON.stringify({ longUrl: createForm.longUrl.trim() })
+        body: JSON.stringify(payload)
       }, { requireClientKey: true });
-      setCreateForm({ longUrl: "" });
+
+      setCreateForm({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" });
       setSelected(null);
       setEditForm({ expiredAt: "" });
       setSuccess("단축 URL을 생성했습니다.");
@@ -245,9 +273,60 @@ export function ShortUrlManagementPage() {
           <div className="flex flex-col gap-2">
             <p className="text-xs text-slate-500 dark:text-slate-400">원본 URL *</p>
             <Input
-              placeholder="https://example.com/landing"
+              placeholder="만족도조사를 선택하면 자동으로 입력됩니다."
               value={createForm.longUrl}
-              onChange={(event) => setCreateForm({ longUrl: event.target.value })}
+              readOnly
+              className="bg-slate-50 dark:bg-slate-900/50"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400">만족도조사명</p>
+            <select
+              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
+              value={createForm.surveyId}
+              onChange={(e) => {
+                const sId = e.target.value;
+                const survey = DUMMY_SURVEYS.find(s => s.id === sId);
+                setCreateForm(prev => ({
+                  ...prev,
+                  surveyId: sId,
+                  surveyVer: survey ? survey.version : "",
+                  longUrl: survey ? survey.url : ""
+                }));
+              }}
+            >
+              <option value="">설문명 선택</option>
+              {DUMMY_SURVEYS.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400">설문 버전</p>
+            <Input
+              readOnly
+              className="bg-slate-50 dark:bg-slate-900/50"
+              value={createForm.surveyVer || "-"}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400">봇 구분</p>
+            <select
+              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
+              value={createForm.botType}
+              onChange={(e) => setCreateForm(prev => ({ ...prev, botType: e.target.value as any }))}
+            >
+              <option value="">선택 안함</option>
+              <option value="CALLBOT">콜봇</option>
+              <option value="CHATBOT">챗봇</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400">참조 키 (전화번호/세션키)</p>
+            <Input
+              placeholder="키 값을 입력하세요"
+              value={createForm.botServiceKey}
+              onChange={(event) => setCreateForm(prev => ({ ...prev, botServiceKey: event.target.value }))}
             />
           </div>
           <div className="flex items-end gap-2 md:col-span-2">
@@ -255,7 +334,7 @@ export function ShortUrlManagementPage() {
               {isBusy("create") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               단축 URL 생성
             </Button>
-            <Button type="button" variant="outline" onClick={() => setCreateForm({ longUrl: "" })}>
+            <Button type="button" variant="outline" onClick={() => setCreateForm({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" })}>
               초기화
             </Button>
           </div>
@@ -281,8 +360,8 @@ export function ShortUrlManagementPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-32">Short Key</TableHead>
-                  <TableHead>원본 URL</TableHead>
-                  <TableHead className="w-32">생성자</TableHead>
+                  <TableHead className="w-48">서베이아이디</TableHead>
+                  <TableHead className="w-32">봇 구분</TableHead>
                   <TableHead className="w-36">생성일</TableHead>
                   <TableHead className="w-36">만료일</TableHead>
                   <TableHead className="w-24 text-center">상태</TableHead>
@@ -315,15 +394,16 @@ export function ShortUrlManagementPage() {
                           {item.shortKey}
                         </a>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="truncate text-sm">{item.longUrl}</span>
-                          <Button variant="ghost" size="icon" onClick={() => handleCopy(item.longUrl)} aria-label="원본 URL 복사">
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      <TableCell className="text-sm">
+                        {item.surveyId || <span className="text-slate-400">-</span>}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-600 dark:text-slate-300">{item.createdBy}</TableCell>
+                      <TableCell className="text-sm">
+                        {item.botType ? (
+                          <Badge variant="outline">{item.botType === "CALLBOT" ? "콜봇" : "챗봇"}</Badge>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-xs text-slate-500">{formatDateTime(item.createdAt)}</TableCell>
                       <TableCell className="text-xs text-slate-500">{formatDateTime(item.expiredAt)}</TableCell>
                       <TableCell className="text-center">
@@ -424,18 +504,38 @@ export function ShortUrlManagementPage() {
               <p className="text-sm break-all text-slate-700 dark:text-slate-200">{selected.longUrl}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">생성자</p>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{selected.createdBy}</p>
-              <p className="text-xs text-slate-500">생성일 · {formatDateTime(selected.createdAt)}</p>
+              <p className="text-xs text-slate-500">봇 정보</p>
+              {selected.botType ? (
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  {selected.botType === "CALLBOT" ? "콜봇" : "챗봇"} ({selected.botServiceKey})
+                </p>
+              ) : (
+                <p className="text-sm text-slate-400">봇 정보 없음</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-slate-500">설문 정보</p>
+              {selected.surveyId ? (
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  {DUMMY_SURVEYS.find(s => s.id === selected.surveyId)?.name || selected.surveyId} ({selected.surveyVer})
+                </p>
+              ) : (
+                <p className="text-sm text-slate-400">설문 정보 없음</p>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <p className="text-xs text-slate-500">만료일</p>
-              <Input
+              <input
                 type="datetime-local"
+                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
                 value={editForm.expiredAt}
                 onChange={(event) => setEditForm({ expiredAt: event.target.value })}
               />
               <p className="text-xs text-slate-500">서버에는 yyyy-MM-dd&apos;T&apos;HH:mm:ss으로 전송됩니다.</p>
+            </div>
+            <div className="flex flex-col gap-1 justify-end">
+              <p className="text-[10px] text-slate-500">생성자: {selected.createdBy}</p>
+              <p className="text-[10px] text-slate-500">생성일: {formatDateTime(selected.createdAt)}</p>
             </div>
           </CardContent>
         </Card>

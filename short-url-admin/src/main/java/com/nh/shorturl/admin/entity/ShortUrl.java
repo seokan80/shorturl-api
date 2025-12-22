@@ -2,6 +2,7 @@ package com.nh.shorturl.admin.entity;
 
 import com.nh.shorturl.admin.constants.SchemaConstants;
 import com.nh.shorturl.admin.entity.common.BaseEntity;
+import com.nh.shorturl.type.BotType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
@@ -12,14 +13,15 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = SchemaConstants.TABLE_PREFIX + "SHORT_URL", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"SHORT_URL"})
+        @UniqueConstraint(columnNames = { "SHORT_URL" })
 })
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SQLDelete(sql = "UPDATE " + SchemaConstants.TABLE_PREFIX + "SHORT_URL SET IS_DEL = 'Y', DELETED_AT = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE " + SchemaConstants.TABLE_PREFIX
+        + "SHORT_URL SET IS_DEL = 'Y', DELETED_AT = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("IS_DEL = 'N'")
 public class ShortUrl extends BaseEntity {
 
@@ -61,6 +63,23 @@ public class ShortUrl extends BaseEntity {
     @Column
     @Comment("삭제일")
     private LocalDateTime deletedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Comment("봇 타입 (CALLBOT, CHATBOT)")
+    private BotType botType;
+
+    @Column(length = 100)
+    @Comment("봇 서비스 식별 키 (전화번호 또는 세션키)")
+    private String botServiceKey;
+
+    @Column(length = 50)
+    @Comment("설문 ID")
+    private String surveyId;
+
+    @Column(length = 20)
+    @Comment("설문 버전")
+    private String surveyVer;
 
     public ShortUrl(String longUrl, String shortUrl, String createBy, LocalDateTime expiredAt) {
         this.longUrl = longUrl;

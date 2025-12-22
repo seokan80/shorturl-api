@@ -96,6 +96,10 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
                     .browser(userAgentMetadata.browser())
                     .country(getCountry(request))
                     .city(getCity(request))
+                    .botType(shortUrlEntity.getBotType())
+                    .botServiceKey(shortUrlEntity.getBotServiceKey())
+                    .surveyId(shortUrlEntity.getSurveyId())
+                    .surveyVer(shortUrlEntity.getSurveyVer())
                     .redirectAt(LocalDateTime.now())
                     .build();
 
@@ -125,6 +129,10 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
                 .browser(userAgentMetadata.browser())
                 .country(request.getCountry())
                 .city(request.getCity())
+                .botType(request.getBotType())
+                .botServiceKey(request.getBotServiceKey())
+                .surveyId(request.getSurveyId())
+                .surveyVer(request.getSurveyVer())
                 .redirectAt(LocalDateTime.now()) // 저장 시점의 시간 기록
                 .build();
 
@@ -160,6 +168,10 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
                 .browser(history.getBrowser())
                 .country(history.getCountry())
                 .city(history.getCity())
+                .botType(history.getBotType())
+                .botServiceKey(history.getBotServiceKey())
+                .surveyId(history.getSurveyId())
+                .surveyVer(history.getSurveyVer())
                 .redirectAt(history.getRedirectAt())
                 .build();
     }

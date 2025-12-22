@@ -51,7 +51,13 @@ public class ShortUrlRedirectController {
             }
 
             // 통계 저장을 비동기로 요청 (Fire-and-Forget)
-            redirectionHistoryService.saveRedirectionHistory(shortUrl, request);
+            redirectionHistoryService.saveRedirectionHistory(
+                    shortUrl,
+                    request,
+                    shortUrlResponse.getBotType(),
+                    shortUrlResponse.getBotServiceKey(),
+                    shortUrlResponse.getSurveyId(),
+                    shortUrlResponse.getSurveyVer());
 
             // 추적 필드 추가
             String targetUrl = appendTrackingFields(shortUrlResponse.getLongUrl(), request, config);

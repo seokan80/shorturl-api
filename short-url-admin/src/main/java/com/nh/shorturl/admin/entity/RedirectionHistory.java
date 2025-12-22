@@ -1,7 +1,7 @@
 package com.nh.shorturl.admin.entity;
 
-
 import com.nh.shorturl.admin.constants.SchemaConstants;
+import com.nh.shorturl.type.BotType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
@@ -57,4 +57,21 @@ public class RedirectionHistory {
 
     @Comment("Redirect 일시")
     private LocalDateTime redirectAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Comment("봇 타입 (CALLBOT, CHATBOT)")
+    private BotType botType;
+
+    @Column(length = 100)
+    @Comment("봇 서비스 식별 키")
+    private String botServiceKey;
+
+    @Column(length = 50)
+    @Comment("설문 ID")
+    private String surveyId;
+
+    @Column(length = 20)
+    @Comment("설문 버전")
+    private String surveyVer;
 }
