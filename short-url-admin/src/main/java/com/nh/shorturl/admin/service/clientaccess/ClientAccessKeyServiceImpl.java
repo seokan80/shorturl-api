@@ -25,14 +25,16 @@ public class ClientAccessKeyServiceImpl implements ClientAccessKeyService {
     public ClientAccessKey create(ClientAccessKeyCreateRequest request) {
         String keyValue = UUID.randomUUID().toString().replaceAll("-", "");
         String name = StringUtils.hasText(request.getName()) ? request.getName() : "Client Access Key";
+        LocalDateTime expiresAt = request.getExpiresAt() != null ? request.getExpiresAt()
+                : LocalDateTime.now().plusYears(100);
         ClientAccessKey entity = ClientAccessKey.builder()
-            .name(name)
-            .issuedBy(request.getIssuedBy())
-            .description(request.getDescription())
-            .expiresAt(request.getExpiresAt())
-            .keyValue(keyValue)
-            .active(true)
-            .build();
+                .name(name)
+                .issuedBy(request.getIssuedBy())
+                .description(request.getDescription())
+                .expiresAt(expiresAt)
+                .keyValue(keyValue)
+                .active(true)
+                .build();
         return clientAccessKeyRepository.save(entity);
     }
 
@@ -40,7 +42,7 @@ public class ClientAccessKeyServiceImpl implements ClientAccessKeyService {
     @Transactional
     public ClientAccessKey update(Long id, ClientAccessKeyUpdateRequest request) {
         ClientAccessKey entity = clientAccessKeyRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Client access key not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Client access key not found with id: " + id));
 
         if (StringUtils.hasText(request.getName())) {
             entity.setName(request.getName());
@@ -57,7 +59,7 @@ public class ClientAccessKeyServiceImpl implements ClientAccessKeyService {
     @Transactional
     public void delete(Long id) {
         ClientAccessKey entity = clientAccessKeyRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Client access key not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Client access key not found with id: " + id));
         clientAccessKeyRepository.delete(entity);
     }
 
@@ -70,7 +72,7 @@ public class ClientAccessKeyServiceImpl implements ClientAccessKeyService {
     @Transactional
     public ClientAccessKey validateActiveKey(String keyValue) {
         ClientAccessKey key = clientAccessKeyRepository.findByKeyValueAndDeletedFalse(keyValue)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid client access key"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid client access key"));
 
         if (Boolean.FALSE.equals(key.getActive())) {
             throw new IllegalArgumentException("Client access key is inactive");
