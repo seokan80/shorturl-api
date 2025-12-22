@@ -23,4 +23,7 @@ jasypt:
 jwt:
   expiration: 3600000 # 1시간
 
-base-url: http://localhost:8080/
+
+short-url:
+  redirect:
+    public-url: http://localhost:8081/

@@ -7,7 +7,7 @@ import { SpecDetailPage } from "./features/specs/SpecDetailPage";
 import { WorkflowInboxPage } from "./features/workflow/WorkflowInboxPage";
 import { ActivityPage } from "./features/activity/ActivityPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
-import { ControlsLayout } from "./layouts/ControlsLayout";
+
 import { AuthControlsPage } from "./features/controls/AuthControlsPage";
 import { ShortUrlManagementPage } from "./features/shorturl/ShortUrlManagementPage";
 import { RedirectionControlsPage } from "./features/controls/RedirectionControlsPage";
@@ -25,20 +25,12 @@ function App() {
           <Route index element={<SpecsOverviewPage />} />
           <Route path=":specId" element={<SpecDetailPage />} />
         </Route>
-        <Route path="auth" element={<ControlsLayout />}>
-          <Route index element={<AuthControlsPage />} />
-        </Route>
+        <Route path="auth" element={<AuthControlsPage />} />
         <Route path="users" element={<UserManagementPage />} />
         <Route path="client-keys" element={<ClientAccessKeyPage />} />
-        <Route path="short-url" element={<ControlsLayout />}>
-          <Route index element={<ShortUrlManagementPage />} />
-        </Route>
-        <Route path="redirection" element={<ControlsLayout />}>
-          <Route index element={<RedirectionControlsPage />} />
-        </Route>
-        <Route path="analytics" element={<ControlsLayout />}>
-          <Route index element={<AnalyticsControlsPage />} />
-        </Route>
+        <Route path="short-url" element={<ShortUrlManagementPage />} />
+        <Route path="redirection" element={<RedirectionControlsPage />} />
+        <Route path="analytics" element={<AnalyticsControlsPage />} />
         <Route path="workflow" element={<WorkflowInboxPage />} />
         <Route path="activity" element={<ActivityPage />} />
         <Route path="settings" element={<SettingsPage />} />

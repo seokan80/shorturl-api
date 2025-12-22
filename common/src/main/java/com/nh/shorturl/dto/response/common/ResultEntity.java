@@ -58,8 +58,8 @@ public class ResultEntity<T> implements Serializable {
 		return ResultEntity.ok(new Result<>(Boolean.FALSE));
 	}
 
-	public static ResultEntity ok(Object data) {
-		return new ResultEntity(data);
+	public static <T> ResultEntity<T> ok(T data) {
+		return new ResultEntity<>(data);
 	}
 
 	public static ResultEntity badRequest() {
@@ -79,8 +79,8 @@ public class ResultEntity<T> implements Serializable {
 
 	public static ResultEntity fail(Map<String, Object> data) {
 		return new ResultEntity()
-			.setCode(ApiResult.FAIL.getCode())
-			.setData(data);
+				.setCode(ApiResult.FAIL.getCode())
+				.setData(data);
 	}
 
 	public ResultEntity fail(String message) {

@@ -305,7 +305,16 @@ export function ShortUrlManagementPage() {
                 ) : (
                   items.map((item) => (
                     <TableRow key={item.id} className={cn(selected?.id === item.id && "bg-slate-50 dark:bg-slate-900/20")}>
-                      <TableCell className="font-mono text-xs">{item.shortKey}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <a
+                          href={item.shortUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline dark:text-blue-400"
+                        >
+                          {item.shortKey}
+                        </a>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="truncate text-sm">{item.longUrl}</span>

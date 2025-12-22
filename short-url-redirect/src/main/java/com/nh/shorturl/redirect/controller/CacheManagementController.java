@@ -17,7 +17,7 @@ public class CacheManagementController {
 
     @PutMapping("/short-urls")
     public ResponseEntity<Void> updateCache(@RequestBody ShortUrlResponse response) {
-        log.info("Updating cache for key: {}", response.getShortUrl());
+        log.info("Updating cache for key: {}", response.getShortKey());
         cacheService.updateShortUrlInCache(response);
         return ResponseEntity.ok().build();
     }

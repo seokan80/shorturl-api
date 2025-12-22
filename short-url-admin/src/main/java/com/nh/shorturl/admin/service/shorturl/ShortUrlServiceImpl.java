@@ -33,10 +33,11 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     private final WebClient redirectApiClient; // redirect 모듈 호출용 WebClient 주입
     private final UserRepository userRepository;
 
-    @Value("${base-url}")
-    private String baseUrl;
+    @Value("${short-url.redirect.public-url}")
+    private String publicUrl;
 
-    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository, WebClient redirectApiClient, UserRepository userRepository) {
+    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository, WebClient redirectApiClient,
+            UserRepository userRepository) {
         this.shortUrlRepository = shortUrlRepository;
         this.redirectApiClient = redirectApiClient;
         this.userRepository = userRepository;
@@ -64,14 +65,11 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         ShortUrl savedShortUrl = shortUrlRepository.save(newShortUrl);
 
-        ShortUrlResponse response = ShortUrlResponse.builder()
-                .longUrl(savedShortUrl.getLongUrl())
-                .shortUrl(savedShortUrl.getShortUrl())
-                .build();
+        ShortUrlResponse response = toResponse(savedShortUrl);
 
         // redirect 모듈에 캐시 업데이트 요청
         notifyCacheUpdate(response);
-        
+
         return response;
     }
 
@@ -107,7 +105,6 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         return toResponse(entity);
     }
-
 
     @Override
     @Transactional
@@ -156,14 +153,11 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         return entity.getLongUrl();
     }
-    
+
     @Override
     public List<ShortUrlResponse> findAllForCaching() {
         return shortUrlRepository.findAll().stream()
-                .map(shortUrl -> ShortUrlResponse.builder()
-                        .longUrl(shortUrl.getLongUrl())
-                        .shortUrl(shortUrl.getShortUrl())
-                        .build())
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -224,7 +218,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         return ShortUrlResponse.builder()
                 .id(entity.getId())
                 .shortKey(entity.getShortUrl())
-                .shortUrl(entity.getShortUrl())
+                .shortUrl(publicUrl + entity.getShortUrl())
                 .longUrl(entity.getLongUrl())
                 .createdBy(entity.getCreateBy())
                 .userId(entity.getUser().getId())

@@ -26,7 +26,11 @@ jwt:
   # secret: ${LOCAL_JWT_SECRET:dAvU+ok0uxdNJADgmnhryNETOxcJCIK6ETe9khKhoPK9WT96GspP7VQ81n9QQJ3f2VLznWXa4VEDF3ejwUmUEA==}
   secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
 
-base-url: http://localhost:8080/
+# base-url: http://localhost:8080/
+short-url:
+  redirect:
+    api.base-url: http://localhost:8081
+    public-url: http://localhost:8081/
 
 jasypt:
   encryptor:
@@ -37,8 +41,3 @@ logging:
     root: INFO
     '[org.springframework.security]': DEBUG
     '[com.nh.shorturl]': DEBUG
-
-# short-url-redirect 모듈의 API 주소
-short-url:
-  redirect:
-    api.base-url: http://localhost:8081

@@ -8,6 +8,7 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
@@ -15,6 +16,7 @@ import java.time.Duration;
 @Configuration
 @EnableCaching
 @EnableAsync
+@EnableScheduling
 public class AppConfig {
 
     @Value("${short-url.admin.api.base-url}")
