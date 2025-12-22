@@ -21,46 +21,47 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtProvider jwtProvider;
-    private final CustomUserDetailsService customUserDetailsService;
-    private final ClientAccessKeyService clientAccessKeyService;
-    private final ObjectMapper objectMapper;
+        private final JwtProvider jwtProvider;
+        private final CustomUserDetailsService customUserDetailsService;
+        private final ClientAccessKeyService clientAccessKeyService;
+        private final ObjectMapper objectMapper;
 
-    @Bean
-    public ClientAccessKeyValidationFilter clientAccessKeyValidationFilter() {
-        return new ClientAccessKeyValidationFilter(clientAccessKeyService, objectMapper);
-    }
+        @Bean
+        public ClientAccessKeyValidationFilter clientAccessKeyValidationFilter() {
+                return new ClientAccessKeyValidationFilter(clientAccessKeyService, objectMapper);
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                // JWT 기반의 무상태(Stateless) API로 운영하기 위해 세션 정책을 STATELESS로 설정합니다.
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // /api/client-keys/, /api/auth/, /api/users/, /r/ 하위 경로 및 /error 경로는 인증 없이 허용
-                        .requestMatchers(
-                                "/api/client-keys/**",
-                                "/api/auth/**",
-                                "/api/users/**",
-                                "/r/**",
-                                "/error",
-                                "/api/internal/**",
-                                "/h2-console/**",
-                                "/api/short-url"
-                        )
-                        .permitAll()
-                        // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
-                        .anyRequest().authenticated()
-                )
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
-                )
-                // JwtAuthenticationFilter를 먼저 실행하고, 그 다음 ClientAccessKeyValidationFilter 실행
-                // 이렇게 하면 JWT 토큰이 있는 경우 먼저 인증되어 ClientAccessKey 검증을 스킵할 수 있음
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(clientAccessKeyValidationFilter(), UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http.csrf(csrf -> csrf.disable())
+                                // JWT 기반의 무상태(Stateless) API로 운영하기 위해 세션 정책을 STATELESS로 설정합니다.
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                // /api/client-keys/, /api/auth/, /api/users/, /r/ 하위 경로 및 /error 경로는 인증
+                                                // 없이 허용
+                                                .requestMatchers(
+                                                                "/api/client-keys/**",
+                                                                "/api/auth/**",
+                                                                "/api/users/**",
+                                                                "/r/**",
+                                                                "/error",
+                                                                "/api/internal/**",
+                                                                "/api/redirections/history/**",
+                                                                "/h2-console/**",
+                                                                "/api/short-url")
+                                                .permitAll()
+                                                // 그 외 나머지 모든 요청은 반드시 인증을 거쳐야 함
+                                                .anyRequest().authenticated())
+                                .headers(headers -> headers
+                                                .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                                // JwtAuthenticationFilter를 먼저 실행하고, 그 다음 ClientAccessKeyValidationFilter 실행
+                                // 이렇게 하면 JWT 토큰이 있는 경우 먼저 인증되어 ClientAccessKey 검증을 스킵할 수 있음
+                                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, customUserDetailsService),
+                                                UsernamePasswordAuthenticationFilter.class)
+                                .addFilterBefore(clientAccessKeyValidationFilter(),
+                                                UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 }

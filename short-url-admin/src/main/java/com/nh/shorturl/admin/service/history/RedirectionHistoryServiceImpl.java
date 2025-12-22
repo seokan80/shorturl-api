@@ -6,12 +6,15 @@ import com.nh.shorturl.admin.repository.RedirectionHistoryRepository;
 import com.nh.shorturl.admin.repository.ShortUrlRepository;
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
 import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
+import com.nh.shorturl.dto.response.history.RedirectionHistoryResponse;
 import com.nh.shorturl.type.GroupingType;
 import com.nh.shorturl.admin.util.UserAgentParser.UserAgentMetadata;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -101,6 +104,7 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
             log.error("saveRedirectionHistory error: {}", e.getMessage(), e);
         }
     }
+
     @Override
     @Transactional
     public void saveRedirectionHistory(RedirectionHistoryRequest request) {
@@ -126,5 +130,37 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
 
         // 3. 데이터베이스에 저장합니다.
         redirectionHistoryRepository.save(history);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RedirectionHistoryResponse> findAll(Pageable pageable) {
+        return redirectionHistoryRepository.findAll(pageable)
+                .map(this::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RedirectionHistoryResponse findById(Long id) {
+        return redirectionHistoryRepository.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new IllegalArgumentException("History not found: " + id));
+    }
+
+    private RedirectionHistoryResponse toResponse(RedirectionHistory history) {
+        return RedirectionHistoryResponse.builder()
+                .id(history.getId())
+                .shortUrlId(history.getShortUrl().getId())
+                .shortKey(history.getShortUrl().getShortUrl())
+                .referer(history.getReferer())
+                .userAgent(history.getUserAgent())
+                .ip(history.getIp())
+                .deviceType(history.getDeviceType())
+                .os(history.getOs())
+                .browser(history.getBrowser())
+                .country(history.getCountry())
+                .city(history.getCity())
+                .redirectAt(history.getRedirectAt())
+                .build();
     }
 }

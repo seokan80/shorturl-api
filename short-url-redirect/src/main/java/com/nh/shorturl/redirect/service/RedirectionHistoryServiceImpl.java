@@ -29,7 +29,7 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
                 .build();
 
         webClient.post()
-                .uri("/api/internal/redirection-histories")
+                .uri("/api/redirections/history/internal")
                 .body(Mono.just(historyRequest), RedirectionHistoryRequest.class)
                 .retrieve()
                 .toBodilessEntity()

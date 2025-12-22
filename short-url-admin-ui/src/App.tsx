@@ -14,6 +14,7 @@ import { RedirectionControlsPage } from "./features/controls/RedirectionControls
 import { AnalyticsControlsPage } from "./features/controls/AnalyticsControlsPage";
 import { UserManagementPage } from "./features/auth/UserManagementPage";
 import { ClientAccessKeyPage } from "./features/auth/ClientAccessKeyPage";
+import { RedirectionHistoryPage } from "./features/history/RedirectionHistoryPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="users" element={<UserManagementPage />} />
         <Route path="client-keys" element={<ClientAccessKeyPage />} />
         <Route path="short-url" element={<ShortUrlManagementPage />} />
+        <Route path="histories" element={<RedirectionHistoryPage />} />
         <Route path="redirection" element={<RedirectionControlsPage />} />
         <Route path="analytics" element={<AnalyticsControlsPage />} />
         <Route path="workflow" element={<WorkflowInboxPage />} />
