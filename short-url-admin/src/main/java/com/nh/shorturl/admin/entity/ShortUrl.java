@@ -27,7 +27,7 @@ public class ShortUrl extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("자동 생성 ID")
+    @Comment("고유 번호")
     private Long id;
 
     @Column(nullable = false, length = 2000)
@@ -35,56 +35,53 @@ public class ShortUrl extends BaseEntity {
     private String longUrl;
 
     @Column(nullable = false, length = 100)
-    @Comment("단축 URL")
+    @Comment("단축 키")
     private String shortUrl;
-
-    @Comment("생성자")
-    private String createBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-    @Comment("생성자 User ID")
+    @Comment("생성 관리자")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CLIENT_ACCESS_KEY_ID")
-    @Comment("클라이언트 접근 키 (비회원 생성 시)")
+    @Comment("클라이언트 키 (비회원 발급용)")
     private ClientAccessKey clientAccessKey;
 
     @Column
-    @Comment("만료일")
+    @Comment("만료 일시")
     private LocalDateTime expiredAt;
 
+    @Convert(converter = org.hibernate.type.YesNoConverter.class)
     @Column(name = "IS_DEL", length = 1)
-    @Comment("삭제 여부")
+    @Comment("삭제 여부 (Y/N)")
     @Builder.Default
     private Boolean deleted = false;
 
     @Column
-    @Comment("삭제일")
+    @Comment("삭제 일시")
     private LocalDateTime deletedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    @Comment("봇 타입 (CALLBOT, CHATBOT)")
+    @Comment("봇 구분 (CALLBOT, CHATBOT)")
     private BotType botType;
 
     @Column(length = 100)
-    @Comment("봇 서비스 식별 키 (전화번호 또는 세션키)")
+    @Comment("봇 서비스 식별 키 (전화번호/세션키)")
     private String botServiceKey;
 
     @Column(length = 50)
-    @Comment("설문 ID")
+    @Comment("설문 식별 ID")
     private String surveyId;
 
     @Column(length = 20)
     @Comment("설문 버전")
     private String surveyVer;
 
-    public ShortUrl(String longUrl, String shortUrl, String createBy, LocalDateTime expiredAt) {
+    public ShortUrl(String longUrl, String shortUrl, LocalDateTime expiredAt) {
         this.longUrl = longUrl;
         this.shortUrl = shortUrl;
-        this.createBy = createBy;
         this.expiredAt = expiredAt;
     }
 }

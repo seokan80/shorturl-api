@@ -17,8 +17,10 @@ public abstract class BaseEntity {
 
     @CreatedDate // Entity가 생성될 때의 시간을 자동으로 저장합니다.
     @Column(updatable = false, nullable = false)
+    @org.hibernate.annotations.Comment("생성 일시")
     private LocalDateTime createdAt;
 
     @LastModifiedDate // Entity가 수정될 때의 시간을 자동으로 저장합니다.
+    @org.hibernate.annotations.Comment("수정 일시")
     private LocalDateTime updatedAt;
 }

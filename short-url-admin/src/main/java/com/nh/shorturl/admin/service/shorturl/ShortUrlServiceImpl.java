@@ -60,7 +60,6 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl newShortUrl = ShortUrl.builder()
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
-                .createBy(user.getUsername())
                 .user(user)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
                 .botType(request.getBotType())
@@ -103,7 +102,6 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl entity = ShortUrl.builder()
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
-                .createBy("anonymous")
                 .user(anonymousUser)
                 .clientAccessKey(clientAccessKey)
                 .expiredAt(LocalDateTime.now().plusDays(1L))
@@ -128,7 +126,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl shortUrl = shortUrlRepository.findById(shortUrlId)
                 .orElseThrow(() -> new IllegalArgumentException("ID에 해당하는 단축 URL을 찾을 수 없습니다: " + shortUrlId));
 
-        if (username == null || !username.equals(shortUrl.getCreateBy())) {
+        if (username == null || !username.equals(shortUrl.getUser().getUsername())) {
             throw new IllegalStateException("자신이 생성한 URL만 삭제할 수 있습니다.");
         }
 
@@ -205,7 +203,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .orElseThrow(() -> new IllegalArgumentException("URL을 찾을 수 없습니다. ID: " + id));
 
         // 권한 확인: 자신이 생성한 URL만 수정 가능
-        if (username != null && !username.equals(shortUrl.getCreateBy())) {
+        if (username != null && !username.equals(shortUrl.getUser().getUsername())) {
             throw new IllegalStateException("자신이 생성한 URL만 수정할 수 있습니다.");
         }
 
@@ -236,7 +234,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .shortKey(entity.getShortUrl())
                 .shortUrl(publicUrl + entity.getShortUrl())
                 .longUrl(entity.getLongUrl())
-                .createdBy(entity.getCreateBy())
+                .createdBy(entity.getUser().getUsername())
                 .userId(entity.getUser().getId())
                 .createdAt(entity.getCreatedAt())
                 .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)

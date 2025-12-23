@@ -18,57 +18,57 @@ import java.time.LocalDateTime;
 public class RedirectionHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("자동 생성 ID")
+    @Comment("고유 번호")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    @Comment("Short URL ID")
+    @Comment("단축 URL 정보")
     private ShortUrl shortUrl;
 
-    @Comment("referer")
+    @Comment("레퍼러 (이전 페이지 주소)")
     private String referer;
 
-    @Comment("userAgent")
+    @Comment("User Agent (브라우저 정보)")
     private String userAgent;
 
-    @Comment("IP")
+    @Comment("접속 IP 주소")
     private String ip;
 
     @Column(length = 20)
-    @Comment("디바이스 유형")
+    @Comment("디바이스 구분 (Mobile, Desktop 등)")
     private String deviceType;
 
     @Column(length = 50)
-    @Comment("운영체제")
+    @Comment("운영체제(OS)")
     private String os;
 
     @Column(length = 50)
-    @Comment("브라우저")
+    @Comment("브라우저 명")
     private String browser;
 
     @Column(length = 10)
-    @Comment("국가 코드")
+    @Comment("접속 국가 코드")
     private String country;
 
     @Column(length = 100)
-    @Comment("도시")
+    @Comment("접속 도시 명")
     private String city;
 
-    @Comment("Redirect 일시")
+    @Comment("리다이렉션 실행 일시")
     private LocalDateTime redirectAt;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    @Comment("봇 타입 (CALLBOT, CHATBOT)")
+    @Comment("봇 구분 (CALLBOT, CHATBOT)")
     private BotType botType;
 
     @Column(length = 100)
-    @Comment("봇 서비스 식별 키")
+    @Comment("봇 서비스 식별 키 (참조 키)")
     private String botServiceKey;
 
     @Column(length = 50)
-    @Comment("설문 ID")
+    @Comment("설문 식별 ID")
     private String surveyId;
 
     @Column(length = 20)
