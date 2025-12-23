@@ -113,9 +113,13 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .surveyVer(request.getSurveyVer())
                 .build();
 
-        shortUrlRepository.save(entity);
+        ShortUrl saved = shortUrlRepository.save(entity);
+        ShortUrlResponse response = toResponse(saved);
 
-        return toResponse(entity);
+        // redirect 모듈에 캐시 업데이트 요청
+        notifyCacheUpdate(response);
+
+        return response;
     }
 
     @Override

@@ -504,24 +504,26 @@ export function ShortUrlManagementPage() {
               <p className="text-sm break-all text-slate-700 dark:text-slate-200">{selected.longUrl}</p>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">봇 정보</p>
-              {selected.botType ? (
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                  {selected.botType === "CALLBOT" ? "콜봇" : "챗봇"} ({selected.botServiceKey})
-                </p>
-              ) : (
-                <p className="text-sm text-slate-400">봇 정보 없음</p>
-              )}
+              <p className="text-xs text-slate-500">봇 구분</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {selected.botType ? (selected.botType === "CALLBOT" ? "콜봇" : "챗봇") : "-"}
+              </p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-slate-500">봇 서비스 키</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {selected.botServiceKey || "-"}
+              </p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-xs text-slate-500">설문 정보</p>
-              {selected.surveyId ? (
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                  {DUMMY_SURVEYS.find(s => s.id === selected.surveyId)?.name || selected.surveyId} ({selected.surveyVer})
-                </p>
-              ) : (
-                <p className="text-sm text-slate-400">설문 정보 없음</p>
-              )}
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {selected.surveyId ? (
+                  `${DUMMY_SURVEYS.find(s => s.id === selected.surveyId)?.name || selected.surveyId} (${selected.surveyVer})`
+                ) : (
+                  "설문 정보 없음"
+                )}
+              </p>
             </div>
             <div className="flex flex-col gap-2">
               <p className="text-xs text-slate-500">만료일</p>
@@ -531,11 +533,15 @@ export function ShortUrlManagementPage() {
                 value={editForm.expiredAt}
                 onChange={(event) => setEditForm({ expiredAt: event.target.value })}
               />
-              <p className="text-xs text-slate-500">서버에는 yyyy-MM-dd&apos;T&apos;HH:mm:ss으로 전송됩니다.</p>
+              <p className="text-[10px] text-slate-500">서버 전송 형식: yyyy-MM-dd&apos;T&apos;HH:mm:ss</p>
             </div>
-            <div className="flex flex-col gap-1 justify-end">
-              <p className="text-[10px] text-slate-500">생성자: {selected.createdBy}</p>
-              <p className="text-[10px] text-slate-500">생성일: {formatDateTime(selected.createdAt)}</p>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-slate-500">생성자</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{selected.createdBy}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-slate-500">생성일</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{formatDateTime(selected.createdAt)}</p>
             </div>
           </CardContent>
         </Card>

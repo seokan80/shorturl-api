@@ -1,7 +1,6 @@
 package com.nh.shorturl.admin.controller;
 
 import com.nh.shorturl.admin.entity.ClientAccessKey;
-import com.nh.shorturl.admin.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.admin.service.shorturl.ShortUrlService;
 import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.Principal;
 
@@ -32,40 +30,30 @@ import java.security.Principal;
 public class ShortUrlController {
 
     private final ShortUrlService shortUrlService;
-    private final ClientAccessKeyService clientAccessKeyService;
-    private final WebClient redirectApiClient;
 
     /**
      * 단축 URL 생성 API.
      * 로그인 사용자(JWT) 또는 비회원(X-access-key) 모두 지원
      */
     @PostMapping
-    public ResultEntity<?> create(@RequestBody ShortUrlRequest request,
-                                  Principal principal,
-                                  HttpServletRequest httpRequest) {
+    public ResultEntity<?> create(@RequestBody @Valid ShortUrlRequest request,
+            Principal principal,
+            HttpServletRequest httpRequest) {
         try {
-            // 로그인 사용자 (JWT 인증)
-            if (principal != null) {
-                return new ResultEntity<>(shortUrlService.createShortUrl(request, principal.getName()));
-            }
-
-            // 비회원 (X-access-key 인증)
+            // 1. 비회원 (X-access-key 인증) 확인 - 우선 순위
             ClientAccessKey validatedKey = (ClientAccessKey) httpRequest.getAttribute(
                     ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE);
 
             if (validatedKey != null) {
-                ShortUrlResponse response = shortUrlService.createShortUrlForClient(request, validatedKey);
-                redirectApiClient.put()
-                        .uri("/api/internal/cache/short-urls")
-                        .bodyValue(response)
-                        .retrieve()
-                        .toBodilessEntity()
-                        .doOnError(e -> log.error("Failed to update short-url cache for {}", response.getShortKey(), e))
-                        .subscribe();
-                return new ResultEntity<>(response);
+                return new ResultEntity<>(shortUrlService.createShortUrlForClient(request, validatedKey));
             }
 
-            // 둘 다 없으면 인증 실패
+            // 2. 로그인 사용자 (JWT 인증)
+            if (principal != null && !"anonymous".equals(principal.getName())) {
+                return new ResultEntity<>(shortUrlService.createShortUrl(request, principal.getName()));
+            }
+
+            // 둘 다 없거나 익명이면 인증 실패
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
@@ -102,9 +90,8 @@ public class ShortUrlController {
 
     /**
      * 단축 URL 삭제.
-     * 로그인한 사용자만 자신이 생성한 URL을 삭제할 수 있음
      */
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResultEntity<?> delete(@PathVariable Long id, Principal principal) {
         try {
             if (principal == null) {
@@ -135,41 +122,38 @@ public class ShortUrlController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort,
             Principal principal) {
-        try {
-            // Sort 파라미터 파싱
-            String[] sortParams = sort.split(",");
-            String sortField = sortParams[0];
-            Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
-                    ? Sort.Direction.ASC
-                    : Sort.Direction.DESC;
 
-            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-
-            String username = principal != null ? principal.getName() : null;
-            ResultList<ShortUrlResponse> result = shortUrlService.listShortUrls(pageable, username);
-
-            return ResultEntity.ok(result);
-        } catch (Exception e) {
-            return ResultEntity.of(ApiResult.FAIL);
+        String username = null;
+        // ClientKey를 통해 "anonymous"로 인증된 경우, 전체 조회를 위해 username을 null로 유지하거나
+        // 명시적으로 처리할 수 있습니다. 여기서는 JWT 실사용자인 경우만 username을 할당합니다.
+        if (principal != null && !"anonymous".equals(principal.getName())) {
+            username = principal.getName();
         }
+
+        // 정렬 정보 파싱 (예: "id,desc" -> Sort.by(Sort.Direction.DESC, "id"))
+        String[] sortParts = sort.split(",");
+        Sort sortObj = Sort.by(sortParts[0]);
+        if (sortParts.length > 1 && "desc".equalsIgnoreCase(sortParts[1])) {
+            sortObj = sortObj.descending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+        return ResultEntity.ok(shortUrlService.listShortUrls(pageable, username));
     }
 
     /**
-     * 단축 URL 만료일 수정.
-     * 로그인한 사용자만 자신이 생성한 URL의 만료일을 수정할 수 있음
+     * 단축 URL 만료일 수정 API.
      */
     @PutMapping("/{id}/expiration")
-    public ResultEntity<ShortUrlResponse> updateExpiration(
+    public ResultEntity<?> updateExpiration(
             @PathVariable Long id,
-            @Valid @RequestBody ShortUrlUpdateRequest request,
+            @RequestBody @Valid ShortUrlUpdateRequest request,
             Principal principal) {
         try {
             if (principal == null) {
                 return ResultEntity.of(ApiResult.UNAUTHORIZED);
             }
-
-            ShortUrlResponse response = shortUrlService.updateShortUrlExpiration(id, request, principal.getName());
-            return ResultEntity.ok(response);
+            return ResultEntity.ok(shortUrlService.updateShortUrlExpiration(id, request, principal.getName()));
         } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.NOT_FOUND);
         } catch (IllegalStateException e) {
@@ -177,17 +161,5 @@ public class ShortUrlController {
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
-    }
-
-    private String resolveAccessKey(HttpServletRequest request) {
-        String header = request.getHeader("X-access-key");
-        if (header != null && !header.isBlank()) {
-            return header.trim();
-        }
-        header = request.getHeader("X-CLIENTACCESS-KEY");
-        if (header != null && !header.isBlank()) {
-            return header.trim();
-        }
-        return null;
     }
 }

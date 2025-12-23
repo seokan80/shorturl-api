@@ -11,14 +11,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 /**
  * X-access-key 헤더를 검증하는 필터.
- * 비회원 shortUrl 생성 요청 시 ClientAccessKey를 검증합니다.
+ * 비회원 요청 시 ClientAccessKey를 검증하고 보안 컨텍스트에 인증 정보를 설정합니다.
  */
 @RequiredArgsConstructor
 public class ClientAccessKeyValidationFilter extends OncePerRequestFilter {
@@ -30,12 +33,12 @@ public class ClientAccessKeyValidationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
-        // /api/short-url POST 요청만 처리
-        if (!"/api/short-url".equals(request.getRequestURI()) || !"POST".equalsIgnoreCase(request.getMethod())) {
+        // /api/short-url 로 시작하는 요청에 대해 검증 시도
+        if (!request.getRequestURI().startsWith("/api/short-url")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -48,22 +51,34 @@ public class ClientAccessKeyValidationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // X-access-key / X-CLIENTACCESS-KEY 헤더 검증 (대소문자 구분 없이 허용)
+        // X-CLIENTACCESS-KEY 헤더 확인
         String accessKey = resolveAccessKey(request);
-        if (accessKey == null || accessKey.trim().isEmpty()) {
-            sendErrorResponse(response, ApiResult.UNAUTHORIZED, "X-access-key header is required");
-            return;
+
+        if (accessKey != null && !accessKey.trim().isEmpty()) {
+            try {
+                // ClientAccessKey 검증
+                ClientAccessKey validatedKey = clientAccessKeyService.validateActiveKey(accessKey);
+
+                // request attribute에 저장하여 컨트롤러에서 사용
+                request.setAttribute(CLIENT_ACCESS_KEY_ATTRIBUTE, validatedKey);
+
+                // Spring Security 보안 컨텍스트에 인증 정보 설정
+                // principal은 "anonymous"로 설정하여 기존 User 엔티티와의 호환성 유지
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        "anonymous",
+                        null,
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_CLIENT")));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
+            } catch (IllegalArgumentException e) {
+                // 유효하지 않은 키인 경우 즉시 에러 응답
+                sendErrorResponse(response, ApiResult.UNAUTHORIZED, e.getMessage());
+                return;
+            }
         }
 
-        try {
-            // ClientAccessKey 검증
-            ClientAccessKey validatedKey = clientAccessKeyService.validateActiveKey(accessKey);
-            // request attribute에 저장하여 컨트롤러에서 사용
-            request.setAttribute(CLIENT_ACCESS_KEY_ATTRIBUTE, validatedKey);
-            filterChain.doFilter(request, response);
-        } catch (IllegalArgumentException e) {
-            sendErrorResponse(response, ApiResult.UNAUTHORIZED, e.getMessage());
-        }
+        // 키가 없으면 그냥 통과 (이후 Spring Security 설정에 따라 인가 여부 결정)
+        filterChain.doFilter(request, response);
     }
 
     private void sendErrorResponse(HttpServletResponse response, ApiResult apiResult, String message)
