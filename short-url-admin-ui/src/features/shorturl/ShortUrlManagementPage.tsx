@@ -360,7 +360,7 @@ export function ShortUrlManagementPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-32">Short Key</TableHead>
-                  <TableHead className="w-48">서베이아이디</TableHead>
+                  <TableHead className="w-48">설문ID</TableHead>
                   <TableHead className="w-32">봇 구분</TableHead>
                   <TableHead className="w-36">생성일</TableHead>
                   <TableHead className="w-36">만료일</TableHead>
