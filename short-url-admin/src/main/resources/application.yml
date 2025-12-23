@@ -27,3 +27,8 @@ jwt:
 short-url:
   redirect:
     public-url: http://localhost:8081/
+  redirection:
+    fallback-url: "https://www.nhbank.com"
+    default-host: "https://www.nhbank.com"
+    show-error-page: true
+    tracking-fields: "utm_source,utm_medium,utm_campaign"

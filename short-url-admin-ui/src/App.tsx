@@ -10,7 +10,6 @@ import { SettingsPage } from "./features/settings/SettingsPage";
 
 import { AuthControlsPage } from "./features/controls/AuthControlsPage";
 import { ShortUrlManagementPage } from "./features/shorturl/ShortUrlManagementPage";
-import { RedirectionControlsPage } from "./features/controls/RedirectionControlsPage";
 import { AnalyticsControlsPage } from "./features/controls/AnalyticsControlsPage";
 import { UserManagementPage } from "./features/auth/UserManagementPage";
 import { ClientAccessKeyPage } from "./features/auth/ClientAccessKeyPage";
@@ -31,7 +30,6 @@ function App() {
         <Route path="client-keys" element={<ClientAccessKeyPage />} />
         <Route path="short-url" element={<ShortUrlManagementPage />} />
         <Route path="histories" element={<RedirectionHistoryPage />} />
-        <Route path="redirection" element={<RedirectionControlsPage />} />
         <Route path="analytics" element={<AnalyticsControlsPage />} />
         <Route path="workflow" element={<WorkflowInboxPage />} />
         <Route path="activity" element={<ActivityPage />} />

@@ -1,10 +1,10 @@
 package com.nh.shorturl.admin.controller;
 
 import com.nh.shorturl.admin.service.shorturl.ShortUrlService;
-import com.nh.shorturl.admin.service.control.RedirectionConfigService;
 import com.nh.shorturl.dto.response.control.RedirectionConfigResponse;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +15,18 @@ import java.util.List;
 public class ShortUrlInternalApiController {
 
     private final ShortUrlService shortUrlService;
-    private final RedirectionConfigService redirectionConfigService;
+
+    @Value("${short-url.redirection.fallback-url}")
+    private String fallbackUrl;
+
+    @Value("${short-url.redirection.default-host}")
+    private String defaultHost;
+
+    @Value("${short-url.redirection.show-error-page}")
+    private Boolean showErrorPage;
+
+    @Value("${short-url.redirection.tracking-fields}")
+    private String trackingFields;
 
     /**
      * short-url-redirect 모듈로부터 단축 URL 키를 받아 원본 URL 정보를 반환합니다.
@@ -38,6 +49,11 @@ public class ShortUrlInternalApiController {
      */
     @GetMapping("/redirection-config")
     public RedirectionConfigResponse getRedirectionConfig() {
-        return redirectionConfigService.getConfig();
+        return RedirectionConfigResponse.builder()
+                .fallbackUrl(fallbackUrl)
+                .defaultHost(defaultHost)
+                .showErrorPage(showErrorPage)
+                .trackingFields(trackingFields)
+                .build();
     }
 }
