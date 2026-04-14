@@ -29,8 +29,7 @@ jwt:
 # base-url: http://localhost:8080/
 short-url:
   redirect:
-    api.base-url: http://localhost:8081
-    public-url: http://localhost:8081/
+    public-url: http://localhost:8080/r/
 
 jasypt:
   encryptor:

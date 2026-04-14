@@ -24,7 +24,6 @@ jwt:
 
 base-url: https://your-domain.com/
 
-# short-url-redirect 모듈의 API 주소
 short-url:
   redirect:
-    api.base-url: http://localhost:8081
+    public-url: https://your-domain.com/r/
