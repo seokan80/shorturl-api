@@ -7,9 +7,13 @@ import com.nh.shorturl.dto.request.auth.TokenReissueRequest;
 import com.nh.shorturl.dto.response.auth.TokenResponse;
 import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.type.ApiResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Auth", description = "인증 서비스 (JWT 토큰 발급 및 갱신)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/token")
@@ -18,9 +22,11 @@ public class AuthController {
     private final TokenService tokenService;
     private final ClientAccessKeyService clientAccessKeyService;
 
+    @Operation(summary = "토큰 발급", description = "X-CLIENTACCESS-KEY와 사용자ID를 이용해 새로운 JWT 토큰을 발급합니다.")
     @PostMapping("/issue")
-    public ResultEntity<?> issueToken(@RequestHeader("X-CLIENTACCESS-KEY") String key,
-                                      @RequestBody TokenIssueRequest request) {
+    public ResultEntity<?> issueToken(
+            @Parameter(description = "클라이언트 접근 키", required = true) @RequestHeader("X-CLIENTACCESS-KEY") String key,
+            @RequestBody TokenIssueRequest request) {
         if (!isAccessKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }
@@ -35,9 +41,11 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "토큰 갱신", description = "만료된 Access Token을 Refresh Token을 이용해 갱신합니다.")
     @PostMapping("/re-issue")
-    public ResultEntity<?> reissueToken(@RequestHeader("X-CLIENTACCESS-KEY") String key,
-                                        @RequestBody TokenReissueRequest request) {
+    public ResultEntity<?> reissueToken(
+            @Parameter(description = "클라이언트 접근 키", required = true) @RequestHeader("X-CLIENTACCESS-KEY") String key,
+            @RequestBody TokenReissueRequest request) {
         if (!isAccessKeyValid(key)) {
             return ResultEntity.of(ApiResult.UNAUTHORIZED);
         }

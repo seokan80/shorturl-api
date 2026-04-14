@@ -1,4 +1,4 @@
-package com.nh.shorturl.config;
+package com.nh.shorturl.admin.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nh.shorturl.admin.entity.ClientAccessKey;

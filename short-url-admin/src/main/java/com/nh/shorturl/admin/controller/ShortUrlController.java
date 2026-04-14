@@ -2,13 +2,16 @@ package com.nh.shorturl.admin.controller;
 
 import com.nh.shorturl.admin.entity.ClientAccessKey;
 import com.nh.shorturl.admin.service.shorturl.ShortUrlService;
-import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
+import com.nh.shorturl.admin.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.dto.response.common.ResultList;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.type.ApiResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import java.security.Principal;
 /**
  * 단축 URL 관련 REST API 컨트롤러.
  */
+@Tag(name = "Short URL", description = "단축 URL 생성 및 관리 API")
 @RestController
 @RequestMapping("/api/short-url")
 @RequiredArgsConstructor
@@ -35,6 +39,7 @@ public class ShortUrlController {
      * 단축 URL 생성 API.
      * 로그인 사용자(JWT) 또는 비회원(X-access-key) 모두 지원
      */
+    @Operation(summary = "단축 URL 생성", description = "긴 URL을 단축 키로 변환합니다. JWT 인증 또는 X-CLIENTACCESS-KEY 헤더를 통한 인증이 필요합니다.")
     @PostMapping
     public ResultEntity<?> create(@RequestBody @Valid ShortUrlRequest request,
             Principal principal,
@@ -67,8 +72,9 @@ public class ShortUrlController {
     /**
      * 단축 URL 단건 조회 (ID 기반).
      */
+    @Operation(summary = "단축 URL 상세 조회 (ID)", description = "고유 ID를 기반으로 단축 URL 정보를 조회합니다.")
     @GetMapping("/{id}")
-    public ResultEntity<?> getById(@PathVariable Long id) {
+    public ResultEntity<?> getById(@Parameter(description = "단축 URL 고유 ID") @PathVariable Long id) {
         try {
             return ResultEntity.ok(shortUrlService.getShortUrl(id));
         } catch (Exception e) {
@@ -79,8 +85,9 @@ public class ShortUrlController {
     /**
      * 단축 URL 키 기반 조회.
      */
+    @Operation(summary = "단축 URL 상세 조회 (Key)", description = "단축 키(Short Key)를 기반으로 단축 URL 정보를 조회합니다.")
     @GetMapping("/key/{shortUrl}")
-    public ResultEntity<?> getByKey(@PathVariable String shortUrl) {
+    public ResultEntity<?> getByKey(@Parameter(description = "단축 키") @PathVariable String shortUrl) {
         try {
             return ResultEntity.ok(shortUrlService.getShortUrlByKey(shortUrl));
         } catch (Exception e) {
@@ -91,8 +98,9 @@ public class ShortUrlController {
     /**
      * 단축 URL 삭제.
      */
+    @Operation(summary = "단축 URL 삭제", description = "생성자 본인만 삭제가 가능합니다.")
     @DeleteMapping("/{id}")
-    public ResultEntity<?> delete(@PathVariable Long id, Principal principal) {
+    public ResultEntity<?> delete(@Parameter(description = "단축 URL 고유 ID") @PathVariable Long id, Principal principal) {
         try {
             if (principal == null) {
                 return ResultEntity.of(ApiResult.UNAUTHORIZED);
@@ -116,11 +124,12 @@ public class ShortUrlController {
      * @param size 페이지 크기 (기본값: 10)
      * @param sort 정렬 기준 (기본값: createdAt,desc)
      */
+    @Operation(summary = "단축 URL 목록 조회", description = "페이징 처리된 단축 URL 목록을 반환합니다. 로그인 시 본인 것만 조회됩니다.")
     @GetMapping
     public ResultEntity<ResultList<ShortUrlResponse>> list(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "정렬 기준 (필드명,asc|desc)") @RequestParam(defaultValue = "createdAt,desc") String sort,
             Principal principal) {
 
         String username = null;
@@ -144,9 +153,10 @@ public class ShortUrlController {
     /**
      * 단축 URL 만료일 수정 API.
      */
+    @Operation(summary = "단축 URL 만료일 수정", description = "단축 URL의 만료 일시를 변경합니다. 생성자 본인만 가능합니다.")
     @PutMapping("/{id}/expiration")
     public ResultEntity<?> updateExpiration(
-            @PathVariable Long id,
+            @Parameter(description = "단축 URL 고유 ID") @PathVariable Long id,
             @RequestBody @Valid ShortUrlUpdateRequest request,
             Principal principal) {
         try {

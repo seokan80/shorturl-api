@@ -7,9 +7,12 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Short URL 응답 DTO
  */
+@Schema(description = "단축 URL 응답 정보")
 @Getter
 @Builder
 @AllArgsConstructor

@@ -3,6 +3,7 @@ package com.nh.shorturl.admin.service.user;
 import com.nh.shorturl.admin.entity.User;
 import com.nh.shorturl.admin.repository.UserRepository;
 import com.nh.shorturl.dto.request.auth.UserRequest;
+import com.nh.shorturl.dto.request.auth.UserUpdateRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,16 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User(username, groupName);
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateUser(String username, UserUpdateRequest request) {
+        User user = getUser(username);
+        if (request.getGroupName() != null) {
+            user.setGroupName(request.getGroupName());
+        }
         return userRepository.save(user);
     }
 
