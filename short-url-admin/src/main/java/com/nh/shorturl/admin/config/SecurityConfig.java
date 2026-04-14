@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nh.shorturl.admin.service.clientaccess.ClientAccessKeyService;
 import com.nh.shorturl.admin.service.user.CustomUserDetailsService;
 import com.nh.shorturl.admin.util.JwtProvider;
-import com.nh.shorturl.config.ClientAccessKeyValidationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -46,8 +44,6 @@ public class SecurityConfig {
                                                                 "/api/users/**",
                                                                 "/r/**",
                                                                 "/error",
-                                                                "/api/internal/**",
-                                                                "/api/redirections/history/**",
                                                                 "/h2-console/**",
                                                                 "/api/short-url")
                                                 .permitAll()

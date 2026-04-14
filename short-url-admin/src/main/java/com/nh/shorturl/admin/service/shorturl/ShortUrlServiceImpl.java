@@ -1,5 +1,7 @@
 package com.nh.shorturl.admin.service.shorturl;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.nh.shorturl.admin.entity.ClientAccessKey;
 import com.nh.shorturl.admin.entity.ShortUrl;
 import com.nh.shorturl.admin.entity.User;
@@ -17,8 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,17 +30,21 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     private static final Logger log = LoggerFactory.getLogger(ShortUrlServiceImpl.class);
 
     private final ShortUrlRepository shortUrlRepository;
-    private final WebClient redirectApiClient; // redirect 모듈 호출용 WebClient 주입
     private final UserRepository userRepository;
+    private final LoadingCache<String, ShortUrlResponse> shortUrlCache;
+    private final Cache<String, Boolean> shortUrlMissingCache;
 
     @Value("${short-url.redirect.public-url}")
     private String publicUrl;
 
-    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository, WebClient redirectApiClient,
-            UserRepository userRepository) {
+    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository,
+            UserRepository userRepository,
+            LoadingCache<String, ShortUrlResponse> shortUrlCache,
+            Cache<String, Boolean> shortUrlMissingCache) {
         this.shortUrlRepository = shortUrlRepository;
-        this.redirectApiClient = redirectApiClient;
         this.userRepository = userRepository;
+        this.shortUrlCache = shortUrlCache;
+        this.shortUrlMissingCache = shortUrlMissingCache;
     }
 
     @Override
@@ -245,22 +249,21 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .build();
     }
 
+    /**
+     * 쓰기 노드의 로컬 캐시를 즉시 최신화한다.
+     * 타 노드는 Caffeine 의 refreshAfterWrite 로 60초 이내 수렴한다.
+     */
     private void notifyCacheUpdate(ShortUrlResponse response) {
-        redirectApiClient.put()
-                .uri("/api/internal/cache/short-urls")
-                .body(Mono.just(response), ShortUrlResponse.class)
-                .retrieve()
-                .toBodilessEntity()
-                .doOnError(e -> log.error("Failed to notify cache update for {}", response.getShortUrl(), e))
-                .subscribe();
+        shortUrlCache.put(response.getShortKey(), response);
+        shortUrlMissingCache.invalidate(response.getShortKey());
     }
 
+    /**
+     * 쓰기 노드의 로컬 캐시에서 즉시 제거하고, 짧게 negative cache 에 등록한다.
+     * 타 노드는 refreshAfterWrite 경과 시 DB 에서 만료/삭제 상태를 확인해 정리된다.
+     */
     private void notifyCacheEviction(String shortUrlKey) {
-        redirectApiClient.delete()
-                .uri("/api/internal/cache/short-urls/{shortUrlKey}", shortUrlKey)
-                .retrieve()
-                .toBodilessEntity()
-                .doOnError(e -> log.error("Failed to notify cache eviction for {}", shortUrlKey, e))
-                .subscribe();
+        shortUrlCache.invalidate(shortUrlKey);
+        shortUrlMissingCache.put(shortUrlKey, Boolean.TRUE);
     }
 }

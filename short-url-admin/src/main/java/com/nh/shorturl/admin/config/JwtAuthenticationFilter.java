@@ -23,12 +23,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // /api/short-url POST 요청은 Authorization 헤더가 있으면 JWT 검증, 없으면 스킵
         String path = request.getRequestURI();
         String method = request.getMethod();
 
+        // 리다이렉트 경로는 JWT 검증 불필요
+        if (path != null && path.startsWith("/r/")) {
+            return true;
+        }
+
+        // /api/short-url POST 요청은 Authorization 헤더가 있으면 JWT 검증, 없으면 스킵
         if ("/api/short-url".equals(path) && "POST".equalsIgnoreCase(method)) {
-            // Authorization 헤더가 있으면 JWT 검증 필요
             String authHeader = request.getHeader("Authorization");
             return authHeader == null || !authHeader.startsWith("Bearer ");
         }
