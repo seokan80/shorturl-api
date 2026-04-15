@@ -19,11 +19,6 @@ jasypt:
     iv-generator-classname: org.jasypt.iv.RandomIvGenerator
     pool-size: 1
 
-# 5. 모든 환경에 공통적인 JWT 만료 시간
-jwt:
-  expiration: 3600000 # 1시간
-
-
 short-url:
   redirect:
     public-url: http://localhost:8080/r/

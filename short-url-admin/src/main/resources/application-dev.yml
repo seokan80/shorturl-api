@@ -14,10 +14,6 @@ spring:
 server:
   port: 8080
 
-# 개발 환경용 JWT 비밀키 (암호화)
-jwt:
-  secret: ENC(0dy0bBuu5nd/sGwye3lYULFmELpgFxHWhd/FwENILoRkPyIqymvOYqm3V1roYPaXOwQzMuOnGcu1EZvfS5oF0MruRTyKF3kne1a+bGU7zUJDmorKdoXMlsMW3qE1BBTzcVL0t9hoxFHS5+OHq+8qfHuutRrmPTNp0vbldT+Fiyw=)
-
 base-url: http://dev.your-domain.com/
 
 short-url:
