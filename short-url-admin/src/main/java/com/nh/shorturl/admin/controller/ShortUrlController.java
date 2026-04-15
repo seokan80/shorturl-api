@@ -1,8 +1,6 @@
 package com.nh.shorturl.admin.controller;
 
-import com.nh.shorturl.admin.entity.ClientAccessKey;
 import com.nh.shorturl.admin.service.shorturl.ShortUrlService;
-import com.nh.shorturl.admin.config.ClientAccessKeyValidationFilter;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.common.ResultEntity;
@@ -12,7 +10,6 @@ import com.nh.shorturl.type.ApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-
 /**
  * 단축 URL 관련 REST API 컨트롤러.
+ * 폐쇄망 내부 도구 전제로 인증이 제거된 상태.
  */
 @Tag(name = "Short URL", description = "단축 URL 생성 및 관리 API")
 @RestController
@@ -35,43 +31,17 @@ public class ShortUrlController {
 
     private final ShortUrlService shortUrlService;
 
-    /**
-     * 단축 URL 생성 API.
-     * 로그인 사용자(JWT) 또는 비회원(X-access-key) 모두 지원
-     */
-    @Operation(summary = "단축 URL 생성", description = "긴 URL을 단축 키로 변환합니다. JWT 인증 또는 X-CLIENTACCESS-KEY 헤더를 통한 인증이 필요합니다.")
+    @Operation(summary = "단축 URL 생성", description = "긴 URL을 단축 키로 변환합니다.")
     @PostMapping
-    public ResultEntity<?> create(@RequestBody @Valid ShortUrlRequest request,
-            Principal principal,
-            HttpServletRequest httpRequest) {
+    public ResultEntity<?> create(@RequestBody @Valid ShortUrlRequest request) {
         try {
-            // 1. 비회원 (X-access-key 인증) 확인 - 우선 순위
-            ClientAccessKey validatedKey = (ClientAccessKey) httpRequest.getAttribute(
-                    ClientAccessKeyValidationFilter.CLIENT_ACCESS_KEY_ATTRIBUTE);
-
-            if (validatedKey != null) {
-                return new ResultEntity<>(shortUrlService.createShortUrlForClient(request, validatedKey));
-            }
-
-            // 2. 로그인 사용자 (JWT 인증)
-            if (principal != null && !"anonymous".equals(principal.getName())) {
-                return new ResultEntity<>(shortUrlService.createShortUrl(request, principal.getName()));
-            }
-
-            // 둘 다 없거나 익명이면 인증 실패
-            return ResultEntity.of(ApiResult.UNAUTHORIZED);
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
-            return ResultEntity.of(ApiResult.UNAUTHORIZED);
+            return new ResultEntity<>(shortUrlService.createShortUrl(request));
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);
             return ResultEntity.of(ApiResult.FAIL);
         }
     }
 
-    /**
-     * 단축 URL 단건 조회 (ID 기반).
-     */
     @Operation(summary = "단축 URL 상세 조회 (ID)", description = "고유 ID를 기반으로 단축 URL 정보를 조회합니다.")
     @GetMapping("/{id}")
     public ResultEntity<?> getById(@Parameter(description = "단축 URL 고유 ID") @PathVariable Long id) {
@@ -82,9 +52,6 @@ public class ShortUrlController {
         }
     }
 
-    /**
-     * 단축 URL 키 기반 조회.
-     */
     @Operation(summary = "단축 URL 상세 조회 (Key)", description = "단축 키(Short Key)를 기반으로 단축 URL 정보를 조회합니다.")
     @GetMapping("/key/{shortUrl}")
     public ResultEntity<?> getByKey(@Parameter(description = "단축 키") @PathVariable String shortUrl) {
@@ -95,51 +62,26 @@ public class ShortUrlController {
         }
     }
 
-    /**
-     * 단축 URL 삭제.
-     */
-    @Operation(summary = "단축 URL 삭제", description = "생성자 본인만 삭제가 가능합니다.")
+    @Operation(summary = "단축 URL 삭제", description = "단축 URL 을 삭제합니다.")
     @DeleteMapping("/{id}")
-    public ResultEntity<?> delete(@Parameter(description = "단축 URL 고유 ID") @PathVariable Long id, Principal principal) {
+    public ResultEntity<?> delete(@Parameter(description = "단축 URL 고유 ID") @PathVariable Long id) {
         try {
-            if (principal == null) {
-                return ResultEntity.of(ApiResult.UNAUTHORIZED);
-            }
-            shortUrlService.deleteShortUrl(id, principal.getName());
+            shortUrlService.deleteShortUrl(id);
             return ResultEntity.True();
         } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.NOT_FOUND);
-        } catch (IllegalStateException e) {
-            return ResultEntity.of(ApiResult.FORBIDDEN);
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }
     }
 
-    /**
-     * 단축 URL 목록 조회 (페이징).
-     * 로그인한 사용자는 자신이 생성한 URL만 조회, 비로그인 시 전체 조회
-     *
-     * @param page 페이지 번호 (0부터 시작, 기본값: 0)
-     * @param size 페이지 크기 (기본값: 10)
-     * @param sort 정렬 기준 (기본값: createdAt,desc)
-     */
-    @Operation(summary = "단축 URL 목록 조회", description = "페이징 처리된 단축 URL 목록을 반환합니다. 로그인 시 본인 것만 조회됩니다.")
+    @Operation(summary = "단축 URL 목록 조회", description = "페이징 처리된 단축 URL 목록을 반환합니다.")
     @GetMapping
     public ResultEntity<ResultList<ShortUrlResponse>> list(
             @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "정렬 기준 (필드명,asc|desc)") @RequestParam(defaultValue = "createdAt,desc") String sort,
-            Principal principal) {
+            @Parameter(description = "정렬 기준 (필드명,asc|desc)") @RequestParam(defaultValue = "createdAt,desc") String sort) {
 
-        String username = null;
-        // ClientKey를 통해 "anonymous"로 인증된 경우, 전체 조회를 위해 username을 null로 유지하거나
-        // 명시적으로 처리할 수 있습니다. 여기서는 JWT 실사용자인 경우만 username을 할당합니다.
-        if (principal != null && !"anonymous".equals(principal.getName())) {
-            username = principal.getName();
-        }
-
-        // 정렬 정보 파싱 (예: "id,desc" -> Sort.by(Sort.Direction.DESC, "id"))
         String[] sortParts = sort.split(",");
         Sort sortObj = Sort.by(sortParts[0]);
         if (sortParts.length > 1 && "desc".equalsIgnoreCase(sortParts[1])) {
@@ -147,27 +89,18 @@ public class ShortUrlController {
         }
 
         Pageable pageable = PageRequest.of(page, size, sortObj);
-        return ResultEntity.ok(shortUrlService.listShortUrls(pageable, username));
+        return ResultEntity.ok(shortUrlService.listShortUrls(pageable));
     }
 
-    /**
-     * 단축 URL 만료일 수정 API.
-     */
-    @Operation(summary = "단축 URL 만료일 수정", description = "단축 URL의 만료 일시를 변경합니다. 생성자 본인만 가능합니다.")
+    @Operation(summary = "단축 URL 만료일 수정", description = "단축 URL의 만료 일시를 변경합니다.")
     @PutMapping("/{id}/expiration")
     public ResultEntity<?> updateExpiration(
             @Parameter(description = "단축 URL 고유 ID") @PathVariable Long id,
-            @RequestBody @Valid ShortUrlUpdateRequest request,
-            Principal principal) {
+            @RequestBody @Valid ShortUrlUpdateRequest request) {
         try {
-            if (principal == null) {
-                return ResultEntity.of(ApiResult.UNAUTHORIZED);
-            }
-            return ResultEntity.ok(shortUrlService.updateShortUrlExpiration(id, request, principal.getName()));
+            return ResultEntity.ok(shortUrlService.updateShortUrlExpiration(id, request));
         } catch (IllegalArgumentException e) {
             return ResultEntity.of(ApiResult.NOT_FOUND);
-        } catch (IllegalStateException e) {
-            return ResultEntity.of(ApiResult.FORBIDDEN);
         } catch (Exception e) {
             return ResultEntity.of(ApiResult.FAIL);
         }

@@ -1,7 +1,6 @@
 package com.nh.shorturl.admin.repository;
 
 import com.nh.shorturl.admin.entity.ShortUrl;
-import com.nh.shorturl.admin.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,27 +12,14 @@ import java.util.Optional;
 @Repository
 public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
 
-    /**
-     * 단축 URL 문자열로 엔티티를 조회한다.
-     */
+    /** 단축 URL 문자열로 엔티티를 조회. */
     Optional<ShortUrl> findByShortUrl(String shortUrl);
 
-    /**
-     * 특정 단축 URL 키가 이미 존재하는지 확인한다.
-     */
+    /** 단축 URL 키 존재 여부. */
     boolean existsByShortUrl(String shortUrl);
 
-    /**
-     * 모든 단축 URL을 페이징하여 조회한다.
-     * 삭제되지 않은 항목만 조회된다. (@SQLRestriction에 의해 자동 필터링)
-     */
+    /** 전체 페이징 조회 (@SQLRestriction 으로 soft-delete 자동 필터). */
     @Override
     @NonNull
     Page<ShortUrl> findAll(@NonNull Pageable pageable);
-
-    /**
-     * 특정 사용자가 생성한 단축 URL을 페이징하여 조회한다.
-     * 삭제되지 않은 항목만 조회된다. (@SQLRestriction에 의해 자동 필터링)
-     */
-    Page<ShortUrl> findByUser(User user, Pageable pageable);
 }
