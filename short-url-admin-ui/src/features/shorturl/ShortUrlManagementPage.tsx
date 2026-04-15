@@ -18,8 +18,6 @@ type ShortUrlItem = {
   shortKey: string;
   shortUrl: string;
   longUrl: string;
-  createdBy: string;
-  userId: number;
   createdAt: string;
   expiredAt: string | null;
   botType: "CALLBOT" | "CHATBOT" | null;
@@ -34,7 +32,6 @@ type ShortUrlList = {
 };
 
 const PAGE_SIZE = 10;
-const CLIENT_KEY_STORAGE_KEY = "shorturl:accessKey";
 
 const DUMMY_SURVEYS = [
   { id: "S001", name: "농협 고객 만족도 통합 조사", version: "V1.2", url: "https://www.naver.com" },
@@ -67,33 +64,12 @@ export function ShortUrlManagementPage() {
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
-  const [clientKey, setClientKey] = useState(() => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem(CLIENT_KEY_STORAGE_KEY) ?? "";
-  });
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (clientKey.trim()) {
-      localStorage.setItem(CLIENT_KEY_STORAGE_KEY, clientKey.trim());
-    } else {
-      localStorage.removeItem(CLIENT_KEY_STORAGE_KEY);
-    }
-  }, [clientKey]);
-
   const request = useCallback(
-    async <T,>(path: string, init: RequestInit = {}, options?: { requireClientKey?: boolean }): Promise<T> => {
-      const key = clientKey.trim();
-      if (options?.requireClientKey && !key) {
-        throw new Error("먼저 클라이언트 키를 입력해주세요.");
-      }
-
+    async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
       const headers = new Headers(init.headers);
-      if (key) {
-        headers.set("X-CLIENTACCESS-KEY", key);
-      }
       if (init.body && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
       }
@@ -111,7 +87,7 @@ export function ShortUrlManagementPage() {
 
       return payload.data;
     },
-    [clientKey]
+    []
   );
 
   const fetchList = useCallback(
@@ -172,7 +148,7 @@ export function ShortUrlManagementPage() {
       await request<ShortUrlItem>("/api/short-url", {
         method: "POST",
         body: JSON.stringify(payload)
-      }, { requireClientKey: true });
+      });
 
       setCreateForm({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" });
       setSelected(null);
@@ -208,8 +184,7 @@ export function ShortUrlManagementPage() {
         {
           method: "PUT",
           body: JSON.stringify({ expiredAt: toServerDate(editForm.expiredAt) })
-        },
-        { requireClientKey: true }
+        }
       );
       setSelected(payload);
       setEditForm({ expiredAt: toInputValue(payload.expiredAt) });
@@ -224,7 +199,7 @@ export function ShortUrlManagementPage() {
     }
 
     await runWithStatus(`delete-${item.id}`, async () => {
-      await request(`/api/short-url/${item.id}`, { method: "DELETE" }, { requireClientKey: true });
+      await request(`/api/short-url/${item.id}`, { method: "DELETE" });
       if (selected?.id === item.id) {
         setSelected(null);
         setEditForm({ expiredAt: "" });
@@ -252,24 +227,15 @@ export function ShortUrlManagementPage() {
 
   const disablePrev = page === 0;
   const disableNext = page >= totalPages - 1 || total === 0;
-  const hasClientKey = clientKey.trim().length > 0;
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-base">단축 URL 관리</CardTitle>
-          <CardDescription>원본 URL을 등록하고 생성된 키를 확인하세요. 생성자만 삭제/수정할 수 있습니다.</CardDescription>
+          <CardDescription>원본 URL을 등록하고 생성된 키를 확인하세요.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">클라이언트 키 *</p>
-            <Input
-              placeholder="X-CLIENTACCESS-KEY 값"
-              value={clientKey}
-              onChange={(event) => setClientKey(event.target.value)}
-            />
-          </div>
           <div className="flex flex-col gap-2">
             <p className="text-xs text-slate-500 dark:text-slate-400">원본 URL *</p>
             <Input
@@ -330,7 +296,7 @@ export function ShortUrlManagementPage() {
             />
           </div>
           <div className="flex items-end gap-2 md:col-span-2">
-            <Button className="flex-1" onClick={handleCreate} disabled={isBusy("create") || !hasClientKey}>
+            <Button className="flex-1" onClick={handleCreate} disabled={isBusy("create")}>
               {isBusy("create") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               단축 URL 생성
             </Button>
@@ -534,10 +500,6 @@ export function ShortUrlManagementPage() {
                 onChange={(event) => setEditForm({ expiredAt: event.target.value })}
               />
               <p className="text-[10px] text-slate-500">서버 전송 형식: yyyy-MM-dd&apos;T&apos;HH:mm:ss</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">생성자</p>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{selected.createdBy}</p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-xs text-slate-500">생성일</p>

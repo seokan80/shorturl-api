@@ -4,7 +4,7 @@ import { ShortUrlManagementPage } from "./ShortUrlManagementPage";
 
 describe("ShortUrlManagementPage", () => {
   beforeEach(() => {
-    vi.spyOn(global, "fetch").mockResolvedValue({
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({
         code: "0000",

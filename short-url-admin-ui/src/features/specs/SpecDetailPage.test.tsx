@@ -9,11 +9,11 @@ describe("SpecDetailPage", () => {
       <Routes>
         <Route path="/specs/:specId" element={<SpecDetailPage />} />
       </Routes>,
-      { initialEntries: ["/specs/user-register"] }
+      { initialEntries: ["/specs/shorturl-create"] }
     );
 
-    expect(screen.getByText("/api/users")).toBeInTheDocument();
-    expect(screen.getByText("Owner · 플랫폼 스쿼드")).toBeInTheDocument();
+    expect(screen.getByText("/api/short-url")).toBeInTheDocument();
+    expect(screen.getByText("Owner · 그로스 스쿼드")).toBeInTheDocument();
     expect(screen.getByText("Headers")).toBeInTheDocument();
   });
 

@@ -19,15 +19,6 @@ export const workflowItems: WorkflowItem[] = [
     priority: "Normal"
   },
   {
-    id: 498,
-    specId: "user-register",
-    specName: "/api/users (POST)",
-    stage: "Approve",
-    assignee: "seo.kan",
-    dueDate: "2025-01-13T12:00:00",
-    priority: "High"
-  },
-  {
     id: 492,
     specId: "redirection-stats",
     specName: "/r/history/{shortUrlId}/stats (POST)",

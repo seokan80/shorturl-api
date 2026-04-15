@@ -63,8 +63,6 @@ const GROUP_BY_OPTIONS = [
     { value: "DAY", label: "일" },
 ];
 
-const REG_STORAGE_KEY = "shorturl:accessKey";
-
 const DUMMY_SURVEYS = [
     { id: "S001", name: "농협 고객 만족도 통합 조사", version: "V1.2" },
     { id: "S002", name: "대출 상담 프로세스 만족도 조사", version: "V2.0" },
@@ -73,10 +71,6 @@ const DUMMY_SURVEYS = [
 ];
 
 export function RedirectionHistoryPage() {
-    const [accessKey, setAccessKey] = useState(() => {
-        if (typeof window === "undefined") return "";
-        return localStorage.getItem(REG_STORAGE_KEY) ?? "";
-    });
     const [items, setItems] = useState<RedirectionHistoryItem[]>([]);
     const [page, setPage] = useState(0);
     const [total, setTotal] = useState(0);
@@ -96,9 +90,6 @@ export function RedirectionHistoryPage() {
     const request = useCallback(
         async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
             const headers = new Headers(init.headers);
-            if (accessKey.trim()) {
-                headers.set("X-CLIENTACCESS-KEY", accessKey.trim());
-            }
             if (init.body && !headers.has("Content-Type")) {
                 headers.set("Content-Type", "application/json");
             }
@@ -116,7 +107,7 @@ export function RedirectionHistoryPage() {
 
             return payload.data;
         },
-        [accessKey]
+        []
     );
 
     const fetchList = useCallback(
@@ -205,30 +196,6 @@ export function RedirectionHistoryPage() {
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">리디렉션 이력</h1>
                 <p className="text-slate-500 dark:text-slate-400">단축 URL의 유입 기록과 통계 데이터를 확인하고 분석합니다.</p>
             </div>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-sm">인증 설정</CardTitle>
-                </CardHeader>
-                <CardContent className="flex gap-2">
-                    <Input
-                        value={accessKey}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            setAccessKey(val);
-                            localStorage.setItem(REG_STORAGE_KEY, val);
-                        }}
-                        placeholder="Client Access Key"
-                        className="max-w-md"
-                    />
-                    {accessKey && (
-                        <Button variant="outline" onClick={() => {
-                            setAccessKey("");
-                            localStorage.removeItem(REG_STORAGE_KEY);
-                        }}>초기화</Button>
-                    )}
-                </CardContent>
-            </Card>
 
             <Tabs defaultValue="history" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-4">
