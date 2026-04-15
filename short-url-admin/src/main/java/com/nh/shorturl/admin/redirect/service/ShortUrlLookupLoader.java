@@ -2,7 +2,6 @@ package com.nh.shorturl.admin.redirect.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.nh.shorturl.admin.entity.ShortUrl;
-import com.nh.shorturl.admin.entity.User;
 import com.nh.shorturl.admin.repository.ShortUrlRepository;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import lombok.RequiredArgsConstructor;
@@ -53,14 +52,11 @@ public class ShortUrlLookupLoader {
     }
 
     private ShortUrlResponse toResponse(ShortUrl entity) {
-        User owner = entity.getUser();
         return ShortUrlResponse.builder()
                 .id(entity.getId())
                 .shortKey(entity.getShortUrl())
                 .shortUrl(publicUrl + entity.getShortUrl())
                 .longUrl(entity.getLongUrl())
-                .createdBy(owner != null ? owner.getUsername() : null)
-                .userId(owner != null ? owner.getId() : null)
                 .createdAt(entity.getCreatedAt())
                 .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)
                 .botType(entity.getBotType())

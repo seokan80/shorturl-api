@@ -29,12 +29,6 @@ public class ShortUrlResponse {
     /** 원본 URL */
     private String longUrl;
 
-    /** 생성자 */
-    private String createdBy;
-
-    /** 생성자 ID */
-    private Long userId;
-
     /** 생성일 */
     private LocalDateTime createdAt;
 

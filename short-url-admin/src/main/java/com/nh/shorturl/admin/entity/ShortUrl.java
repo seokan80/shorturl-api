@@ -38,16 +38,6 @@ public class ShortUrl extends BaseEntity {
     @Comment("단축 키")
     private String shortUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
-    @Comment("생성 관리자")
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CLIENT_ACCESS_KEY_ID")
-    @Comment("클라이언트 키 (비회원 발급용)")
-    private ClientAccessKey clientAccessKey;
-
     @Column
     @Comment("만료 일시")
     private LocalDateTime expiredAt;
