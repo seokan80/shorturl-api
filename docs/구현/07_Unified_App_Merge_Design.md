@@ -8,6 +8,7 @@ Redis 없이 Caffeine 로컬 캐시만으로 2중화 환경의 URL 조회 성능
 - 캐시 일관성: `expireAfterWrite` + `refreshAfterWrite` 조합으로 노드 간 stale 편차를 상한선으로 제한
 - 장애 저감: 존재하지 않는 키(404) 폭주 방지를 위한 negative cache 도입
 - 배포 단순화: 하나의 JAR, 하나의 컨테이너, 하나의 `application.yml`
+- 기능 축소: **폐쇄망 내부 도구** 전제로 User/Auth/ClientAccessKey 관리 기능을 본 브랜치에서 전부 제거 (main 브랜치에는 유지)
 
 ## 2. 현재 구조와 문제점
 
@@ -275,3 +276,44 @@ short-url:
 - `refreshAfterWrite` 동작: 60초 경과 후 첫 요청은 즉시 응답, 로그에서 비동기 DB 재조회 확인
 - `/actuator/caches` 또는 로그로 히트율/미스율/로드시간 확인
 - 관리 API 응답 시간 회귀 없음
+
+## 13. 기능 축소 — User/Auth/ClientAccessKey 제거
+
+### 13.1 배경
+이 브랜치는 **폐쇄망/내부 도구** 전제로 운영한다. 인증/소유자 개념이 필요 없으므로,
+본 설계 적용과 함께 User·Auth(JWT)·ClientAccessKey 관련 기능을 완전히 제거한다.
+원본은 `main` 브랜치와 `pre-unified-merge` 태그에 그대로 보존되어 있다.
+
+### 13.2 제거된 엔드포인트
+| 이전 | 상태 |
+|---|---|
+| `POST /api/users` | 삭제 |
+| `GET /api/users/**` | 삭제 |
+| `POST /api/auth/token/issue` | 삭제 |
+| `POST /api/auth/token/re-issue` | 삭제 |
+| `GET/POST/PUT/DELETE /api/client-keys/**` | 삭제 |
+
+### 13.3 제거된 구성요소
+- Spring Security 필터 체인, `SecurityConfig`, `JwtAuthenticationFilter`, `ClientAccessKeyValidationFilter`
+- `spring-boot-starter-security`, `jjwt-api/impl/jackson` 의존성
+- `application*.yml` 의 `jwt.secret`, `jwt.expiration` 설정
+- `User`/`ClientAccessKey` 엔티티와 JPA Repository, Service, Controller, DTO
+- `TokenService`, `JwtProvider`, `CustomUserDetailsService`
+- `data.sql` 의 `TBL_USER`, `TBL_CLIENT_ACCESS_KEY` 초기 데이터
+- 프론트엔드 `UserManagementPage`, `ClientAccessKeyPage`, `AuthControlsPage` 및 사이드바/라우트 참조
+
+### 13.4 ShortUrl 엔티티 변경
+기존 `ShortUrl.user` (NOT NULL FK) 및 `ShortUrl.clientAccessKey` (nullable FK) 필드를 제거하여
+단축 URL은 순수한 key→URL 매핑이 된다. `ShortUrlResponse` 의 `createdBy`, `userId` 필드도 삭제.
+Oracle DDL 은 향후 정리 필요 (JPA ddl-auto=validate 프로파일에서 운영 반영 시 스키마 정합성 확인).
+
+### 13.5 ShortUrlController 변경
+- `Principal`, `HttpServletRequest`, `ClientAccessKey` 파라미터 전부 제거
+- `create/delete/list/updateExpiration` 모두 인증 없이 호출 가능
+- 누구나 전체 CRUD 가능하므로 **반드시 폐쇄망에서만** 운영해야 함
+
+### 13.6 보안 주의
+- Spring Security 의존성 자체가 빠졌으므로 CSRF·CORS 기본값이 모두 적용되지 않는다.
+- 본 브랜치를 외부 노출이 가능한 환경에 배포하면 **누구나 URL CRUD 가능**. 반드시 내부망/
+  리버스 프록시 레벨 ACL 로 접근을 통제할 것.
+- 필요 시 `main` 브랜치의 인증 체계를 cherry-pick 하여 복원 가능.
