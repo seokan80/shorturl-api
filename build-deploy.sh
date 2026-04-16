@@ -3,22 +3,22 @@
 # short-url 배포용 WAR 빌드 스크립트
 #
 # 사용법:
-#   ./build-deploy.sh [dev|prod]   # 프로파일 지정 (기본: prod)
-#   ./build-deploy.sh dev
+#   ./build-deploy.sh
+#
+# 프로파일(local/dev/prod)은 빌드 시 결정되지 않고, Tomcat 기동 시 JVM 옵션으로 지정한다.
+#   예) JAVA_OPTS="-Dspring.profiles.active=dev"
 # ============================================================
 set -euo pipefail
 
-PROFILE="${1:-prod}"
 ARTIFACT_DIR="short-url-admin/build/libs"
 ARTIFACT="short-url-admin-0.0.1-SNAPSHOT.war"
 
 echo "========================================"
-echo " short-url WAR 빌드  (profile=${PROFILE})"
+echo " short-url WAR 빌드"
 echo "========================================"
 
 # 1. 빌드 (테스트 제외, UI 포함)
 ./gradlew clean :short-url-admin:bootWar \
-  -Pprofile="${PROFILE}" \
   -x test \
   --no-daemon \
   --stacktrace
@@ -50,6 +50,9 @@ echo ""
 echo "배포 방법:"
 echo "  cp ${WAR_PATH} \$CATALINA_HOME/webapps/s.war"
 echo "  (컨텍스트 패스 /s 로 배포 시 파일명을 s.war 로 설정)"
+echo ""
+echo "프로파일 지정 (Tomcat setenv.sh):"
+echo "  export JAVA_OPTS=\"-Dspring.profiles.active=dev\""
 echo ""
 echo "배포 검증:"
 echo "  curl -I http://localhost:8080/s/verify"
