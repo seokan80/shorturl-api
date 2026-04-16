@@ -5,16 +5,20 @@ import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import com.nh.shorturl.redirect.service.RedirectionConfigStore;
 import com.nh.shorturl.redirect.service.RedirectionHistoryService;
 import com.nh.shorturl.redirect.service.ShortUrlCacheService;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/")
@@ -25,6 +29,19 @@ public class ShortUrlRedirectController {
     private final ShortUrlCacheService cacheService;
     private final RedirectionHistoryService historyService;
     private final RedirectionConfigStore configStore;
+
+    private String errorHtmlTemplate;
+
+    @PostConstruct
+    void loadErrorTemplate() {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/redirect-error.html");
+            errorHtmlTemplate = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            log.warn("[redirect] Failed to load error template, using fallback inline HTML", e);
+            errorHtmlTemplate = "<!DOCTYPE html><html><body><h1>이동 실패</h1><p>%s</p></body></html>";
+        }
+    }
 
     /**
      * 배포 후 스모크 테스트용 고정 키.
@@ -79,7 +96,10 @@ public class ShortUrlRedirectController {
         for (String field : fields) {
             String value = request.getParameter(field.trim());
             if (value != null && !value.isBlank()) {
-                sb.append(first ? "?" : "&").append(field.trim()).append("=").append(value);
+                sb.append(first ? "?" : "&")
+                  .append(URLEncoder.encode(field.trim(), StandardCharsets.UTF_8))
+                  .append("=")
+                  .append(URLEncoder.encode(value, StandardCharsets.UTF_8));
                 first = false;
             }
         }
@@ -101,14 +121,19 @@ public class ShortUrlRedirectController {
     }
 
     private String buildErrorHtml(String reason) {
-        return "<!DOCTYPE html><html><head><title>이동 실패</title>" +
-                "<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;" +
-                "height:100vh;margin:0;background:#f8fafc;}" +
-                ".card{background:white;padding:2rem;border-radius:1rem;" +
-                "box-shadow:0 10px 15px -3px rgba(0,0,0,.1);max-width:400px;text-align:center;}" +
-                "h1{color:#e11d48;}p{color:#64748b;line-height:1.6;}</style></head>" +
-                "<body><div class='card'><h1>이동 실패</h1>" +
-                "<p>요청하신 URL이 존재하지 않거나 만료되었습니다.</p>" +
-                "<p><small>" + reason + "</small></p></div></body></html>";
+        return String.format(errorHtmlTemplate, escapeHtml(reason));
+    }
+
+    /**
+     * HTML 특수문자 이스케이프 (XSS 방어).
+     * 외부 라이브러리 의존 없이 OWASP 권장 5개 문자 치환.
+     */
+    private static String escapeHtml(String input) {
+        if (input == null) return "";
+        return input.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;");
     }
 }

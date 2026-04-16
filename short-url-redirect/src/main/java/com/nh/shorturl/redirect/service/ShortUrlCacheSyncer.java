@@ -91,24 +91,43 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
         }
     }
 
+    private static final int MAX_RETRIES = 3;
+    private static final long INITIAL_WAIT_MS = 5_000;
+
     private void fullLoad() {
         log.info("[cache-sync] Starting full cache load...");
-        try {
-            List<ShortUrlResponse> all = webClient.get()
-                    .uri("/api/internal/short-urls/all")
-                    .retrieve()
-                    .bodyToFlux(ShortUrlResponse.class)
-                    .collectList()
-                    .block();
+        long waitMs = INITIAL_WAIT_MS;
 
-            if (all != null) {
-                all.forEach(cacheService::put);
-                lastSyncTime.set(LocalDateTime.now());
-                log.info("[cache-sync] Full load completed. {} items cached.", all.size());
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                List<ShortUrlResponse> all = webClient.get()
+                        .uri("/api/internal/short-urls/all")
+                        .retrieve()
+                        .bodyToFlux(ShortUrlResponse.class)
+                        .collectList()
+                        .block();
+
+                if (all != null) {
+                    all.forEach(cacheService::put);
+                    lastSyncTime.set(LocalDateTime.now());
+                    log.info("[cache-sync] Full load completed. {} items cached.", all.size());
+                    return;
+                }
+            } catch (Exception e) {
+                log.warn("[cache-sync] Full load attempt {}/{} failed: {}", attempt, MAX_RETRIES, e.getMessage());
+                if (attempt < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(waitMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    waitMs *= 2;
+                }
             }
-        } catch (Exception e) {
-            log.warn("[cache-sync] Full load failed — will retry on next scheduled sync. cause: {}", e.getMessage());
         }
+        log.error("[cache-sync] Full load failed after {} retries. Cache is empty — "
+                + "all requests will fall back until next sync cycle.", MAX_RETRIES);
     }
 
     private boolean isDeletedOrExpired(ShortUrlResponse item, LocalDateTime now) {
