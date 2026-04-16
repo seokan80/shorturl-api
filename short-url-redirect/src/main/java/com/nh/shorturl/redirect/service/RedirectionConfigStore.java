@@ -1,10 +1,12 @@
 package com.nh.shorturl.redirect.service;
 
+import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.dto.response.control.RedirectionConfigResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,14 +36,15 @@ public class RedirectionConfigStore {
     @Scheduled(fixedRateString = "${short-url.sync.config-interval-ms:60000}")
     public void refreshConfig() {
         try {
-            RedirectionConfigResponse response = webClient.get()
+            ResultEntity<RedirectionConfigResponse> result = webClient.get()
                     .uri(uriConfig)
                     .retrieve()
-                    .bodyToMono(RedirectionConfigResponse.class)
+                    .bodyToMono(new ParameterizedTypeReference<ResultEntity<RedirectionConfigResponse>>() {})
                     .block();
-            if (response != null) {
-                config.set(response);
-                log.debug("[config] refreshed: fallback={}", response.getFallbackUrl());
+            if (result != null && result.getData() != null) {
+                config.set(result.getData());
+                log.debug("[config] refreshed: fallback={}, defaultHost={}",
+                        result.getData().getFallbackUrl(), result.getData().getDefaultHost());
             }
         } catch (Exception e) {
             log.error("[config] refresh failed — using previous value", e);
