@@ -26,4 +26,4 @@ base-url: https://your-domain.com/
 
 short-url:
   redirect:
-    public-url: https://your-domain.com/r/
+    public-url: https://your-domain.com/s/

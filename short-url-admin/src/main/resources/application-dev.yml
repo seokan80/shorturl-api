@@ -22,4 +22,4 @@ base-url: http://dev.your-domain.com/
 
 short-url:
   redirect:
-    public-url: http://dev.your-domain.com/r/
+    public-url: http://dev.your-domain.com/s/
