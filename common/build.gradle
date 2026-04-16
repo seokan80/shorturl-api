@@ -1,5 +1,13 @@
 apply plugin: 'java-library'
 
+// common 모듈은 라이브러리이므로 Spring Boot executable jar 를 생성하지 않는다.
+bootJar {
+    enabled = false
+}
+jar {
+    enabled = true
+}
+
 dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'

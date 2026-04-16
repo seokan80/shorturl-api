@@ -2,7 +2,6 @@ package com.nh.shorturl.admin.entity;
 
 import com.nh.shorturl.admin.constants.SchemaConstants;
 import com.nh.shorturl.admin.entity.common.BaseEntity;
-import com.nh.shorturl.type.BotType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Comment;
@@ -51,23 +50,6 @@ public class ShortUrl extends BaseEntity {
     @Column
     @Comment("삭제 일시")
     private LocalDateTime deletedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    @Comment("봇 구분 (CALLBOT, CHATBOT)")
-    private BotType botType;
-
-    @Column(length = 100)
-    @Comment("봇 서비스 식별 키 (전화번호/세션키)")
-    private String botServiceKey;
-
-    @Column(length = 50)
-    @Comment("설문 식별 ID")
-    private String surveyId;
-
-    @Column(length = 20)
-    @Comment("설문 버전")
-    private String surveyVer;
 
     public ShortUrl(String longUrl, String shortUrl, LocalDateTime expiredAt) {
         this.longUrl = longUrl;
