@@ -31,10 +31,6 @@ dependencies {
     // 외부 톰캣 배포용: 내장 톰캣은 컴파일/테스트 시에만 사용
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    // Cache (Caffeine)
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'com.github.ben-manes.caffeine:caffeine'
-
     // Jasypt (Properties 암호화)
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
 

@@ -1,0 +1,31 @@
+apply plugin: 'war'
+
+// 톰캣 배포용 WAR. 내장 톰캣은 provided 로 분리.
+bootJar { enabled = false }
+bootWar { enabled = true }
+war   { enabled = false }
+
+dependencies {
+    implementation project(':common')
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // WebFlux (WebClient)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // Cache (Caffeine)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    // 외부 톰캣 배포용
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

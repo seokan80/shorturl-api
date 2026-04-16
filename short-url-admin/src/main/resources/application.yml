@@ -1,37 +1,29 @@
 spring:
-  # 1. 기본 활성화 프로파일 지정
   profiles:
     active: local
-  # 2. 모든 환경에 공통적인 애플리케이션 이름
   application:
-    name: short-url
-  # 3. 모든 환경에 공통적인 JPA 네이밍 전략
+    name: short-url-admin
   jpa:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
 
-# 4. 모든 환경에 공통적인 Jasypt 설정
 jasypt:
   encryptor:
-    password: ${JASYPT_ENCRYPTOR_PASSWORD} # 환경변수에서 마스터 키를 가져옴
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
     algorithm: "PBEWITHHMACSHA512ANDAES_256"
     iv-generator-classname: org.jasypt.iv.RandomIvGenerator
     pool-size: 1
 
 short-url:
+  # 단축 URL 생성 시 기본 만료 기간(일). 재빌드 없이 운영 중 조정 가능.
+  default-expiration-days: 1
+  # redirect 서버가 단축 URL 생성 후 공개 주소를 조합할 때 사용하는 prefix
   redirect:
     public-url: http://localhost:8080/r/
+  # redirect 서버가 /api/internal/redirection-config 로 폴링해 가져가는 설정
   redirection:
     fallback-url: "https://www.nhbank.com"
     default-host: "https://www.nhbank.com"
     show-error-page: true
     tracking-fields: "utm_source,utm_medium,utm_campaign"
-  cache:
-    short-url:
-      maximum-size: 10000
-      expire-after-write-seconds: 300
-      refresh-after-write-seconds: 60
-    missing:
-      maximum-size: 5000
-      expire-after-write-seconds: 30

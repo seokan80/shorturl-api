@@ -1,7 +1,5 @@
 package com.nh.shorturl.admin.service.shorturl;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.nh.shorturl.admin.entity.ShortUrl;
 import com.nh.shorturl.admin.repository.ShortUrlRepository;
 import com.nh.shorturl.admin.util.Base62;
@@ -9,37 +7,40 @@ import com.nh.shorturl.dto.request.shorturl.ShortUrlRequest;
 import com.nh.shorturl.dto.request.shorturl.ShortUrlUpdateRequest;
 import com.nh.shorturl.dto.response.common.ResultList;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * 단축 URL CRUD 서비스.
+ *
+ * <p>캐시는 redirect 서버(short-url-redirect)가 독립적으로 관리한다.
+ * admin 은 생성·수정·삭제 후 redirect 서버의 /api/internal/cache/short-urls 를 호출해
+ * 캐시를 동기화해야 한다(현재는 redirect 서버가 폴링으로 수렴).
+ */
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ShortUrlServiceImpl implements ShortUrlService {
-    private static final Logger log = LoggerFactory.getLogger(ShortUrlServiceImpl.class);
 
     private final ShortUrlRepository shortUrlRepository;
-    private final LoadingCache<String, ShortUrlResponse> shortUrlCache;
-    private final Cache<String, Boolean> shortUrlMissingCache;
 
     @Value("${short-url.redirect.public-url}")
     private String publicUrl;
 
-    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository,
-            LoadingCache<String, ShortUrlResponse> shortUrlCache,
-            Cache<String, Boolean> shortUrlMissingCache) {
-        this.shortUrlRepository = shortUrlRepository;
-        this.shortUrlCache = shortUrlCache;
-        this.shortUrlMissingCache = shortUrlMissingCache;
-    }
+    @Value("${short-url.default-expiration-days:1}")
+    private long defaultExpirationDays;
 
     @Override
     @Transactional
@@ -51,22 +52,16 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         log.info("Creating Short URL, request: {}", request);
 
+        LocalDateTime expiredAt = resolveExpiration(request);
+
         ShortUrl entity = ShortUrl.builder()
                 .shortUrl(shortUrl)
                 .longUrl(request.getLongUrl())
-                .expiredAt(LocalDateTime.now().plusDays(1L))
-                .botType(request.getBotType())
-                .botServiceKey(request.getBotServiceKey())
-                .surveyId(request.getSurveyId())
-                .surveyVer(request.getSurveyVer())
+                .expiredAt(expiredAt)
                 .build();
 
         ShortUrl saved = shortUrlRepository.save(entity);
-        ShortUrlResponse response = toResponse(saved);
-
-        notifyCacheUpdate(response);
-
-        return response;
+        return toResponse(saved);
     }
 
     @Override
@@ -74,11 +69,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public void deleteShortUrl(Long shortUrlId) {
         ShortUrl shortUrl = shortUrlRepository.findById(shortUrlId)
                 .orElseThrow(() -> new IllegalArgumentException("ID에 해당하는 단축 URL을 찾을 수 없습니다: " + shortUrlId));
-
-        String shortUrlKey = shortUrl.getShortUrl();
         shortUrlRepository.delete(shortUrl);
-
-        notifyCacheEviction(shortUrlKey);
     }
 
     @Override
@@ -92,11 +83,9 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public ShortUrlResponse getShortUrlByKey(String shortUrl) {
         ShortUrl entity = shortUrlRepository.findByShortUrl(shortUrl)
                 .orElseThrow(() -> new IllegalArgumentException("URL not found"));
-
         if (isExpired(entity)) {
             throw new IllegalStateException("단축 URL이 만료되었습니다.");
         }
-
         return toResponse(entity);
     }
 
@@ -104,17 +93,16 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public String resolveOriginalUrl(String shortUrl) {
         ShortUrl entity = shortUrlRepository.findByShortUrl(shortUrl)
                 .orElseThrow(() -> new IllegalArgumentException("URL not found"));
-
         if (isExpired(entity)) {
             throw new IllegalStateException("단축 URL이 만료되었습니다.");
         }
-
         return entity.getLongUrl();
     }
 
     @Override
     public List<ShortUrlResponse> findAllForCaching() {
         return shortUrlRepository.findAll().stream()
+                .filter(e -> !isExpired(e))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -133,14 +121,32 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     public ShortUrlResponse updateShortUrlExpiration(Long id, ShortUrlUpdateRequest request) {
         ShortUrl shortUrl = shortUrlRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("URL을 찾을 수 없습니다. ID: " + id));
-
         shortUrl.setExpiredAt(request.getExpiredAt());
         ShortUrl updated = shortUrlRepository.save(shortUrl);
+        return toResponse(updated);
+    }
 
-        ShortUrlResponse response = toResponse(updated);
-        notifyCacheUpdate(response);
+    /**
+     * 만료 시각 결정 우선순위:
+     * 1) validDays 지정 → 오늘 기준 N 일 뒤 23:59:59
+     * 2) expireDate 지정 → 절대 시각 그대로
+     * 3) 미지정 → default-expiration-days 적용
+     */
+    private LocalDateTime resolveExpiration(ShortUrlRequest request) {
+        if (request.getValidDays() != null) {
+            if (request.getValidDays() <= 0) {
+                throw new IllegalArgumentException("validDays 는 1 이상이어야 합니다.");
+            }
+            return endOfDayAfter(request.getValidDays());
+        }
+        if (request.getExpireDate() != null) {
+            return request.getExpireDate();
+        }
+        return endOfDayAfter(defaultExpirationDays);
+    }
 
-        return response;
+    private LocalDateTime endOfDayAfter(long days) {
+        return LocalDate.now().plusDays(days).atTime(LocalTime.MAX);
     }
 
     private boolean isExpired(ShortUrl entity) {
@@ -155,22 +161,6 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .longUrl(entity.getLongUrl())
                 .createdAt(entity.getCreatedAt())
                 .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)
-                .botType(entity.getBotType())
-                .botServiceKey(entity.getBotServiceKey())
-                .surveyId(entity.getSurveyId())
-                .surveyVer(entity.getSurveyVer())
                 .build();
-    }
-
-    /** 쓰기 노드의 로컬 캐시를 즉시 최신화한다. 타 노드는 refreshAfterWrite(60s)로 수렴. */
-    private void notifyCacheUpdate(ShortUrlResponse response) {
-        shortUrlCache.put(response.getShortKey(), response);
-        shortUrlMissingCache.invalidate(response.getShortKey());
-    }
-
-    /** 쓰기 노드의 로컬 캐시에서 즉시 제거하고 short TTL negative cache 에 기록한다. */
-    private void notifyCacheEviction(String shortUrlKey) {
-        shortUrlCache.invalidate(shortUrlKey);
-        shortUrlMissingCache.put(shortUrlKey, Boolean.TRUE);
     }
 }
