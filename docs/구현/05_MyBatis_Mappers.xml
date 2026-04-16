@@ -1,0 +1,499 @@
+<!-- ============================================================================
+     Short URL Service - MyBatis Mapper XML
+     ============================================================================
+     작성일: 2026-02-09
+     설명: Spring Data JPA Repository를 MyBatis로 변환한 매퍼 파일
+     ============================================================================ -->
+
+<!-- ============================================================================
+     1. UserMapper.xml
+     ============================================================================ -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nh.shorturl.admin.repository.UserRepository">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="userResultMap" type="com.nh.shorturl.admin.entity.User">
+        <id property="id" column="ID"/>
+        <result property="username" column="USERNAME"/>
+        <result property="groupName" column="GROUP_NAME"/>
+        <result property="apiKey" column="API_KEY"/>
+        <result property="refreshToken" column="REFRESH_TOKEN"/>
+        <result property="deleted" column="IS_DEL" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="deletedAt" column="DELETED_AT"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <!-- 사용자명으로 조회 -->
+    <select id="findByUsername" parameterType="string" resultMap="userResultMap">
+        SELECT ID, USERNAME, GROUP_NAME, API_KEY, REFRESH_TOKEN,
+               IS_DEL, DELETED_AT, CREATED_AT, UPDATED_AT
+        FROM TBL_USER
+        WHERE USERNAME = #{username}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 사용자명으로 조회 (삭제되지 않은 사용자만) -->
+    <select id="findByUsernameAndDeletedFalse" parameterType="string" resultMap="userResultMap">
+        SELECT ID, USERNAME, GROUP_NAME, API_KEY, REFRESH_TOKEN,
+               IS_DEL, DELETED_AT, CREATED_AT, UPDATED_AT
+        FROM TBL_USER
+        WHERE USERNAME = #{username}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 사용자명 + Refresh Token으로 조회 -->
+    <select id="findByUsernameAndRefreshToken" resultMap="userResultMap">
+        SELECT ID, USERNAME, GROUP_NAME, API_KEY, REFRESH_TOKEN,
+               IS_DEL, DELETED_AT, CREATED_AT, UPDATED_AT
+        FROM TBL_USER
+        WHERE USERNAME = #{username}
+          AND REFRESH_TOKEN = #{refreshToken}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 삭제되지 않은 모든 사용자 조회 (생성일 내림차순) -->
+    <select id="findAllByDeletedFalseOrderByCreatedAtDesc" resultMap="userResultMap">
+        SELECT ID, USERNAME, GROUP_NAME, API_KEY, REFRESH_TOKEN,
+               IS_DEL, DELETED_AT, CREATED_AT, UPDATED_AT
+        FROM TBL_USER
+        WHERE IS_DEL = 'N'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <!-- 사용자 등록 -->
+    <insert id="insert" parameterType="com.nh.shorturl.admin.entity.User">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT SEQ_COMMON.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO TBL_USER (
+            ID, USERNAME, GROUP_NAME, API_KEY, REFRESH_TOKEN,
+            IS_DEL, CREATED_AT, UPDATED_AT
+        ) VALUES (
+            #{id}, #{username}, #{groupName}, #{apiKey}, #{refreshToken},
+            'N', SYSTIMESTAMP, SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- 사용자 정보 수정 -->
+    <update id="update" parameterType="com.nh.shorturl.admin.entity.User">
+        UPDATE TBL_USER
+        SET USERNAME = #{username},
+            GROUP_NAME = #{groupName},
+            API_KEY = #{apiKey},
+            REFRESH_TOKEN = #{refreshToken},
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 사용자 논리 삭제 -->
+    <update id="delete" parameterType="long">
+        UPDATE TBL_USER
+        SET IS_DEL = 'Y',
+            DELETED_AT = SYSTIMESTAMP,
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+</mapper>
+
+<!-- ============================================================================
+     2. ClientAccessKeyMapper.xml
+     ============================================================================ -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nh.shorturl.admin.repository.ClientAccessKeyRepository">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="clientAccessKeyResultMap" type="com.nh.shorturl.admin.entity.ClientAccessKey">
+        <id property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="keyValue" column="KEY_VALUE"/>
+        <result property="issuedBy" column="ISSUED_BY"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="expiresAt" column="EXPIRES_AT"/>
+        <result property="lastUsedAt" column="LAST_USED_AT"/>
+        <result property="active" column="IS_ACTIVE" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="deleted" column="IS_DEL" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="deletedAt" column="DELETED_AT"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <!-- KEY_VALUE로 조회 (삭제되지 않은 것만) -->
+    <select id="findByKeyValueAndDeletedFalse" parameterType="string" resultMap="clientAccessKeyResultMap">
+        SELECT ID, NAME, KEY_VALUE, ISSUED_BY, DESCRIPTION,
+               EXPIRES_AT, LAST_USED_AT, IS_ACTIVE, IS_DEL,
+               DELETED_AT, CREATED_AT, UPDATED_AT
+        FROM TBL_CLIENT_ACCESS_KEY
+        WHERE KEY_VALUE = #{keyValue}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 삭제되지 않은 모든 클라이언트 키 조회 (생성일 내림차순) -->
+    <select id="findAllByDeletedFalseOrderByCreatedAtDesc" resultMap="clientAccessKeyResultMap">
+        SELECT ID, NAME, KEY_VALUE, ISSUED_BY, DESCRIPTION,
+               EXPIRES_AT, LAST_USED_AT, IS_ACTIVE, IS_DEL,
+               DELETED_AT, CREATED_AT, UPDATED_AT
+        FROM TBL_CLIENT_ACCESS_KEY
+        WHERE IS_DEL = 'N'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <!-- 클라이언트 키 등록 -->
+    <insert id="insert" parameterType="com.nh.shorturl.admin.entity.ClientAccessKey">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT SEQ_COMMON.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO TBL_CLIENT_ACCESS_KEY (
+            ID, NAME, KEY_VALUE, ISSUED_BY, DESCRIPTION,
+            EXPIRES_AT, LAST_USED_AT, IS_ACTIVE, IS_DEL,
+            CREATED_AT, UPDATED_AT
+        ) VALUES (
+            #{id}, #{name}, #{keyValue}, #{issuedBy}, #{description},
+            #{expiresAt}, #{lastUsedAt}, 'Y', 'N',
+            SYSTIMESTAMP, SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- 클라이언트 키 정보 수정 -->
+    <update id="update" parameterType="com.nh.shorturl.admin.entity.ClientAccessKey">
+        UPDATE TBL_CLIENT_ACCESS_KEY
+        SET NAME = #{name},
+            ISSUED_BY = #{issuedBy},
+            DESCRIPTION = #{description},
+            EXPIRES_AT = #{expiresAt},
+            IS_ACTIVE = #{active, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 최근 사용 일시 업데이트 -->
+    <update id="updateLastUsedAt" parameterType="long">
+        UPDATE TBL_CLIENT_ACCESS_KEY
+        SET LAST_USED_AT = SYSTIMESTAMP,
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 클라이언트 키 논리 삭제 -->
+    <update id="delete" parameterType="long">
+        UPDATE TBL_CLIENT_ACCESS_KEY
+        SET IS_DEL = 'Y',
+            DELETED_AT = SYSTIMESTAMP,
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+</mapper>
+
+<!-- ============================================================================
+     3. ShortUrlMapper.xml
+     ============================================================================ -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nh.shorturl.admin.repository.ShortUrlRepository">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="shortUrlResultMap" type="com.nh.shorturl.admin.entity.ShortUrl">
+        <id property="id" column="ID"/>
+        <result property="longUrl" column="LONG_URL"/>
+        <result property="shortUrl" column="SHORT_URL"/>
+        <result property="expiredAt" column="EXPIRED_AT"/>
+        <result property="deleted" column="IS_DEL" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="deletedAt" column="DELETED_AT"/>
+        <result property="botType" column="BOT_TYPE" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="botServiceKey" column="BOT_SERVICE_KEY"/>
+        <result property="surveyId" column="SURVEY_ID"/>
+        <result property="surveyVer" column="SURVEY_VER"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <association property="user" column="USER_ID" javaType="com.nh.shorturl.admin.entity.User">
+            <id property="id" column="USER_ID"/>
+        </association>
+        <association property="clientAccessKey" column="CLIENT_ACCESS_KEY_ID"
+                     javaType="com.nh.shorturl.admin.entity.ClientAccessKey">
+            <id property="id" column="CLIENT_ACCESS_KEY_ID"/>
+        </association>
+    </resultMap>
+
+    <!-- 단축 URL 키로 조회 -->
+    <select id="findByShortUrl" parameterType="string" resultMap="shortUrlResultMap">
+        SELECT ID, LONG_URL, SHORT_URL, USER_ID, CLIENT_ACCESS_KEY_ID,
+               EXPIRED_AT, IS_DEL, DELETED_AT, BOT_TYPE, BOT_SERVICE_KEY,
+               SURVEY_ID, SURVEY_VER, CREATED_AT, UPDATED_AT
+        FROM TBL_SHORT_URL
+        WHERE SHORT_URL = #{shortUrl}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 단축 URL 존재 여부 확인 -->
+    <select id="existsByShortUrl" parameterType="string" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM TBL_SHORT_URL
+        WHERE SHORT_URL = #{shortUrl}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 모든 단축 URL 페이징 조회 -->
+    <select id="findAll" resultMap="shortUrlResultMap">
+        SELECT ID, LONG_URL, SHORT_URL, USER_ID, CLIENT_ACCESS_KEY_ID,
+               EXPIRED_AT, IS_DEL, DELETED_AT, BOT_TYPE, BOT_SERVICE_KEY,
+               SURVEY_ID, SURVEY_VER, CREATED_AT, UPDATED_AT
+        FROM TBL_SHORT_URL
+        WHERE IS_DEL = 'N'
+        ORDER BY CREATED_AT DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- 사용자별 단축 URL 페이징 조회 -->
+    <select id="findByUser" resultMap="shortUrlResultMap">
+        SELECT ID, LONG_URL, SHORT_URL, USER_ID, CLIENT_ACCESS_KEY_ID,
+               EXPIRED_AT, IS_DEL, DELETED_AT, BOT_TYPE, BOT_SERVICE_KEY,
+               SURVEY_ID, SURVEY_VER, CREATED_AT, UPDATED_AT
+        FROM TBL_SHORT_URL
+        WHERE USER_ID = #{userId}
+          AND IS_DEL = 'N'
+        ORDER BY CREATED_AT DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{limit} ROWS ONLY
+    </select>
+
+    <!-- ID로 조회 -->
+    <select id="findById" parameterType="long" resultMap="shortUrlResultMap">
+        SELECT ID, LONG_URL, SHORT_URL, USER_ID, CLIENT_ACCESS_KEY_ID,
+               EXPIRED_AT, IS_DEL, DELETED_AT, BOT_TYPE, BOT_SERVICE_KEY,
+               SURVEY_ID, SURVEY_VER, CREATED_AT, UPDATED_AT
+        FROM TBL_SHORT_URL
+        WHERE ID = #{id}
+          AND IS_DEL = 'N'
+    </select>
+
+    <!-- 단축 URL 등록 -->
+    <insert id="insert" parameterType="com.nh.shorturl.admin.entity.ShortUrl">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT SEQ_COMMON.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO TBL_SHORT_URL (
+            ID, LONG_URL, SHORT_URL, USER_ID, CLIENT_ACCESS_KEY_ID,
+            EXPIRED_AT, IS_DEL, BOT_TYPE, BOT_SERVICE_KEY,
+            SURVEY_ID, SURVEY_VER, CREATED_AT, UPDATED_AT
+        ) VALUES (
+            #{id}, #{longUrl}, #{shortUrl}, #{user.id}, #{clientAccessKey.id},
+            #{expiredAt}, 'N', #{botType, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{botServiceKey}, #{surveyId}, #{surveyVer}, SYSTIMESTAMP, SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- 단축 URL 정보 수정 -->
+    <update id="update" parameterType="com.nh.shorturl.admin.entity.ShortUrl">
+        UPDATE TBL_SHORT_URL
+        SET LONG_URL = #{longUrl},
+            EXPIRED_AT = #{expiredAt},
+            BOT_TYPE = #{botType, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            BOT_SERVICE_KEY = #{botServiceKey},
+            SURVEY_ID = #{surveyId},
+            SURVEY_VER = #{surveyVer},
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+    <!-- 단축 URL 논리 삭제 -->
+    <update id="delete" parameterType="long">
+        UPDATE TBL_SHORT_URL
+        SET IS_DEL = 'Y',
+            DELETED_AT = SYSTIMESTAMP,
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+</mapper>
+
+<!-- ============================================================================
+     4. RedirectionHistoryMapper.xml
+     ============================================================================ -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nh.shorturl.admin.repository.RedirectionHistoryRepository">
+
+    <!-- ResultMap 정의 -->
+    <resultMap id="redirectionHistoryResultMap" type="com.nh.shorturl.admin.entity.RedirectionHistory">
+        <id property="id" column="ID"/>
+        <result property="referer" column="REFERER"/>
+        <result property="userAgent" column="USER_AGENT"/>
+        <result property="ip" column="IP"/>
+        <result property="deviceType" column="DEVICE_TYPE"/>
+        <result property="os" column="OS"/>
+        <result property="browser" column="BROWSER"/>
+        <result property="country" column="COUNTRY"/>
+        <result property="city" column="CITY"/>
+        <result property="redirectAt" column="REDIRECT_AT"/>
+        <result property="botType" column="BOT_TYPE" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="botServiceKey" column="BOT_SERVICE_KEY"/>
+        <result property="surveyId" column="SURVEY_ID"/>
+        <result property="surveyVer" column="SURVEY_VER"/>
+        <association property="shortUrl" column="SHORT_URL_ID" javaType="com.nh.shorturl.admin.entity.ShortUrl">
+            <id property="id" column="SHORT_URL_ID"/>
+        </association>
+    </resultMap>
+
+    <!-- 단축 URL ID로 카운트 조회 -->
+    <select id="countByShortUrlId" parameterType="long" resultType="long">
+        SELECT COUNT(*)
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+    </select>
+
+    <!-- 리다이렉션 히스토리 등록 -->
+    <insert id="insert" parameterType="com.nh.shorturl.admin.entity.RedirectionHistory">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT SEQ_COMMON.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO TBL_REDIRECTION_HISTORY (
+            ID, SHORT_URL_ID, REFERER, USER_AGENT, IP,
+            DEVICE_TYPE, OS, BROWSER, COUNTRY, CITY,
+            REDIRECT_AT, BOT_TYPE, BOT_SERVICE_KEY, SURVEY_ID, SURVEY_VER
+        ) VALUES (
+            #{id}, #{shortUrl.id}, #{referer}, #{userAgent}, #{ip},
+            #{deviceType}, #{os}, #{browser}, #{country}, #{city},
+            #{redirectAt}, #{botType, typeHandler=org.apache.ibatis.type.EnumTypeHandler},
+            #{botServiceKey}, #{surveyId}, #{surveyVer}
+        )
+    </insert>
+
+    <!-- 통계 조회 - REFERER 기준 -->
+    <select id="getStatsByShortUrlIdGroupByReferer" parameterType="long" resultType="map">
+        SELECT REFERER AS referer, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY REFERER
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - DEVICE_TYPE 기준 -->
+    <select id="getStatsByShortUrlIdGroupByDeviceType" parameterType="long" resultType="map">
+        SELECT DEVICE_TYPE AS deviceType, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY DEVICE_TYPE
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - OS 기준 -->
+    <select id="getStatsByShortUrlIdGroupByOs" parameterType="long" resultType="map">
+        SELECT OS AS os, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY OS
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - BROWSER 기준 -->
+    <select id="getStatsByShortUrlIdGroupByBrowser" parameterType="long" resultType="map">
+        SELECT BROWSER AS browser, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY BROWSER
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - COUNTRY 기준 -->
+    <select id="getStatsByShortUrlIdGroupByCountry" parameterType="long" resultType="map">
+        SELECT COUNTRY AS country, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY COUNTRY
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - YEAR 기준 -->
+    <select id="getStatsByShortUrlIdGroupByYear" parameterType="long" resultType="map">
+        SELECT EXTRACT(YEAR FROM REDIRECT_AT) AS year, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY EXTRACT(YEAR FROM REDIRECT_AT)
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - MONTH 기준 -->
+    <select id="getStatsByShortUrlIdGroupByMonth" parameterType="long" resultType="map">
+        SELECT EXTRACT(YEAR FROM REDIRECT_AT) AS year,
+               EXTRACT(MONTH FROM REDIRECT_AT) AS month,
+               COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY EXTRACT(YEAR FROM REDIRECT_AT), EXTRACT(MONTH FROM REDIRECT_AT)
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - DAY 기준 -->
+    <select id="getStatsByShortUrlIdGroupByDay" parameterType="long" resultType="map">
+        SELECT TRUNC(REDIRECT_AT) AS day, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY TRUNC(REDIRECT_AT)
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 통계 조회 - HOUR 기준 -->
+    <select id="getStatsByShortUrlIdGroupByHour" parameterType="long" resultType="map">
+        SELECT EXTRACT(HOUR FROM REDIRECT_AT) AS hour, COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY EXTRACT(HOUR FROM REDIRECT_AT)
+        ORDER BY COUNT(*) DESC
+    </select>
+
+    <!-- 동적 그룹핑 통계 조회 (여러 GroupingType 조합) -->
+    <select id="getStatsByShortUrlId" resultType="map">
+        SELECT
+        <foreach collection="groupBy" item="groupType" separator=", ">
+            <choose>
+                <when test="groupType.name() == 'REFERER'">REFERER AS referer</when>
+                <when test="groupType.name() == 'USER_AGENT'">USER_AGENT AS userAgent</when>
+                <when test="groupType.name() == 'DEVICE_TYPE'">DEVICE_TYPE AS deviceType</when>
+                <when test="groupType.name() == 'OS'">OS AS os</when>
+                <when test="groupType.name() == 'BROWSER'">BROWSER AS browser</when>
+                <when test="groupType.name() == 'COUNTRY'">COUNTRY AS country</when>
+                <when test="groupType.name() == 'CITY'">CITY AS city</when>
+                <when test="groupType.name() == 'YEAR'">EXTRACT(YEAR FROM REDIRECT_AT) AS year</when>
+                <when test="groupType.name() == 'MONTH'">EXTRACT(MONTH FROM REDIRECT_AT) AS month</when>
+                <when test="groupType.name() == 'DAY'">TRUNC(REDIRECT_AT) AS day</when>
+                <when test="groupType.name() == 'HOUR'">EXTRACT(HOUR FROM REDIRECT_AT) AS hour</when>
+            </choose>
+        </foreach>
+        , COUNT(*) AS count
+        FROM TBL_REDIRECTION_HISTORY
+        WHERE SHORT_URL_ID = #{shortUrlId}
+        GROUP BY
+        <foreach collection="groupBy" item="groupType" separator=", ">
+            <choose>
+                <when test="groupType.name() == 'REFERER'">REFERER</when>
+                <when test="groupType.name() == 'USER_AGENT'">USER_AGENT</when>
+                <when test="groupType.name() == 'DEVICE_TYPE'">DEVICE_TYPE</when>
+                <when test="groupType.name() == 'OS'">OS</when>
+                <when test="groupType.name() == 'BROWSER'">BROWSER</when>
+                <when test="groupType.name() == 'COUNTRY'">COUNTRY</when>
+                <when test="groupType.name() == 'CITY'">CITY</when>
+                <when test="groupType.name() == 'YEAR'">EXTRACT(YEAR FROM REDIRECT_AT)</when>
+                <when test="groupType.name() == 'MONTH'">EXTRACT(MONTH FROM REDIRECT_AT)</when>
+                <when test="groupType.name() == 'DAY'">TRUNC(REDIRECT_AT)</when>
+                <when test="groupType.name() == 'HOUR'">EXTRACT(HOUR FROM REDIRECT_AT)</when>
+            </choose>
+        </foreach>
+        ORDER BY COUNT(*) DESC
+    </select>
+
+</mapper>
+
+<!-- ============================================================================
+     END OF MAPPERS
+     ============================================================================ -->
