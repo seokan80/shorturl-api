@@ -1,16 +1,20 @@
 package com.nh.shorturl.redirect.service;
 
+import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,17 +22,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * 단축 URL 캐시 동기화.
  *
  * <ul>
- *   <li>기동 시: admin 의 /api/internal/short-urls/all 로 만료되지 않은 전체 URL 을 캐시에 로드</li>
- *   <li>5분 주기: /api/internal/short-urls/changes?since= 로 변경분만 증분 반영
+ *   <li>기동 시: 전체 URL 을 캐시에 로드 (full load)</li>
+ *   <li>주기적: 변경분만 증분 반영 (incremental sync)
  *       <ul>
  *         <li>삭제(deleted=true) 또는 만료(expiredAt &lt; now) → 캐시에서 evict</li>
  *         <li>그 외 → 캐시에 put (신규 또는 수정)</li>
  *       </ul>
  *   </li>
  * </ul>
- *
- * <p>per-entry expiry(AppConfig) 와 조합되어 만료 시각 도달 시 Caffeine 이 자동 제거하므로,
- * 증분 폴링은 신규 URL 반영과 admin 측 삭제/만료일 변경을 동기화하는 역할에 집중한다.
  */
 @Component
 @RequiredArgsConstructor
@@ -38,6 +39,12 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
     private final WebClient webClient;
     private final ShortUrlCacheService cacheService;
 
+    @Value("${short-url.admin.api.uri.all}")
+    private String uriAll;
+
+    @Value("${short-url.admin.api.uri.changes}")
+    private String uriChanges;
+
     private final AtomicReference<LocalDateTime> lastSyncTime = new AtomicReference<>();
 
     @Override
@@ -46,29 +53,26 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
     }
 
     /**
-     * 5분마다 변경분을 폴링하여 캐시에 반영한다.
-     * admin 이 응답하지 않아도 기존 캐시는 유지되며, 다음 폴링에서 재시도한다.
+     * 주기적으로 변경분을 폴링하여 캐시에 반영한다.
+     * 주기는 application.yml 의 short-url.sync.cache-interval-ms 로 설정.
      */
-    @Scheduled(fixedRate = 300_000, initialDelay = 300_000) // 5분
+    @Scheduled(fixedRateString = "${short-url.sync.cache-interval-ms:300000}",
+               initialDelayString = "${short-url.sync.cache-initial-delay-ms:300000}")
     public void incrementalSync() {
         LocalDateTime since = lastSyncTime.get();
         if (since == null) {
-            // 전체 로드가 실패했던 경우 → 다시 전체 로드 시도
             fullLoad();
             return;
         }
 
         try {
             String sinceParam = since.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            List<ShortUrlResponse> changes = webClient.get()
-                    .uri("/api/internal/short-urls/changes?since={since}", sinceParam)
-                    .retrieve()
-                    .bodyToFlux(ShortUrlResponse.class)
-                    .collectList()
-                    .block();
+            log.info("[cache-sync] Incremental sync started. since={}, cacheSize={}", sinceParam, cacheService.size());
+
+            List<ShortUrlResponse> changes = fetchList(uriChanges, sinceParam);
 
             if (changes == null || changes.isEmpty()) {
-                log.debug("[cache-sync] no changes since {}", sinceParam);
+                log.info("[cache-sync] no changes since {}", sinceParam);
             } else {
                 int put = 0, evict = 0;
                 LocalDateTime now = LocalDateTime.now();
@@ -77,17 +81,22 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
                     if (isDeletedOrExpired(item, now)) {
                         cacheService.evict(item.getShortKey());
                         evict++;
+                        log.info("[cache-sync]   evict: [{}] {} (deleted={}, expiredAt={})",
+                                item.getId(), item.getShortKey(), item.getDeleted(), item.getExpiredAt());
                     } else {
                         cacheService.put(item);
                         put++;
+                        log.info("[cache-sync]   put: [{}] {} → {} (expires: {})",
+                                item.getId(), item.getShortKey(), item.getLongUrl(), item.getExpiredAt());
                     }
                 }
-                log.info("[cache-sync] {} changes applied (put={}, evict={})", changes.size(), put, evict);
+                log.info("[cache-sync] {} changes applied (put={}, evict={}), cacheSize={}",
+                        changes.size(), put, evict, cacheService.size());
             }
 
             lastSyncTime.set(LocalDateTime.now());
         } catch (Exception e) {
-            log.warn("[cache-sync] incremental sync failed, will retry in 5m. cause: {}", e.getMessage());
+            log.warn("[cache-sync] incremental sync failed, will retry next cycle. cause: {}", e.getMessage());
         }
     }
 
@@ -100,17 +109,20 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
 
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                List<ShortUrlResponse> all = webClient.get()
-                        .uri("/api/internal/short-urls/all")
-                        .retrieve()
-                        .bodyToFlux(ShortUrlResponse.class)
-                        .collectList()
-                        .block();
+                List<ShortUrlResponse> all = fetchList(uriAll);
 
-                if (all != null) {
-                    all.forEach(cacheService::put);
+                if (all != null && !all.isEmpty()) {
+                    all.forEach(item -> {
+                        cacheService.put(item);
+                        log.debug("[cache-sync]   loaded: {} → {}, expiredAt={}",
+                                item.getShortKey(), item.getLongUrl(), item.getExpiredAt());
+                    });
                     lastSyncTime.set(LocalDateTime.now());
                     log.info("[cache-sync] Full load completed. {} items cached.", all.size());
+                    if (log.isInfoEnabled() && !all.isEmpty()) {
+                        all.forEach(item -> log.info("[cache-sync]   [{}] {} → {} (expires: {})",
+                                item.getId(), item.getShortKey(), item.getLongUrl(), item.getExpiredAt()));
+                    }
                     return;
                 }
             } catch (Exception e) {
@@ -130,15 +142,31 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
                 + "all requests will fall back until next sync cycle.", MAX_RETRIES);
     }
 
+    /**
+     * admin API 호출 후 ResultEntity 래퍼에서 data(List) 를 추출한다.
+     * 응답 형태: {"code":"0000","message":"Success","data":[...]}
+     */
+    private List<ShortUrlResponse> fetchList(String uri, Object... uriVars) {
+        ResultEntity<List<ShortUrlResponse>> result = webClient.get()
+                .uri(uri, uriVars)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ResultEntity<List<ShortUrlResponse>>>() {})
+                .block();
+
+        if (result == null || result.getData() == null) {
+            return Collections.emptyList();
+        }
+        return result.getData();
+    }
+
     private boolean isDeletedOrExpired(ShortUrlResponse item, LocalDateTime now) {
-        // admin 에서 soft-delete 된 항목
         if (Boolean.TRUE.equals(item.getDeleted())) {
             return true;
         }
-        // 만료 시각이 지난 항목
         if (item.getExpiredAt() == null) return false;
         try {
-            LocalDateTime expiry = LocalDateTime.parse(item.getExpiredAt());
+            LocalDateTime expiry = LocalDateTime.parse(item.getExpiredAt(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             return expiry.isBefore(now);
         } catch (Exception e) {
             return false;

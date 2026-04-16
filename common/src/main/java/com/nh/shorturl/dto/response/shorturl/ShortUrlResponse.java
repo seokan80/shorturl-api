@@ -1,8 +1,11 @@
 package com.nh.shorturl.dto.response.shorturl;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +18,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ShortUrlResponse {
 
     private Long id;
@@ -29,6 +34,7 @@ public class ShortUrlResponse {
     private String longUrl;
 
     /** 생성일 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     /** 만료일 */

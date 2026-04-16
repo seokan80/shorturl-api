@@ -8,6 +8,8 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
@@ -24,6 +26,10 @@ public class AppConfig {
     public WebClient webClient() {
         return WebClient.builder()
                 .baseUrl(adminApiBaseUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader("token", "cded2084-ef21-4030-a189-c040ed089127")
+                .defaultHeader("x-tenant-code", "nh")
+
                 .build();
     }
 
@@ -39,7 +45,7 @@ public class AppConfig {
     @Bean
     public Cache<String, ShortUrlResponse> shortUrlCache() {
         return Caffeine.newBuilder()
-                .maximumSize(10_000)
+                .maximumSize(1_000_000)
                 .expireAfter(new Expiry<String, ShortUrlResponse>() {
                     @Override
                     public long expireAfterCreate(String key, ShortUrlResponse value, long currentTime) {

@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Tag(name = "Internal", description = "redirect 서버 전용 내부 API (외부 노출 금지)")
 @RestController
-@RequestMapping("/api/internal")
+@RequestMapping("/openapi/internal")
 @RequiredArgsConstructor
 @Slf4j
 public class InternalApiController {
@@ -48,7 +48,7 @@ public class InternalApiController {
      * 만료되지 않은 전체 단축 URL 목록을 반환한다.
      */
     @Operation(summary = "[내부] 전체 단축 URL 목록", description = "redirect 서버 캐시 워밍 전용. 외부 노출 금지.")
-    @GetMapping("/short-urls/all")
+    @GetMapping("/short-url/all")
     public List<ShortUrlResponse> getAllShortUrls() {
         return shortUrlService.findAllForCaching();
     }
@@ -69,7 +69,7 @@ public class InternalApiController {
      * 1분 주기로 폴링하여 설정을 최신 유지한다.
      */
     @Operation(summary = "[내부] 리다이렉트 설정 조회", description = "redirect 서버 설정 폴링 전용. 외부 노출 금지.")
-    @GetMapping("/redirection-config")
+    @GetMapping("/short-url/redirection-config")
     public RedirectionConfigResponse getRedirectionConfig() {
         return RedirectionConfigResponse.builder()
                 .fallbackUrl(fallbackUrl)
@@ -84,7 +84,7 @@ public class InternalApiController {
      * redirect 서버는 DB 에 직접 접근하지 않고 이 API 를 통해 저장한다.
      */
     @Operation(summary = "[내부] 리다이렉트 이력 저장", description = "redirect 서버 이력 기록 전용. 외부 노출 금지.")
-    @PostMapping("/redirections/history")
+    @PostMapping("/short-url/redirections/history")
     public ResponseEntity<Void> saveHistory(@RequestBody RedirectionHistoryRequest request) {
         log.debug("[internal] save history for key={}", request.getShortUrlKey());
         redirectionHistoryService.saveRedirectionHistory(request);

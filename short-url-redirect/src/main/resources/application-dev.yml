@@ -1,6 +1,8 @@
 # --- Development 환경 ---
 server:
-  port: 8081
+  port: 19040
+  servlet:
+    context-path: /
 
 short-url:
   admin:

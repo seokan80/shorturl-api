@@ -17,6 +17,8 @@ dependencies {
 
     // WebFlux (WebClient)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // macOS Netty DNS 네이티브 리졸버 (없으면 ERROR 로그 출력, 실동작 무관)
+    runtimeOnly 'io.netty:netty-resolver-dns-native-macos::osx-aarch_64'
 
     // Cache (Caffeine)
     implementation 'org.springframework.boot:spring-boot-starter-cache'

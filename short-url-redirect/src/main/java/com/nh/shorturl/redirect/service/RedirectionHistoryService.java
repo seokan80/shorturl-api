@@ -4,13 +4,14 @@ import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
- * 리다이렉트 이력을 admin 서버의 /api/internal/redirections/history 에 비동기로 전송한다.
+ * 리다이렉트 이력을 admin 서버에 비동기로 전송한다.
  * redirect 서버는 DB 에 직접 접근하지 않는다.
  */
 @Service
@@ -19,6 +20,9 @@ import reactor.core.publisher.Mono;
 public class RedirectionHistoryService {
 
     private final WebClient webClient;
+
+    @Value("${short-url.admin.api.uri.history}")
+    private String uriHistory;
 
     @Async
     public void save(String shortKey, HttpServletRequest request) {
@@ -30,7 +34,7 @@ public class RedirectionHistoryService {
                 .build();
 
         webClient.post()
-                .uri("/api/internal/redirections/history")
+                .uri(uriHistory)
                 .body(Mono.just(payload), RedirectionHistoryRequest.class)
                 .retrieve()
                 .toBodilessEntity()

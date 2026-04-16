@@ -4,7 +4,21 @@ spring:
   application:
     name: short-url-redirect
 
+server:
+  servlet:
+    context-path: ${SHORT_URL_CONTEXT_PATH:/}  # 환경변수 또는 프로파일별 오버라이드
+
 short-url:
   admin:
     api:
       base-url: http://localhost:8080  # admin 서버 주소 (프로파일별 오버라이드)
+      # 내부 API 경로
+      uri:
+        all: /openapi/internal/short-url/all
+        changes: /openapi/internal/short-url/changes?since={since}
+        config: /openapi/internal/short-url/redirection-config
+        history: /openapi/internal/short-url/redirections/history
+  sync:
+    cache-interval-ms: 300000       # 캐시 증분 동기화 주기 (기본 5분)
+    cache-initial-delay-ms: 300000  # 캐시 증분 동기화 최초 지연
+    config-interval-ms: 60000       # 설정 폴링 주기 (기본 1분)

@@ -1,8 +1,10 @@
 # --- Local 개발 환경 ---
 server:
-  port: 8081
+  port: 18081
+  servlet:
+    context-path: /s   # 운영 Tomcat 컨텍스트(/s)와 동일하게 로컬에서도 테스트
 
 short-url:
   admin:
     api:
-      base-url: http://localhost:8080
+      base-url: http://localhost:8280
