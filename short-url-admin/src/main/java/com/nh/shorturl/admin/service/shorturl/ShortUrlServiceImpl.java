@@ -126,6 +126,14 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         return toResponse(updated);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ShortUrlResponse> findChangedSince(LocalDateTime since) {
+        return shortUrlRepository.findChangedSince(since).stream()
+                .map(this::toChangeResponse)
+                .collect(Collectors.toList());
+    }
+
     /**
      * 만료 시각 결정 우선순위:
      * 1) validDays 지정 → 오늘 기준 N 일 뒤 23:59:59
@@ -161,6 +169,22 @@ public class ShortUrlServiceImpl implements ShortUrlService {
                 .longUrl(entity.getLongUrl())
                 .createdAt(entity.getCreatedAt())
                 .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)
+                .build();
+    }
+
+    /**
+     * 증분 동기화용 응답 변환. deleted 플래그를 포함한다.
+     * 네이티브 쿼리로 조회된 소프트 삭제 항목도 여기에 포함된다.
+     */
+    private ShortUrlResponse toChangeResponse(ShortUrl entity) {
+        return ShortUrlResponse.builder()
+                .id(entity.getId())
+                .shortKey(entity.getShortUrl())
+                .shortUrl(publicUrl + entity.getShortUrl())
+                .longUrl(entity.getLongUrl())
+                .createdAt(entity.getCreatedAt())
+                .expiredAt(entity.getExpiredAt() != null ? entity.getExpiredAt().toString() : null)
+                .deleted(Boolean.TRUE.equals(entity.getDeleted()))
                 .build();
     }
 }

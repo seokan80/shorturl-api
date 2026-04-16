@@ -1,40 +1,35 @@
 package com.nh.shorturl.redirect.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 /**
- * admin 서버가 PUT/DELETE /api/internal/cache/short-urls 로 캐시를 동기화할 때 사용한다.
+ * 단축 URL Caffeine 캐시에 대한 단순 래퍼.
+ * per-entry expiry 는 {@code AppConfig} 에서 설정된 Expiry 가 자동 처리한다.
  */
 @Service
 @RequiredArgsConstructor
 public class ShortUrlCacheService {
 
-    private final CacheManager cacheManager;
+    private final Cache<String, ShortUrlResponse> shortUrlCache;
 
-    @CachePut(value = "shortUrl", key = "#response.shortKey")
-    public ShortUrlResponse put(ShortUrlResponse response) {
-        Cache cache = cacheManager.getCache("shortUrl");
-        if (cache != null && response != null) {
-            cache.put(response.getShortKey(), response);
+    public void put(ShortUrlResponse response) {
+        if (response != null && response.getShortKey() != null) {
+            shortUrlCache.put(response.getShortKey(), response);
         }
-        return response;
     }
 
-    @CacheEvict(value = "shortUrl", key = "#shortKey")
     public void evict(String shortKey) {
-        // annotation drives eviction
+        shortUrlCache.invalidate(shortKey);
     }
 
     public ShortUrlResponse get(String shortKey) {
-        Cache cache = cacheManager.getCache("shortUrl");
-        if (cache == null) return null;
-        Cache.ValueWrapper wrapper = cache.get(shortKey);
-        return wrapper != null ? (ShortUrlResponse) wrapper.get() : null;
+        return shortUrlCache.getIfPresent(shortKey);
+    }
+
+    public long size() {
+        return shortUrlCache.estimatedSize();
     }
 }

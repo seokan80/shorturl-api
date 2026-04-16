@@ -1,6 +1,5 @@
 package com.nh.shorturl.dto.response.shorturl;
 
-import com.nh.shorturl.type.BotType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,11 +34,6 @@ public class ShortUrlResponse {
     /** 만료일 */
     private String expiredAt;
 
-    // 봇 정보
-    private BotType botType;
-    private String botServiceKey;
-
-    // 설문 정보
-    private String surveyId;
-    private String surveyVer;
+    /** 삭제 여부 (증분 동기화 시 evict 판단용) */
+    private Boolean deleted;
 }

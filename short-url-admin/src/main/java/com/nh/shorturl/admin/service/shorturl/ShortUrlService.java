@@ -6,6 +6,7 @@ import com.nh.shorturl.dto.response.common.ResultList;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ShortUrlService {
@@ -32,4 +33,10 @@ public interface ShortUrlService {
 
     /** 단축 URL 만료일 수정. */
     ShortUrlResponse updateShortUrlExpiration(Long id, ShortUrlUpdateRequest request);
+
+    /**
+     * 지정 시각 이후 생성·수정·삭제된 단축 URL 목록 (증분 동기화용).
+     * 소프트 삭제된 항목도 포함하여 redirect 서버가 캐시에서 evict 할 수 있도록 한다.
+     */
+    List<ShortUrlResponse> findChangedSince(LocalDateTime since);
 }

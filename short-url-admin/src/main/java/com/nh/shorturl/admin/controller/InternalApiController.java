@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -50,6 +51,17 @@ public class InternalApiController {
     @GetMapping("/short-urls/all")
     public List<ShortUrlResponse> getAllShortUrls() {
         return shortUrlService.findAllForCaching();
+    }
+
+    /**
+     * 지정 시각 이후 변경(생성·수정·삭제)된 단축 URL 목록.
+     * redirect 서버의 증분 캐시 동기화(5분 폴링) 전용.
+     */
+    @Operation(summary = "[내부] 변경분 단축 URL 조회", description = "redirect 서버 증분 폴링 전용. 외부 노출 금지.")
+    @GetMapping("/short-urls/changes")
+    public List<ShortUrlResponse> getChangedShortUrls(
+            @RequestParam("since") LocalDateTime since) {
+        return shortUrlService.findChangedSince(since);
     }
 
     /**
