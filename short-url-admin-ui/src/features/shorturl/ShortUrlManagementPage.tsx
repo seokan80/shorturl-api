@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, RefreshCw, Search, Trash2, Copy, Link as LinkIcon } from "lucide-react";
+import { Loader2, RefreshCw, Search, Trash2, Copy, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
-
-type ApiEnvelope<T> = {
-  code: string;
-  message: string;
-  data: T;
-};
+import { apiRequest } from "../../lib/apiClient";
+import { formatDateTime, isExpired, toInputDateTime, toServerDateTime } from "../../lib/formats";
 
 type ShortUrlItem = {
   id: number;
@@ -20,10 +16,6 @@ type ShortUrlItem = {
   longUrl: string;
   createdAt: string;
   expiredAt: string | null;
-  botType: "CALLBOT" | "CHATBOT" | null;
-  botServiceKey: string | null;
-  surveyId: string | null;
-  surveyVer: string | null;
 };
 
 type ShortUrlList = {
@@ -31,81 +23,53 @@ type ShortUrlList = {
   elements: ShortUrlItem[];
 };
 
+type ExpireMode = "none" | "validDays" | "expireDate";
+
+type CreateForm = {
+  longUrl: string;
+  mode: ExpireMode;
+  validDays: string;
+  expireDate: string;
+};
+
 const PAGE_SIZE = 10;
 
-const DUMMY_SURVEYS = [
-  { id: "S001", name: "농협 고객 만족도 통합 조사", version: "V1.2", url: "https://www.naver.com" },
-  { id: "S002", name: "대출 상담 프로세스 만족도 조사", version: "V2.0", url: "https://www.daum.net" },
-  { id: "S003", name: "전자금융 서비스 이용 만족도 조사", version: "V1.0", url: "https://www.google.com" },
-  { id: "S004", name: "영업점 친절도 정기 조사", version: "V3.1", url: "https://finance.naver.com/" },
-];
-
-const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : "-");
-const toInputValue = (value?: string | null) => {
-  if (!value) return "";
-  return value.length >= 16 ? value.slice(0, 16) : value;
+const INITIAL_CREATE_FORM: CreateForm = {
+  longUrl: "",
+  mode: "none",
+  validDays: "7",
+  expireDate: ""
 };
-const toServerDate = (value: string) => (value.length === 16 ? `${value}:00` : value);
-const isExpired = (value?: string | null) => (value ? new Date(value).getTime() < Date.now() : false);
 
 export function ShortUrlManagementPage() {
   const [items, setItems] = useState<ShortUrlItem[]>([]);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<ShortUrlItem | null>(null);
-  const [createForm, setCreateForm] = useState<{
-    longUrl: string;
-    botType: "CALLBOT" | "CHATBOT" | "";
-    botServiceKey: string;
-    surveyId: string;
-    surveyVer: string;
-  }>({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" });
+  const [createForm, setCreateForm] = useState<CreateForm>(INITIAL_CREATE_FORM);
   const [editForm, setEditForm] = useState({ expiredAt: "" });
+  const [searchKey, setSearchKey] = useState("");
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
-  const request = useCallback(
-    async <T,>(path: string, init: RequestInit = {}): Promise<T> => {
-      const headers = new Headers(init.headers);
-      if (init.body && !headers.has("Content-Type")) {
-        headers.set("Content-Type", "application/json");
-      }
-
-      const response = await fetch(path, { ...init, headers });
-      const payload = (await response.json().catch(() => null)) as ApiEnvelope<T> | null;
-
-      if (!payload) {
-        throw new Error("응답을 파싱할 수 없습니다.");
-      }
-
-      if (!response.ok || payload.code !== "0000") {
-        throw new Error(payload.message ?? "요청에 실패했습니다.");
-      }
-
-      return payload.data;
-    },
-    []
-  );
-
-  const fetchList = useCallback(
-    async (pageToLoad: number) => {
-      setIsFetching(true);
-      try {
-        const data = await request<ShortUrlList>(`/api/short-url?page=${pageToLoad}&size=${PAGE_SIZE}&sort=createdAt,desc`);
-        setItems(data?.elements ?? []);
-        setTotal(data?.totalCount ?? 0);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "목록을 불러오는 중 오류가 발생했습니다.";
-        setStatus({ type: "error", message });
-      } finally {
-        setIsFetching(false);
-      }
-    },
-    [request]
-  );
+  const fetchList = useCallback(async (pageToLoad: number) => {
+    setIsFetching(true);
+    try {
+      const data = await apiRequest<ShortUrlList>(
+        `/api/short-url?page=${pageToLoad}&size=${PAGE_SIZE}&sort=createdAt,desc`
+      );
+      setItems(data?.elements ?? []);
+      setTotal(data?.totalCount ?? 0);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "목록을 불러오는 중 오류가 발생했습니다.";
+      setStatus({ type: "error", message });
+    } finally {
+      setIsFetching(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchList(page);
@@ -130,44 +94,60 @@ export function ShortUrlManagementPage() {
 
   const handleCreate = async () => {
     if (!createForm.longUrl.trim()) {
-      setError("만족도조사를 선택하여 원본 URL을 확인해주세요.");
+      setError("원본 URL 을 입력해주세요.");
       return;
     }
 
-    await runWithStatus("create", async () => {
-      const payload = {
-        longUrl: createForm.longUrl.trim(),
-        botType: createForm.botType || null,
-        botServiceKey: createForm.botServiceKey.trim() || null,
-        surveyId: createForm.surveyId || null,
-        surveyVer: createForm.surveyVer || null,
-      };
-
-      console.log("Creating Short URL with payload:", payload);
-
-      await request<ShortUrlItem>("/api/short-url", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      setCreateForm({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" });
-      setSelected(null);
-      setEditForm({ expiredAt: "" });
-      setSuccess("단축 URL을 생성했습니다.");
-      if (page !== 0) {
-        setPage(0);
-      } else {
-        await fetchList(0);
+    const body: Record<string, unknown> = { longUrl: createForm.longUrl.trim() };
+    if (createForm.mode === "validDays") {
+      const n = Number(createForm.validDays);
+      if (!Number.isInteger(n) || n <= 0) {
+        setError("유효 기간(일) 은 1 이상의 정수여야 합니다.");
+        return;
       }
+      body.validDays = n;
+    } else if (createForm.mode === "expireDate") {
+      if (!createForm.expireDate) {
+        setError("만료 일시를 선택해주세요.");
+        return;
+      }
+      body.expireDate = toServerDateTime(createForm.expireDate);
+    }
+
+    await runWithStatus("create", async () => {
+      const created = await apiRequest<ShortUrlItem>("/api/short-url", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      setCreateForm(INITIAL_CREATE_FORM);
+      setSelected(created);
+      setEditForm({ expiredAt: toInputDateTime(created.expiredAt) });
+      setSuccess(`단축 URL(${created.shortKey}) 을 생성했습니다.`);
+      if (page !== 0) setPage(0);
+      else await fetchList(0);
     });
   };
 
   const handleSelect = async (item: ShortUrlItem) => {
     await runWithStatus(`detail-${item.id}`, async () => {
-      const detail = await request<ShortUrlItem>(`/api/short-url/${item.id}`);
+      const detail = await apiRequest<ShortUrlItem>(`/api/short-url/${item.id}`);
       setSelected(detail);
-      setEditForm({ expiredAt: toInputValue(detail.expiredAt) });
+      setEditForm({ expiredAt: toInputDateTime(detail.expiredAt) });
       setSuccess(`단축 URL(${detail.shortKey}) 상세를 불러왔습니다.`);
+    });
+  };
+
+  const handleSearchByKey = async () => {
+    const key = searchKey.trim();
+    if (!key) {
+      setError("조회할 Short Key 를 입력해주세요.");
+      return;
+    }
+    await runWithStatus("search-key", async () => {
+      const detail = await apiRequest<ShortUrlItem>(`/api/short-url/key/${encodeURIComponent(key)}`);
+      setSelected(detail);
+      setEditForm({ expiredAt: toInputDateTime(detail.expiredAt) });
+      setSuccess(`Short Key(${detail.shortKey}) 조회 성공`);
     });
   };
 
@@ -177,45 +157,35 @@ export function ShortUrlManagementPage() {
       setError("만료일을 선택해주세요.");
       return;
     }
-
     await runWithStatus(`update-${selected.id}`, async () => {
-      const payload = await request<ShortUrlItem>(
-        `/api/short-url/${selected.id}/expiration`,
-        {
-          method: "PUT",
-          body: JSON.stringify({ expiredAt: toServerDate(editForm.expiredAt) })
-        }
-      );
+      const payload = await apiRequest<ShortUrlItem>(`/api/short-url/${selected.id}/expiration`, {
+        method: "PUT",
+        body: JSON.stringify({ expiredAt: toServerDateTime(editForm.expiredAt) })
+      });
       setSelected(payload);
-      setEditForm({ expiredAt: toInputValue(payload.expiredAt) });
-      setItems((prev) => prev.map((item) => (item.id === payload.id ? payload : item)));
+      setEditForm({ expiredAt: toInputDateTime(payload.expiredAt) });
+      setItems((prev) => prev.map((it) => (it.id === payload.id ? payload : it)));
       setSuccess(`단축 URL(${payload.shortKey}) 만료일을 수정했습니다.`);
     });
   };
 
   const handleDelete = async (item: ShortUrlItem) => {
-    if (!window.confirm(`'${item.shortKey}' 단축 URL을 삭제하시겠습니까?`)) {
-      return;
-    }
-
+    if (!window.confirm(`'${item.shortKey}' 단축 URL 을 삭제하시겠습니까?`)) return;
     await runWithStatus(`delete-${item.id}`, async () => {
-      await request(`/api/short-url/${item.id}`, { method: "DELETE" });
+      await apiRequest(`/api/short-url/${item.id}`, { method: "DELETE" });
       if (selected?.id === item.id) {
         setSelected(null);
         setEditForm({ expiredAt: "" });
       }
-      setSuccess(`단축 URL(${item.shortKey})을 삭제했습니다.`);
-      if (items.length === 1 && page > 0) {
-        setPage(page - 1);
-      } else {
-        await fetchList(page);
-      }
+      setSuccess(`단축 URL(${item.shortKey}) 을 삭제했습니다.`);
+      if (items.length === 1 && page > 0) setPage(page - 1);
+      else await fetchList(page);
     });
   };
 
-  const handleRefresh = () => {
-    setStatus(null);
-    fetchList(page);
+  const handleRedirectTest = (item: ShortUrlItem) => {
+    window.open(item.shortUrl, "_blank", "noopener");
+    setSuccess(`${item.shortKey} 리다이렉트 테스트 시작 — 잠시 후 이력 페이지를 확인하세요.`);
   };
 
   const handleCopy = (value: string) => {
@@ -232,76 +202,94 @@ export function ShortUrlManagementPage() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">단축 URL 관리</CardTitle>
-          <CardDescription>원본 URL을 등록하고 생성된 키를 확인하세요.</CardDescription>
+          <CardTitle className="text-base">단축 URL 생성</CardTitle>
+          <CardDescription>원본 URL 과 만료 정책을 지정해 새 단축 키를 발급합니다.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2">
+        <CardContent className="grid gap-4">
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">원본 URL *</p>
+            <p className="text-xs text-slate-500">원본 URL *</p>
             <Input
-              placeholder="만족도조사를 선택하면 자동으로 입력됩니다."
+              placeholder="https://example.com/..."
               value={createForm.longUrl}
-              readOnly
-              className="bg-slate-50 dark:bg-slate-900/50"
+              onChange={(e) => setCreateForm({ ...createForm, longUrl: e.target.value })}
             />
           </div>
+
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">만족도조사명</p>
-            <select
-              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
-              value={createForm.surveyId}
-              onChange={(e) => {
-                const sId = e.target.value;
-                const survey = DUMMY_SURVEYS.find(s => s.id === sId);
-                setCreateForm(prev => ({
-                  ...prev,
-                  surveyId: sId,
-                  surveyVer: survey ? survey.version : "",
-                  longUrl: survey ? survey.url : ""
-                }));
-              }}
-            >
-              <option value="">설문명 선택</option>
-              {DUMMY_SURVEYS.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+            <p className="text-xs text-slate-500">만료 정책</p>
+            <div className="flex flex-wrap gap-3 text-sm">
+              {(
+                [
+                  { value: "none", label: "기본(서버 설정)" },
+                  { value: "validDays", label: "유효 기간(일)" },
+                  { value: "expireDate", label: "만료 일시 지정" }
+                ] as const
+              ).map((opt) => (
+                <label key={opt.value} className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="expire-mode"
+                    checked={createForm.mode === opt.value}
+                    onChange={() => setCreateForm({ ...createForm, mode: opt.value })}
+                  />
+                  <span>{opt.label}</span>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">설문 버전</p>
-            <Input
-              readOnly
-              className="bg-slate-50 dark:bg-slate-900/50"
-              value={createForm.surveyVer || "-"}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">봇 구분</p>
-            <select
-              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
-              value={createForm.botType}
-              onChange={(e) => setCreateForm(prev => ({ ...prev, botType: e.target.value as any }))}
-            >
-              <option value="">선택 안함</option>
-              <option value="CALLBOT">콜봇</option>
-              <option value="CHATBOT">챗봇</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-500 dark:text-slate-400">참조 키 (전화번호/세션키)</p>
-            <Input
-              placeholder="키 값을 입력하세요"
-              value={createForm.botServiceKey}
-              onChange={(event) => setCreateForm(prev => ({ ...prev, botServiceKey: event.target.value }))}
-            />
-          </div>
-          <div className="flex items-end gap-2 md:col-span-2">
+
+          {createForm.mode === "validDays" && (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-slate-500">유효 기간(일) — 오늘 기준 N 일 뒤 23:59:59 로 설정</p>
+              <Input
+                type="number"
+                min={1}
+                value={createForm.validDays}
+                onChange={(e) => setCreateForm({ ...createForm, validDays: e.target.value })}
+              />
+            </div>
+          )}
+
+          {createForm.mode === "expireDate" && (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-slate-500">만료 일시 (절대 시각)</p>
+              <input
+                type="datetime-local"
+                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-950"
+                value={createForm.expireDate}
+                onChange={(e) => setCreateForm({ ...createForm, expireDate: e.target.value })}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
             <Button className="flex-1" onClick={handleCreate} disabled={isBusy("create")}>
               {isBusy("create") && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               단축 URL 생성
             </Button>
-            <Button type="button" variant="outline" onClick={() => setCreateForm({ longUrl: "", botType: "", botServiceKey: "", surveyId: "", surveyVer: "" })}>
+            <Button type="button" variant="outline" onClick={() => setCreateForm(INITIAL_CREATE_FORM)}>
               초기화
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Short Key 로 조회</CardTitle>
+          <CardDescription>발급된 키를 입력해 상세 정보를 확인합니다 (GET /api/short-url/key/{`{key}`}).</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Input
+              placeholder="예: Ab3dEf"
+              value={searchKey}
+              onChange={(e) => setSearchKey(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearchByKey()}
+            />
+            <Button onClick={handleSearchByKey} disabled={isBusy("search-key")}>
+              {isBusy("search-key") ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              조회
             </Button>
           </div>
         </CardContent>
@@ -311,10 +299,10 @@ export function ShortUrlManagementPage() {
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="text-base">단축 URL 목록</CardTitle>
-            <CardDescription>페이징 목록에서 생성자, 만료일, 상태를 확인하세요.</CardDescription>
+            <CardDescription>페이징 목록에서 생성일, 만료일, 상태를 확인하세요.</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={handleRefresh} disabled={isFetching}>
+            <Button type="button" variant="outline" size="sm" onClick={() => fetchList(page)} disabled={isFetching}>
               {isFetching && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               목록 새로고침
             </Button>
@@ -326,25 +314,24 @@ export function ShortUrlManagementPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-32">Short Key</TableHead>
-                  <TableHead className="w-48">설문ID</TableHead>
-                  <TableHead className="w-32">봇 구분</TableHead>
+                  <TableHead>원본 URL</TableHead>
                   <TableHead className="w-36">생성일</TableHead>
                   <TableHead className="w-36">만료일</TableHead>
                   <TableHead className="w-24 text-center">상태</TableHead>
-                  <TableHead className="w-28 text-center">작업</TableHead>
+                  <TableHead className="w-36 text-center">작업</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isFetching ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-sm text-slate-500">
+                    <TableCell colSpan={6} className="py-8 text-center text-sm text-slate-500">
                       데이터를 불러오는 중입니다...
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-sm text-slate-500">
-                      등록된 단축 URL이 없습니다. 상단 폼에서 새 URL을 생성하세요.
+                    <TableCell colSpan={6} className="py-8 text-center text-sm text-slate-500">
+                      등록된 단축 URL 이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -360,16 +347,7 @@ export function ShortUrlManagementPage() {
                           {item.shortKey}
                         </a>
                       </TableCell>
-                      <TableCell className="text-sm">
-                        {item.surveyId || <span className="text-slate-400">-</span>}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {item.botType ? (
-                          <Badge variant="outline">{item.botType === "CALLBOT" ? "콜봇" : "챗봇"}</Badge>
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
-                      </TableCell>
+                      <TableCell className="max-w-[320px] truncate text-xs text-slate-500">{item.longUrl}</TableCell>
                       <TableCell className="text-xs text-slate-500">{formatDateTime(item.createdAt)}</TableCell>
                       <TableCell className="text-xs text-slate-500">{formatDateTime(item.expiredAt)}</TableCell>
                       <TableCell className="text-center">
@@ -378,15 +356,23 @@ export function ShortUrlManagementPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-center gap-2">
+                        <div className="flex justify-center gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="상세 보기"
+                            aria-label="상세"
                             onClick={() => handleSelect(item)}
                             disabled={isBusy(`detail-${item.id}`)}
                           >
                             {isBusy(`detail-${item.id}`) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="리다이렉트 테스트"
+                            onClick={() => handleRedirectTest(item)}
+                          >
+                            <ExternalLink className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -396,11 +382,7 @@ export function ShortUrlManagementPage() {
                             onClick={() => handleDelete(item)}
                             disabled={isBusy(`delete-${item.id}`)}
                           >
-                            {isBusy(`delete-${item.id}`) ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
+                            {isBusy(`delete-${item.id}`) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                           </Button>
                         </div>
                       </TableCell>
@@ -413,16 +395,10 @@ export function ShortUrlManagementPage() {
           <div className="flex flex-col items-center gap-2 text-sm text-slate-600 dark:text-slate-300 md:flex-row md:justify-between">
             <div>총 {total.toLocaleString()}건 · 페이지 {total === 0 ? 0 : page + 1}/{totalPages}</div>
             <div className="flex gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => setPage((prev) => Math.max(prev - 1, 0))} disabled={disablePrev}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setPage((p) => Math.max(p - 1, 0))} disabled={disablePrev}>
                 이전
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((prev) => prev + 1)}
-                disabled={disableNext}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={disableNext}>
                 다음
               </Button>
             </div>
@@ -452,14 +428,14 @@ export function ShortUrlManagementPage() {
               <p className="text-xs text-slate-500">단축 URL</p>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs">{selected.shortUrl}</span>
-                <Button variant="ghost" size="icon" onClick={() => handleCopy(selected.shortUrl)} aria-label="단축 URL 복사">
+                <Button variant="ghost" size="icon" onClick={() => handleCopy(selected.shortUrl)} aria-label="복사">
                   <Copy className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => window.open(selected.shortUrl, "_blank", "noopener")}
-                  aria-label="새 탭 열기"
+                  aria-label="새 탭"
                 >
                   <LinkIcon className="h-4 w-4" />
                 </Button>
@@ -469,35 +445,13 @@ export function ShortUrlManagementPage() {
               <p className="text-xs text-slate-500">원본 URL</p>
               <p className="text-sm break-all text-slate-700 dark:text-slate-200">{selected.longUrl}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">봇 구분</p>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                {selected.botType ? (selected.botType === "CALLBOT" ? "콜봇" : "챗봇") : "-"}
-              </p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">봇 서비스 키</p>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                {selected.botServiceKey || "-"}
-              </p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-slate-500">설문 정보</p>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                {selected.surveyId ? (
-                  `${DUMMY_SURVEYS.find(s => s.id === selected.surveyId)?.name || selected.surveyId} (${selected.surveyVer})`
-                ) : (
-                  "설문 정보 없음"
-                )}
-              </p>
-            </div>
             <div className="flex flex-col gap-2">
               <p className="text-xs text-slate-500">만료일</p>
               <input
                 type="datetime-local"
-                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
+                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
                 value={editForm.expiredAt}
-                onChange={(event) => setEditForm({ expiredAt: event.target.value })}
+                onChange={(e) => setEditForm({ expiredAt: e.target.value })}
               />
               <p className="text-[10px] text-slate-500">서버 전송 형식: yyyy-MM-dd&apos;T&apos;HH:mm:ss</p>
             </div>

@@ -1,10 +1,14 @@
 # --- Development 환경 설정 ---
+# DataSource 는 외부 Tomcat 이 context.xml 의 <Resource> 로 주입한다.
+# Tomcat 측 예시:
+#   <Resource name="jdbc/shortUrlDS" auth="Container" type="javax.sql.DataSource"
+#             driverClassName="oracle.jdbc.OracleDriver"
+#             url="jdbc:oracle:thin:@dev-db:1521/FREEPDB1"
+#             username="my_user" password="..."
+#             maxTotal="20" maxIdle="10" maxWaitMillis="10000"/>
 spring:
   datasource:
-    url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
-    username: my_user
-    password: ENC(UIcFmVIQOtGDRGD+zoC2eVvlzlSiB91fcNmLKTWkY7fKZyJjY87ryvMH4fvpfwO3)
-    driver-class-name: oracle.jdbc.OracleDriver
+    jndi-name: java:comp/env/jdbc/shortUrlDS
   jpa:
     hibernate:
       ddl-auto: validate # 스키마가 올바른지 검증만 함

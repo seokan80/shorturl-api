@@ -1,14 +1,35 @@
+apply plugin: 'war'
+
+// 톰캣 배포용 WAR 를 생성한다. 내장 톰캣은 provided 로 분리하여 외부 톰캣과 충돌을 방지한다.
+bootJar { enabled = false }
+bootWar { enabled = true }
+war { enabled = false }
+
+// admin-ui 의 빌드 산출물(build/dist)을 WAR 의 static 리소스로 포함한다.
+// Spring Boot 가 classpath:/static/ 아래를 자동 서빙하므로 별도 ResourceHandler 불필요.
+evaluationDependsOn(':short-url-admin-ui')
+
+processResources {
+    dependsOn ':short-url-admin-ui:yarnBuild'
+    from(project(':short-url-admin-ui').layout.buildDirectory.dir('dist')) {
+        into 'static'
+    }
+}
+
 dependencies {
     implementation project(':common')
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    
+
     // Web, JPA, Validation
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // 외부 톰캣 배포용: 내장 톰캣은 컴파일/테스트 시에만 사용
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
     // Cache (Caffeine)
     implementation 'org.springframework.boot:spring-boot-starter-cache'
@@ -22,10 +43,10 @@ dependencies {
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11' // 운영 환경용 Oracle 드라이버 추가
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    
+
     // Swagger UI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-    
+
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
