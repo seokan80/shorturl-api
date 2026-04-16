@@ -1,0 +1,11 @@
+meta {
+  name: Get by Key
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{hostname}}/api/short-url/key/{{shortUrlKey}}
+  body: none
+  auth: none
+}

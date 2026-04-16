@@ -1,0 +1,17 @@
+meta {
+  name: List
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{hostname}}/api/short-url?page=0&size=10&sort=createdAt,desc
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 0
+  size: 10
+  sort: createdAt,desc
+}

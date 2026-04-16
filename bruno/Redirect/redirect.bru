@@ -1,0 +1,21 @@
+meta {
+  name: Redirect
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{hostname}}/r/{{shortUrlKey}}
+  body: none
+  auth: none
+}
+
+headers {
+  Referer: https://www.google.com/
+  User-Agent: Bruno-Test-Agent/1.0
+}
+
+docs {
+  단축 키를 원본 URL 로 리다이렉트. 302 응답 + Location 헤더.
+  Bruno 기본 설정에서는 자동 follow 되므로 최종 응답을 확인하려면 Follow Redirect 옵션을 끄고 테스트.
+}

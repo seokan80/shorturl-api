@@ -1,0 +1,17 @@
+meta {
+  name: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{hostname}}/api/redirections/history?page=0&size=20&sort=id,desc
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 0
+  size: 20
+  sort: id,desc
+}

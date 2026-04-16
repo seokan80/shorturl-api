@@ -1,0 +1,11 @@
+meta {
+  name: Delete
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{hostname}}/api/short-url/{{shortUrlId}}
+  body: none
+  auth: none
+}

@@ -1,0 +1,34 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{hostname}}/api/short-url
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "longUrl": "https://github.com/google/gemini-api",
+    "validDays": 7
+  }
+}
+
+script:post-response {
+  if (res.body && res.body.data) {
+    const shortUrl = res.body.data.shortUrl;
+    const key = shortUrl.substring(shortUrl.lastIndexOf('/') + 1);
+    bru.setEnvVar("shortUrlId", res.body.data.id);
+    bru.setEnvVar("shortUrlKey", key);
+  }
+}
+
+docs {
+  단축 URL 생성.
+  - longUrl: 원본 URL (필수)
+  - validDays: 유효 기간(일). 지정 시 오늘 기준 n일 뒤 23:59:59 로 만료 계산, expireDate 보다 우선
+  - expireDate: 만료 일시 (절대 시각)
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Update Expiration
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{hostname}}/api/short-url/{{shortUrlId}}/expiration
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "expiredAt": "2030-12-31T23:59:59"
+  }
+}
