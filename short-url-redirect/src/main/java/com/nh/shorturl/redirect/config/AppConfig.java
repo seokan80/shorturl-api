@@ -21,14 +21,18 @@ public class AppConfig {
 
     @Value("${short-url.admin.api.base-url}")
     private String adminApiBaseUrl;
+    @Value("${short-url.admin.api.token}")
+    private String token;
+    @Value("${short-url.admin.api.tenant-code}")
+    private String tenantCode;
 
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
                 .baseUrl(adminApiBaseUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader("token", "cded2084-ef21-4030-a189-c040ed089127")
-                .defaultHeader("x-tenant-code", "nh")
+                .defaultHeader("token", token)
+                .defaultHeader("x-tenant-code", tenantCode)
 
                 .build();
     }

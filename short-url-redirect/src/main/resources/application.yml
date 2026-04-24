@@ -12,6 +12,8 @@ short-url:
   admin:
     api:
       base-url: http://localhost:8080  # admin 서버 주소 (프로파일별 오버라이드)
+      token: cded2084-ef21-4030-a189-c040ed089127
+      tenant-code: nh
       # 내부 API 경로
       uri:
         all: /openapi/internal/short-url/all
