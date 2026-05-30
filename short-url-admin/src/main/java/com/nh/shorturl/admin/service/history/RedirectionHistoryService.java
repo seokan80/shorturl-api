@@ -3,7 +3,6 @@ package com.nh.shorturl.admin.service.history;
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
 import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
 import com.nh.shorturl.dto.response.history.RedirectionHistoryResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,8 +11,6 @@ import java.util.Map;
 
 public interface RedirectionHistoryService {
     int getRedirectCount(Long shortUrlId);
-
-    void saveRedirectionHistory(String shortUrl, HttpServletRequest request);
 
     void saveRedirectionHistory(RedirectionHistoryRequest request);
 

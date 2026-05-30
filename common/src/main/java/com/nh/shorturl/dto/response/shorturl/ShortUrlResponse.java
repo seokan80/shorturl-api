@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "단축 URL 응답 정보")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

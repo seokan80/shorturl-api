@@ -1,6 +1,9 @@
 package com.nh.shorturl.dto.request.shorturl;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +22,9 @@ import java.time.LocalDateTime;
 public class ShortUrlRequest {
 
     @Schema(description = "원본 URL", example = "https://www.google.com")
+    @NotBlank(message = "원본 URL 은 필수입니다.")
+    @Size(max = 2000, message = "원본 URL 은 2000자를 넘을 수 없습니다.")
+    @Pattern(regexp = "(?i)^https?://.+", message = "원본 URL 은 http:// 또는 https:// 로 시작해야 합니다.")
     private String longUrl;
 
     @Schema(description = "만료 일시 (절대 시각)", example = "2025-12-31T23:59:59")

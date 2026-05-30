@@ -3,6 +3,7 @@ package com.nh.shorturl.admin.controller;
 import com.nh.shorturl.admin.service.history.RedirectionHistoryService;
 import com.nh.shorturl.admin.service.shorturl.ShortUrlService;
 import com.nh.shorturl.dto.request.history.RedirectionHistoryRequest;
+import com.nh.shorturl.dto.response.common.ResultEntity;
 import com.nh.shorturl.dto.response.control.RedirectionConfigResponse;
 import com.nh.shorturl.dto.response.shorturl.ShortUrlResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,8 +51,8 @@ public class InternalApiController {
      */
     @Operation(summary = "[내부] 전체 단축 URL 목록", description = "redirect 서버 캐시 워밍 전용. 외부 노출 금지.")
     @GetMapping("/short-url/all")
-    public List<ShortUrlResponse> getAllShortUrls() {
-        return shortUrlService.findAllForCaching();
+    public ResultEntity<List<ShortUrlResponse>> getAllShortUrls() {
+        return ResultEntity.ok(shortUrlService.findAllForCaching());
     }
 
     /**
@@ -58,10 +60,10 @@ public class InternalApiController {
      * redirect 서버의 증분 캐시 동기화(5분 폴링) 전용.
      */
     @Operation(summary = "[내부] 변경분 단축 URL 조회", description = "redirect 서버 증분 폴링 전용. 외부 노출 금지.")
-    @GetMapping("/short-urls/changes")
-    public List<ShortUrlResponse> getChangedShortUrls(
-            @RequestParam("since") LocalDateTime since) {
-        return shortUrlService.findChangedSince(since);
+    @GetMapping("/short-url/changes")
+    public ResultEntity<List<ShortUrlResponse>> getChangedShortUrls(
+            @RequestParam("since") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since) {
+        return ResultEntity.ok(shortUrlService.findChangedSince(since));
     }
 
     /**
@@ -70,13 +72,13 @@ public class InternalApiController {
      */
     @Operation(summary = "[내부] 리다이렉트 설정 조회", description = "redirect 서버 설정 폴링 전용. 외부 노출 금지.")
     @GetMapping("/short-url/redirection-config")
-    public RedirectionConfigResponse getRedirectionConfig() {
-        return RedirectionConfigResponse.builder()
+    public ResultEntity<RedirectionConfigResponse> getRedirectionConfig() {
+        return ResultEntity.ok(RedirectionConfigResponse.builder()
                 .fallbackUrl(fallbackUrl)
                 .defaultHost(defaultHost)
                 .showErrorPage(showErrorPage)
                 .trackingFields(trackingFields)
-                .build();
+                .build());
     }
 
     /**

@@ -55,7 +55,7 @@ class ShortUrlControllerTest {
         ShortUrlResponse response = ShortUrlResponse.builder()
                 .id(1L)
                 .shortKey("ABCDE123")
-                .shortUrl("http://localhost:8080/r/ABCDE123")
+                .shortUrl("http://localhost:18081/s/ABCDE123")
                 .longUrl("https://example.com")
                 .createdAt(LocalDateTime.now())
                 .build();

@@ -9,7 +9,6 @@ import com.nh.shorturl.dto.request.history.RedirectionStatsRequest;
 import com.nh.shorturl.dto.response.history.RedirectionHistoryResponse;
 import com.nh.shorturl.type.GroupingType;
 import com.nh.shorturl.admin.util.UserAgentParser.UserAgentMetadata;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.nh.shorturl.admin.util.RequestInfoUtils.*;
 import static com.nh.shorturl.admin.util.UserAgentParser.*;
 
 @Service
@@ -73,36 +71,6 @@ public class RedirectionHistoryServiceImpl implements RedirectionHistoryService 
             stats.add(statRow);
         }
         return stats;
-    }
-
-    @Override
-    public void saveRedirectionHistory(String shortUrl, HttpServletRequest request) {
-        log.info("saveRedirectionHistory: shortUrl={}, request={}", shortUrl, request);
-
-        try {
-            ShortUrl shortUrlEntity = shortUrlRepository.findByShortUrl(shortUrl)
-                    .orElseThrow(() -> new IllegalArgumentException("URL not found"));
-
-            String userAgent = getUserAgent(request);
-            UserAgentMetadata userAgentMetadata = parse(userAgent);
-
-            RedirectionHistory redirectionHistory = RedirectionHistory.builder()
-                    .ip(getClientIp(request))
-                    .shortUrl(shortUrlEntity)
-                    .referer(getReferer(request))
-                    .userAgent(userAgent)
-                    .deviceType(userAgentMetadata.deviceType())
-                    .os(userAgentMetadata.os())
-                    .browser(userAgentMetadata.browser())
-                    .country(getCountry(request))
-                    .city(getCity(request))
-                    .redirectAt(LocalDateTime.now())
-                    .build();
-
-            redirectionHistoryRepository.save(redirectionHistory);
-        } catch (Exception e) {
-            log.error("saveRedirectionHistory error: {}", e.getMessage(), e);
-        }
     }
 
     @Override

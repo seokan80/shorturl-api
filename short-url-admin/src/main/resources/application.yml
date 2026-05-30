@@ -18,10 +18,11 @@ jasypt:
 short-url:
   # 단축 URL 생성 시 기본 만료 기간(일). 재빌드 없이 운영 중 조정 가능.
   default-expiration-days: 1
-  # redirect 서버가 단축 URL 생성 후 공개 주소를 조합할 때 사용하는 prefix
+  # 단축 URL 공개 주소 prefix. 실제 리다이렉트는 short-url-redirect 서버가 처리하므로
+  # redirect 서버의 외부 진입 주소(호스트+포트+context-path)로 맞춘다. (local: 18081 + /s)
   redirect:
-    public-url: http://localhost:8080/r/
-  # redirect 서버가 /api/internal/redirection-config 로 폴링해 가져가는 설정
+    public-url: http://localhost:18081/s/
+  # redirect 서버가 /openapi/internal/short-url/redirection-config 로 폴링해 가져가는 설정
   redirection:
     fallback-url: "https://www.nhbank.com"
     default-host: "https://www.nhbank.com"

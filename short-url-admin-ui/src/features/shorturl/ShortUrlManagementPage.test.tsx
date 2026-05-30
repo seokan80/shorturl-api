@@ -20,7 +20,8 @@ describe("ShortUrlManagementPage", () => {
 
   it("renders management cards", async () => {
     render(<ShortUrlManagementPage />);
-    expect(await screen.findByText("단축 URL 관리")).toBeInTheDocument();
+    // 고유한 카드 제목으로 검증한다 ("단축 URL 생성" 은 제목과 제출 버튼 양쪽에 있어 모호함).
+    expect(await screen.findByText("Short Key 로 조회")).toBeInTheDocument();
     expect(await screen.findByText("단축 URL 목록")).toBeInTheDocument();
   });
 });

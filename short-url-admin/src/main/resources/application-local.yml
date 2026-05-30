@@ -22,7 +22,8 @@ server:
 
 short-url:
   redirect:
-    public-url: http://localhost:8080/r/
+    # 로컬 redirect 서버 주소(18081 + context-path /s)와 일치시킨다.
+    public-url: http://localhost:18081/s/
 
 jasypt:
   encryptor:
