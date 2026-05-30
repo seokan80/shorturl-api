@@ -39,7 +39,7 @@ public class ShortUrlRedirectController {
             errorHtmlTemplate = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.warn("[redirect] Failed to load error template, using fallback inline HTML", e);
-            errorHtmlTemplate = "<!DOCTYPE html><html><body><h1>이동 실패</h1><p>%s</p></body></html>";
+            errorHtmlTemplate = "<!DOCTYPE html><html><body><h1>이동 실패</h1><p>{{reason}}</p></body></html>";
         }
     }
 
@@ -75,7 +75,9 @@ public class ShortUrlRedirectController {
                 return;
             }
 
-            historyService.save(shortKey, request);
+            // 요청 메타데이터는 서블릿 스레드에서 추출해 값으로 전달한다(비동기 스레드에서 request 접근 금지).
+            historyService.save(shortKey, request.getHeader("Referer"),
+                    request.getHeader("User-Agent"), resolveClientIp(request));
 
             String targetUrl = appendTrackingFields(found.getLongUrl(), request, config);
             response.sendRedirect(targetUrl);
@@ -121,7 +123,20 @@ public class ShortUrlRedirectController {
     }
 
     private String buildErrorHtml(String reason) {
-        return String.format(errorHtmlTemplate, escapeHtml(reason));
+        // String.format 대신 단순 치환을 사용한다(템플릿 CSS 의 '%' 가 포맷 지시자로 오인되는 문제 방지).
+        return errorHtmlTemplate.replace("{{reason}}", escapeHtml(reason));
+    }
+
+    /**
+     * 리버스 프록시 뒤에서도 원 클라이언트 IP 를 얻는다.
+     * X-Forwarded-For 의 첫 번째 값(원 클라이언트)을 우선 사용하고, 없으면 소켓 주소를 쓴다.
+     */
+    private static String resolveClientIp(HttpServletRequest request) {
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            return xff.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 
     /**

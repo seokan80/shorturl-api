@@ -7,4 +7,4 @@ server:
 short-url:
   admin:
     api:
-      base-url: http://localhost:8280
+      base-url: http://localhost:8080   # admin 은 모든 프로파일에서 8080 으로 기동한다

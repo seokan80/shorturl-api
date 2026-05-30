@@ -65,6 +65,9 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
             return;
         }
 
+        // fetch 도중 발생한 변경이 누락되지 않도록, 폴링 시작 시각을 다음 since 기준으로 삼는다.
+        // (put/evict 는 멱등이므로 경계의 소폭 중복 반영은 무해하다.)
+        LocalDateTime syncStart = LocalDateTime.now();
         try {
             String sinceParam = since.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             log.info("[cache-sync] Incremental sync started. since={}, cacheSize={}", sinceParam, cacheService.size());
@@ -94,7 +97,7 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
                         changes.size(), put, evict, cacheService.size());
             }
 
-            lastSyncTime.set(LocalDateTime.now());
+            lastSyncTime.set(syncStart);
         } catch (Exception e) {
             log.warn("[cache-sync] incremental sync failed, will retry next cycle. cause: {}", e.getMessage());
         }
@@ -108,6 +111,7 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
         long waitMs = INITIAL_WAIT_MS;
 
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            LocalDateTime attemptStart = LocalDateTime.now();
             try {
                 List<ShortUrlResponse> all = fetchList(uriAll);
 
@@ -117,7 +121,7 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
                         log.debug("[cache-sync]   loaded: {} → {}, expiredAt={}",
                                 item.getShortKey(), item.getLongUrl(), item.getExpiredAt());
                     });
-                    lastSyncTime.set(LocalDateTime.now());
+                    lastSyncTime.set(attemptStart);
                     log.info("[cache-sync] Full load completed. {} items cached.", all.size());
                     if (log.isInfoEnabled() && !all.isEmpty()) {
                         all.forEach(item -> log.info("[cache-sync]   [{}] {} → {} (expires: {})",
@@ -165,8 +169,9 @@ public class ShortUrlCacheSyncer implements ApplicationRunner {
         }
         if (item.getExpiredAt() == null) return false;
         try {
-            LocalDateTime expiry = LocalDateTime.parse(item.getExpiredAt(),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            // admin 은 expiredAt 을 LocalDateTime.toString()(ISO-8601, 예: 2026-05-30T23:59:59.999)으로 내려준다.
+            // AppConfig.ttlNanos 와 동일하게 ISO 파서를 사용해 포맷을 일치시킨다.
+            LocalDateTime expiry = LocalDateTime.parse(item.getExpiredAt());
             return expiry.isBefore(now);
         } catch (Exception e) {
             return false;
